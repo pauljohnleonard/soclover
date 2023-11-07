@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="300" height="300">
+  <defs>
+
+
+    <circle id="a" cx="70" cy="0" r="35" fill="#390" />
+
+    <g id="aa">
+      <g transform="translate(0 ,20 )">
+        <use xlink:href="#a" />
+      </g>
+      <g transform="translate(0 , -20 )">
+        <use xlink:href="#a" />
+      </g>
+    </g>
+  </defs>
+
+
+  <g transform="translate(120 120)">
+    <use xlink:href="#aa" />
+    <g transform=rotate(90)>
+      <use xlink:href="#aa" />
+    </g>
+    <g transform=rotate(-90)>
+      <use xlink:href="#aa" />
+    </g>
+    <g transform=rotate(180)>
+      <use xlink:href="#aa" />
+    </g>
+    <circle cx="0" cy="0" r="70" fill="#390" />
+  </g>
+</svg>

@@ -1,0 +1,60 @@
+<div style="background-color: bisque; width: 100vw; height: 100vh">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="300"
+    height="300"
+    transform-origin="0 0"
+    [attr.transform]="transform"
+  >
+    <defs>
+      <circle id="a" [attr.cx]="cx" cy="0" [attr.r]="rad" fill="#390" />
+
+      <g id="aa">
+        <g [attr.transform]="'translate(0, ' + tweakY + ')'">
+          <use xlink:href="#a" />
+        </g>
+        <g [attr.transform]="'translate(0,  -' + tweakY + ')'">
+          <use xlink:href="#a" />
+        </g>
+      </g>
+
+      <rect
+        id="bb"
+        [attr.x]="cardPad"
+        [attr.y]="cardPad"
+        [attr.width]="cardWidth - cardPad"
+        [attr.height]="cardWidth - cardPad"
+        [attr.rx]="cardRad"
+        fill="#fff"
+      />
+    </defs>
+
+    <g [attr.transform]="'translate(120 120)'">
+      <g transform="rotate(45)">
+        <use xlink:href="#aa" />
+        <g transform="rotate(90)">
+          <use xlink:href="#aa" />
+        </g>
+        <g transform="rotate(180)">
+          <use xlink:href="#aa" />
+        </g>
+        <g transform="rotate(270)">
+          <use xlink:href="#aa" />
+        </g>
+        <circle cx="0" cy="0" [attr.r]="rHub" fill="#390" />
+
+        <use xlink:href="#bb" />
+        <g [attr.transform]="'rotate(90)'">
+          <use xlink:href="#bb" />
+        </g>
+        <g [attr.transform]="'rotate(180)'">
+          <use xlink:href="#bb" />
+        </g>
+        <g [attr.transform]="'rotate(270)'">
+          <use xlink:href="#bb" />
+        </g>
+      </g>
+    </g>
+  </svg>
+</div>
