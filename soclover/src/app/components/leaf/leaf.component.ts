@@ -23,6 +23,8 @@ export class LeafComponent implements OnInit {
   fontSize = 7;
   wordNudgeIn = 9;
   wordPad = 6;
+  spinX = this.cardWidth / 2 + 1;
+  spinY = this.cardWidth / 2 + 1;
   heapPos = [
     [150, -100],
     [150, 0],
@@ -97,11 +99,6 @@ export class LeafComponent implements OnInit {
   }
 
   mouseDownCard(event: any, card: Card) {
-    // Prevent the default behavior of the click event (text selection).
-    // event.preventDefault();
-
-    // // Stop event propagation to prevent it from reaching parent elements.
-    // event.stopPropagation();
     console.log('downCard', event, card);
     this.dragCard = card;
   }
@@ -112,11 +109,8 @@ export class LeafComponent implements OnInit {
     this.initialX = event.clientX;
     this.initialY = event.clientY;
     this.setDragDelta(event);
-
-    // Prevent the default behavior of the click event (text selection).
     event.preventDefault();
 
-    // Stop event propagation to prevent it from reaching parent elements.
     event.stopPropagation();
   }
 
@@ -170,6 +164,10 @@ export class LeafComponent implements OnInit {
       console.log('Move', event);
       this.setDragDelta;
     }
+  }
+  spinClick(card: Card) {
+    console.log('spin', card);
+    card.orientation = (card.orientation + 1) % 4;
   }
 }
 

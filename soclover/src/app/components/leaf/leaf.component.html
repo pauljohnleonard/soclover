@@ -12,14 +12,14 @@
     (mouseleave)="mouseLeave($event)"
   >
     <defs>
-      <circle id="a" [attr.cx]="cx" cy="0" [attr.r]="rad" fill="#390" />
+      <circle id="mycircle" [attr.cx]="cx" cy="0" [attr.r]="rad" fill="#390" />
 
-      <g id="aa">
+      <g id="petal">
         <g [attr.transform]="'translate(0, ' + tweakY + ')'">
-          <use xlink:href="#a" />
+          <use xlink:href="#mycircle" />
         </g>
         <g [attr.transform]="'translate(0,  -' + tweakY + ')'">
-          <use xlink:href="#a" />
+          <use xlink:href="#mycircle" />
         </g>
       </g>
 
@@ -31,7 +31,7 @@
           [attr.height]="cardWidth - cardPad"
           [attr.rx]="cardRad"
           fill="#fff"
-          style="cursor: move"
+          style="cursor: grab"
         />
 
         <rect
@@ -40,8 +40,7 @@
           [attr.width]="cardWidth - cardPad - holeBorder * 2"
           [attr.height]="cardWidth - cardPad - holeBorder * 2"
           [attr.rx]="cardRad"
-          fill="none"
-          style="cursor: move"
+          fill="#366e39"
         />
       </g>
 
@@ -53,14 +52,13 @@
           [attr.height]="cardWidth - cardPad"
           [attr.rx]="cardRad"
           fill="#366e39"
-          style="cursor: move"
         />
       </g>
       <g
         fill="#000000"
         id="bin"
         transform="translate(-6,-6) scale(0.03)"
-        style="cursor: move"
+        style="cursor: grab"
       >
         <!-- <g stroke-linecap="round" stroke-linejoin="round" fill="#000"></g> -->
 
@@ -85,20 +83,35 @@
         </g>
       </g>
 
+      <g id="spin" transform="translate(-8.2,-8.2) scale(0.08)">
+        <rect
+          x="0"
+          y="0"
+          width="200"
+          height="200"
+          rx="11"
+          fill="transparent"
+          style="cursor: alias"
+        ></rect>
+        <path
+          d="M202.403,95.22c0,46.312-33.237,85.002-77.109,93.484v25.663l-69.76-40l69.76-40v23.494 c27.176-7.87,47.109-32.964,47.109-62.642c0-35.962-29.258-65.22-65.22-65.22s-65.22,29.258-65.22,65.22 c0,9.686,2.068,19.001,6.148,27.688l-27.154,12.754c-5.968-12.707-8.994-26.313-8.994-40.441C11.964,42.716,54.68,0,107.184,0 S202.403,42.716,202.403,95.22z"
+        ></path>
+      </g>
+
       <!-- <line x1="0" y1="0" x2="0" y2="150" stroke="red" stroke-width="2" /> -->
     </defs>
 
     <g [attr.transform]="'translate(120 120)'">
       <g transform="rotate(45)">
-        <use xlink:href="#aa" />
+        <use xlink:href="#petal" />
         <g transform="rotate(90)">
-          <use xlink:href="#aa" />
+          <use xlink:href="#petal" />
         </g>
         <g transform="rotate(180)">
-          <use xlink:href="#aa" />
+          <use xlink:href="#petal" />
         </g>
         <g transform="rotate(270)">
-          <use xlink:href="#aa" />
+          <use xlink:href="#petal" />
         </g>
 
         <circle cx="0" cy="0" [attr.r]="rHub" fill="#390" />
@@ -122,8 +135,14 @@
                 card.slot >= 0 ? 'rotate(' + card.slot * 90 + ')' : ''
               "
             >
-              <use *ngIf="!card.dropZone" xlink:href="#card" />
-
+              <ng-container *ngIf="!card.dropZone">
+                <use xlink:href="#card" />
+                <use
+                  xlink:href="#spin"
+                  [attr.transform]="'translate(' + spinX + ' ' + spinY + ')'"
+                  (click)="spinClick(card)"
+                />
+              </ng-container>
               <use *ngIf="card.dropZone" xlink:href="#dropZone" />
 
               <ng-container *ngFor="let word of card.words; let word_i = index">
