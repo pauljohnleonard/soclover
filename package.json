@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx s soclover"
+    "start": "nx s soclover",
+    "build": "nx b soclover"
   },
   "private": true,
   "dependencies": {
