@@ -14,7 +14,10 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@soclover/lib-frontend": ["lib-frontend/src/index.ts"],
+      "@soclover/lib-soclover": ["lib-soclover/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

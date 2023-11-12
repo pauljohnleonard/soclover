@@ -4,12 +4,15 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { appRoutes } from './app.routes';
 import { LeafComponent } from './components/leaf/leaf.component';
-import { DragAndDropDirective } from './directives/dragAndDrop.directive';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  declarations: [AppComponent, LeafComponent, DragAndDropDirective],
+  declarations: [AppComponent, LeafComponent],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
+    MatIconModule,
     RouterModule.forRoot(appRoutes, { initialNavigation: 'enabledBlocking' }),
   ],
   providers: [],

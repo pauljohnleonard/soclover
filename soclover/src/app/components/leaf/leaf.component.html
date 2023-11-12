@@ -1,204 +1,209 @@
-<div style="background-color: bisque; width: 100vw; height: 100vh">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
-    width="800"
-    height="600"
-    transform-origin="0 0"
-    [attr.transform]="transform"
-    (mousemove)="mouseMove($event)"
-    (mousedown)="mouseDown($event)"
-    (mouseup)="mouseUp($event)"
-    (mouseleave)="mouseLeave($event)"
-  >
-    <defs>
-      <circle id="mycircle" [attr.cx]="cx" cy="0" [attr.r]="rad" fill="#390" />
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  width="800"
+  height="600"
+  transform-origin="0 0"
+  [attr.transform]="transform"
+  (mousemove)="mouseMove($event)"
+  (mousedown)="mouseDown($event)"
+  (mouseup)="mouseUp($event)"
+  (mouseleave)="mouseLeave($event)"
+>
+  <defs>
+    <circle id="mycircle" [attr.cx]="cx" cy="0" [attr.r]="rad" fill="#390" />
 
-      <g id="petal">
-        <g [attr.transform]="'translate(0, ' + tweakY + ')'">
-          <use xlink:href="#mycircle" />
-        </g>
-        <g [attr.transform]="'translate(0,  -' + tweakY + ')'">
-          <use xlink:href="#mycircle" />
-        </g>
+    <g id="petal">
+      <g [attr.transform]="'translate(0, ' + tweakY + ')'">
+        <use xlink:href="#mycircle" />
       </g>
-
-      <g id="card">
-        <rect
-          [attr.x]="cardPad"
-          [attr.y]="cardPad"
-          [attr.width]="cardWidth - cardPad"
-          [attr.height]="cardWidth - cardPad"
-          [attr.rx]="cardRad"
-          fill="#fff"
-          style="cursor: grab"
-        />
-
-        <rect
-          [attr.x]="cardPad + holeBorder"
-          [attr.y]="cardPad + holeBorder"
-          [attr.width]="cardWidth - cardPad - holeBorder * 2"
-          [attr.height]="cardWidth - cardPad - holeBorder * 2"
-          [attr.rx]="cardRad"
-          fill="#366e39"
-        />
+      <g [attr.transform]="'translate(0,  -' + tweakY + ')'">
+        <use xlink:href="#mycircle" />
       </g>
+    </g>
 
-      <g id="dropZone">
-        <rect
-          [attr.x]="cardPad"
-          [attr.y]="cardPad"
-          [attr.width]="cardWidth - cardPad"
-          [attr.height]="cardWidth - cardPad"
-          [attr.rx]="cardRad"
-          fill="#366e39"
-        />
-      </g>
-      <g
-        fill="#000000"
-        id="bin"
-        transform="translate(-6,-6) scale(0.03)"
+    <g id="card">
+      <rect
+        [attr.x]="cardPad"
+        [attr.y]="cardPad"
+        [attr.width]="cardWidth - cardPad"
+        [attr.height]="cardWidth - cardPad"
+        [attr.rx]="cardRad"
+        fill="#fff"
         style="cursor: grab"
-      >
-        <!-- <g stroke-linecap="round" stroke-linejoin="round" fill="#000"></g> -->
+      />
 
-        <rect
-          x="50.5"
-          y="50.5"
-          width="300"
-          height="407"
-          rx="11"
-          fill="transparent"
-        ></rect>
+      <rect
+        [attr.x]="cardPad + holeBorder"
+        [attr.y]="cardPad + holeBorder"
+        [attr.width]="cardWidth - cardPad - holeBorder * 2"
+        [attr.height]="cardWidth - cardPad - holeBorder * 2"
+        [attr.rx]="cardRad"
+        fill="#366e39"
+        style="cursor: grab"
+      />
+    </g>
 
+    <g id="dropZone">
+      <rect
+        [attr.x]="cardPad"
+        [attr.y]="cardPad"
+        [attr.width]="cardWidth - cardPad"
+        [attr.height]="cardWidth - cardPad"
+        [attr.rx]="cardRad"
+        fill="#366e39"
+      />
+    </g>
+    <g
+      fill="#000000"
+      id="bin"
+      transform="translate(-6,-6) scale(0.03)"
+      style="cursor: grab"
+    >
+      <!-- <g stroke-linecap="round" stroke-linejoin="round" fill="#000"></g> -->
+
+      <rect
+        x="50.5"
+        y="50.5"
+        width="300"
+        height="407"
+        rx="11"
+        fill="transparent"
+      ></rect>
+
+      <g>
         <g>
-          <g>
-            <path
-              d="M87.748,388.784c0.461,11.01,9.521,19.699,20.539,19.699h191.911c11.018,0,20.078-8.689,20.539-19.699l13.705-289.316 H74.043L87.748,388.784z M247.655,171.329c0-4.61,3.738-8.349,8.35-8.349h13.355c4.609,0,8.35,3.738,8.35,8.349v165.293 c0,4.611-3.738,8.349-8.35,8.349h-13.355c-4.61,0-8.35-3.736-8.35-8.349V171.329z M189.216,171.329 c0-4.61,3.738-8.349,8.349-8.349h13.355c4.609,0,8.349,3.738,8.349,8.349v165.293c0,4.611-3.737,8.349-8.349,8.349h-13.355 c-4.61,0-8.349-3.736-8.349-8.349V171.329L189.216,171.329z M130.775,171.329c0-4.61,3.738-8.349,8.349-8.349h13.356 c4.61,0,8.349,3.738,8.349,8.349v165.293c0,4.611-3.738,8.349-8.349,8.349h-13.356c-4.61,0-8.349-3.736-8.349-8.349V171.329z"
-            ></path>
-            <path
-              d="M343.567,21.043h-88.535V4.305c0-2.377-1.927-4.305-4.305-4.305h-92.971c-2.377,0-4.304,1.928-4.304,4.305v16.737H64.916 c-7.125,0-12.9,5.776-12.9,12.901V74.47h304.451V33.944C356.467,26.819,350.692,21.043,343.567,21.043z"
-            ></path>
-          </g>
+          <path
+            d="M87.748,388.784c0.461,11.01,9.521,19.699,20.539,19.699h191.911c11.018,0,20.078-8.689,20.539-19.699l13.705-289.316 H74.043L87.748,388.784z M247.655,171.329c0-4.61,3.738-8.349,8.35-8.349h13.355c4.609,0,8.35,3.738,8.35,8.349v165.293 c0,4.611-3.738,8.349-8.35,8.349h-13.355c-4.61,0-8.35-3.736-8.35-8.349V171.329z M189.216,171.329 c0-4.61,3.738-8.349,8.349-8.349h13.355c4.609,0,8.349,3.738,8.349,8.349v165.293c0,4.611-3.737,8.349-8.349,8.349h-13.355 c-4.61,0-8.349-3.736-8.349-8.349V171.329L189.216,171.329z M130.775,171.329c0-4.61,3.738-8.349,8.349-8.349h13.356 c4.61,0,8.349,3.738,8.349,8.349v165.293c0,4.611-3.738,8.349-8.349,8.349h-13.356c-4.61,0-8.349-3.736-8.349-8.349V171.329z"
+          ></path>
+          <path
+            d="M343.567,21.043h-88.535V4.305c0-2.377-1.927-4.305-4.305-4.305h-92.971c-2.377,0-4.304,1.928-4.304,4.305v16.737H64.916 c-7.125,0-12.9,5.776-12.9,12.901V74.47h304.451V33.944C356.467,26.819,350.692,21.043,343.567,21.043z"
+          ></path>
         </g>
       </g>
+    </g>
 
-      <g id="spin" transform="translate(-8.2,-8.2) scale(0.08)">
-        <rect
-          x="0"
-          y="0"
-          width="200"
-          height="200"
-          rx="11"
-          fill="transparent"
-          style="cursor: alias"
-        ></rect>
-        <path
-          d="M202.403,95.22c0,46.312-33.237,85.002-77.109,93.484v25.663l-69.76-40l69.76-40v23.494 c27.176-7.87,47.109-32.964,47.109-62.642c0-35.962-29.258-65.22-65.22-65.22s-65.22,29.258-65.22,65.22 c0,9.686,2.068,19.001,6.148,27.688l-27.154,12.754c-5.968-12.707-8.994-26.313-8.994-40.441C11.964,42.716,54.68,0,107.184,0 S202.403,42.716,202.403,95.22z"
-        ></path>
-      </g>
+    <g id="spin" transform="translate(-8.2,-8.2) scale(0.08)">
+      <rect
+        x="0"
+        y="0"
+        width="200"
+        height="200"
+        rx="11"
+        fill="transparent"
+        style="cursor: alias"
+      ></rect>
+      <path
+        d="M202.403,95.22c0,46.312-33.237,85.002-77.109,93.484v25.663l-69.76-40l69.76-40v23.494 c27.176-7.87,47.109-32.964,47.109-62.642c0-35.962-29.258-65.22-65.22-65.22s-65.22,29.258-65.22,65.22 c0,9.686,2.068,19.001,6.148,27.688l-27.154,12.754c-5.968-12.707-8.994-26.313-8.994-40.441C11.964,42.716,54.68,0,107.184,0 S202.403,42.716,202.403,95.22z"
+      ></path>
+    </g>
 
-      <!-- <line x1="0" y1="0" x2="0" y2="150" stroke="red" stroke-width="2" /> -->
-    </defs>
+    <!-- <line x1="0" y1="0" x2="0" y2="150" stroke="red" stroke-width="2" /> -->
+  </defs>
 
-    <g [attr.transform]="'translate(120 120)'">
-      <g transform="rotate(45)">
+  <g [attr.transform]="'translate(120 120)'">
+    <g transform="rotate(45)">
+      <use xlink:href="#petal" />
+      <g transform="rotate(90)">
         <use xlink:href="#petal" />
-        <g transform="rotate(90)">
-          <use xlink:href="#petal" />
-        </g>
-        <g transform="rotate(180)">
-          <use xlink:href="#petal" />
-        </g>
-        <g transform="rotate(270)">
-          <use xlink:href="#petal" />
-        </g>
-
-        <circle cx="0" cy="0" [attr.r]="rHub" fill="#390" />
       </g>
+      <g transform="rotate(180)">
+        <use xlink:href="#petal" />
+      </g>
+      <g transform="rotate(270)">
+        <use xlink:href="#petal" />
+      </g>
+
+      <circle cx="0" cy="0" [attr.r]="rHub" fill="#390" />
     </g>
+  </g>
 
-    <g [attr.transform]="'translate(120 120)'">
-      <ng-container *ngFor="let card of cards; let card_i = index">
-        <g
-          [attr.transform]="
-            card.slot < 0
-              ? 'translate(' + card.dragPos?.[0] + ' ' + card.dragPos?.[1] + ')'
-              : ''
-          "
-          (mousedown)="mouseDownCard($event, card)"
-          (mouseup)="mouseUpCard($event, card)"
-        >
-          <g transform="rotate(45)">
-            <g
-              [attr.transform]="
-                card.slot >= 0 ? 'rotate(' + card.slot * 90 + ')' : ''
-              "
-            >
-              <ng-container *ngIf="!card.dropZone">
-                <use xlink:href="#card" />
-                <use
-                  xlink:href="#spin"
-                  [attr.transform]="'translate(' + spinX + ' ' + spinY + ')'"
-                  (click)="spinClick(card)"
-                />
-              </ng-container>
-              <use *ngIf="card.dropZone" xlink:href="#dropZone" />
+  <g [attr.transform]="'translate(120 120)'">
+    <ng-container *ngFor="let card of cards; let card_i = index">
+      <g
+        [attr.transform]="
+          card.slot < 0
+            ? 'translate(' + card.dragPos?.x + ',' + card.dragPos?.y + ')'
+            : ''
+        "
+        (mousedown)="mouseDownCard($event, card)"
+        (mouseup)="mouseUpCard($event, card)"
+      >
+        <g transform="rotate(45)">
+          <g
+            [attr.transform]="
+              card.slot >= 0 ? 'rotate(' + card.slot * 90 + ')' : ''
+            "
+          >
+            <ng-container *ngIf="!card.dropZone">
+              <use xlink:href="#card" (click)="spinClick(card)" />
 
-              <ng-container *ngFor="let word of card.words; let word_i = index">
-                <g
+              <!-- <use
+                xlink:href="#spin"
+                [attr.transform]="'translate(' + spinX + ' ' + spinY + ')'"
+                (click)="spinClick(card)"
+              /> -->
+            </ng-container>
+
+            <use
+              id="cardDropZone"
+              *ngIf="card.dropZone"
+              xlink:href="#dropZone"
+            />
+
+            <ng-container *ngFor="let word of card.words; let word_i = index">
+              <g
+                [attr.transform]="
+                  'rotate(' +
+                  (word_i + card.orientation) * 90 +
+                  ' ' +
+                  (cardPad + cardWidth) / 2 +
+                  ' ' +
+                  (cardPad + cardWidth) / 2 +
+                  ') translate(' +
+                  (cardPad + cardWidth / 2) +
+                  ',' +
+                  wordNudgeIn +
+                  ')'
+                "
+              >
+                <text
+                  x="0"
+                  y="0"
                   [attr.transform]="
-                    'rotate(' +
-                    (word_i + card.orientation) * 90 +
-                    ' ' +
-                    (cardPad + cardWidth) / 2 +
-                    ' ' +
-                    (cardPad + cardWidth) / 2 +
-                    ') translate(' +
-                    (cardPad + cardWidth / 2) +
-                    ',' +
-                    wordNudgeIn +
-                    ')'
+                    (word_i +
+                      (card.slot >= 0 ? card.slot : 0) +
+                      1 +
+                      card.orientation) %
+                      4 >
+                    1
+                      ? 'rotate( 180 0 -1)'
+                      : ''
                   "
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  fill="black"
+                  [attr.font-size]="fontSize"
+                  font-family="Arial"
+                  font-weight="600"
                 >
-                  <text
-                    x="0"
-                    y="0"
-                    [attr.transform]="
-                      (word_i +
-                        (card.slot >= 0 ? card.slot : 0) +
-                        1 +
-                        card.orientation) %
-                        4 >
-                      1
-                        ? 'rotate( 180 0 -1)'
-                        : ''
-                    "
-                    text-anchor="middle"
-                    dominant-baseline="middle"
-                    fill="black"
-                    [attr.font-size]="fontSize"
-                    font-family="Arial"
-                    font-weight="600"
-                  >
-                    {{ card.words[word_i] }}
-                  </text>
-                </g>
-              </ng-container>
-            </g>
+                  {{ card.words[word_i] }}
+                </text>
+              </g>
+            </ng-container>
           </g>
         </g>
-      </ng-container>
+      </g>
+    </ng-container>
 
-      <ng-container *ngFor="let bin of bins">
-        <use
-          *ngIf="bin.card"
-          xlink:href="#bin"
-          [attr.x]="bin.binX"
-          [attr.y]="bin.binY"
-          (click)="binClick(bin)"
-        />
-      </ng-container>
-    </g>
-  </svg>
-</div>
+    <ng-container *ngFor="let bin of bins">
+      <use
+        *ngIf="bin.card"
+        xlink:href="#bin"
+        [attr.x]="bin.binX"
+        [attr.y]="bin.binY"
+        (click)="binClick(bin)"
+      />
+    </ng-container>
+  </g>
+</svg>

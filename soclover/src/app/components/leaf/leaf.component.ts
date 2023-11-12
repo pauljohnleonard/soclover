@@ -1,6 +1,8 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { ModelService } from '../../model/model.service';
-import { Card, Hand, dropZones } from '../../model/model';
+import { dropZones } from '../../model/model';
+import { cloneDeep } from 'lodash';
+import { Card, Hand } from '@soclover/lib-soclover';
 
 type Bin = { binX: number; slot: number; binY: number; card: Card | null };
 @Component({
@@ -26,11 +28,11 @@ export class LeafComponent implements OnInit {
   spinX = this.cardWidth / 2 + 1;
   spinY = this.cardWidth / 2 + 1;
   heapPos = [
-    [150, -100],
-    [150, 0],
-    [150, 100],
-    [50, 100],
-    [-50, 100],
+    { x: 150, y: -100 },
+    { x: 150, y: 0 },
+    { x: 150, y: 100 },
+    { x: 50, y: 100 },
+    { x: -50, y: 100 },
   ];
   binX = 40;
   dragCard!: Card | null;
@@ -45,41 +47,19 @@ export class LeafComponent implements OnInit {
     { binY: -this.cardWidth * 1.5, binX: 0, slot: 2, card: null },
     { binX: this.cardWidth * 1.5, binY: 0, slot: 3, card: null },
   ];
+  dragScaleFactor = 1.0;
+  dragElement: any;
 
-  constructor(public modelService: ModelService) {
+  constructor(public modelService: ModelService, public elRef: ElementRef) {
     this.hand = this.modelService.getPuzzle();
     for (let i = 0; i < 5; i++) {
-      this.hand.cards[i].heapPos = this.heapPos[i];
-      this.hand.cards[i].dragPos = this.heapPos[i];
+      this.hand.cards[i].heapPos = cloneDeep(this.heapPos[i]);
+      this.hand.cards[i].dragPos = cloneDeep(this.heapPos[i]);
       this.hand.cards[i].heapSlot = i + 1;
       this.hand.cards[i].slot = -(i + 1);
     }
-
+    this.modelService.update();
     this.cards = dropZones.concat(this.hand.cards);
-  }
-
-  generatePolygonPoints(): string {
-    const x1 = this.cardPad;
-    const y1 = this.cardPad;
-    const x2 = this.cardPad + this.holeBorder;
-    const y2 = this.cardPad + this.holeBorder;
-    const width1 = this.cardWidth - this.cardPad;
-    const height1 = this.cardWidth - this.cardPad;
-    const width2 = this.cardWidth - this.cardPad * 2 - this.holeBorder * 2;
-    const height2 = this.cardWidth - this.cardPad * 2 - this.holeBorder * 2;
-
-    const points = `${x1},${y1} ${x1 + width1},${y1} ${x1 + width1},${
-      y1 + height1
-    } ${x1},${y1 + height1} ${x1},${y1}`;
-    // const holePoints = `${x2},${y2} ${x2 + width2},${y2} ${x2 + width2},${
-    //   y2 + height2
-    // } ${x2},${y2 + height2}`;
-
-    const holePoints = `${x2},${y2}    ${x2},${y2 + height2}
-    ${x2 + width2},${y2 + height2} ${x2 + width2},${y2} ${x2},${y2}`;
-
-    // return holePoints;
-    return points + ' ' + holePoints;
   }
 
   ngOnInit() {
@@ -96,28 +76,14 @@ export class LeafComponent implements OnInit {
     const viewportWidth = window.innerWidth;
     const scaleFactor = Math.min(viewportHeight, viewportWidth) / 350;
     this.transform = `scale(${scaleFactor})`;
+    console.log('scale', scaleFactor);
+    this.dragScaleFactor = 1.0 / scaleFactor;
   }
 
-  mouseDownCard(event: any, card: Card) {
-    console.log('downCard', event, card);
-    this.dragCard = card;
-  }
-
-  mouseDown(event: any) {
-    console.log('down', event);
-    this.isDragging = true;
-    this.initialX = event.clientX;
-    this.initialY = event.clientY;
-    this.setDragDelta(event);
-    event.preventDefault();
-
-    event.stopPropagation();
-  }
-
-  mouseUp(evt: any) {
-    console.log('up', evt);
-    this.isDragging = false;
-    this.dragCard = null;
+  spinClick(card: Card) {
+    console.log('spin', card);
+    card.orientation = (card.orientation + 1) % 4;
+    this.modelService.update();
   }
 
   binClick(bin: Bin) {
@@ -125,10 +91,56 @@ export class LeafComponent implements OnInit {
     if (card) {
       card.slot = -(card.heapSlot || 0);
       bin.card = null;
+      card.dragPos = card.heapPos;
+      this.modelService.update();
     }
   }
 
-  mouseUpCard(evt: any, card: Card) {
+  // --- drag and drop ---
+  mouseDownCard(event: any, card: Card) {
+    if (card.dropZone) {
+      return;
+    }
+    console.log('downCard', event, card);
+    this.dragCard = card;
+    this.dragElement = event.target;
+    this.dragElement.style.pointerEvents = 'none';
+  }
+
+  mouseDown(event: any) {
+    console.log('down', event);
+    this.isDragging = true;
+    this.initialX = event.clientX;
+    this.initialY = event.clientY;
+    this.setDragDelta(event.clientX, event.clientY);
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  // dragStart(event: any) {}
+
+  mouseUp(event: any) {
+    console.log('up', event);
+
+    if (this.dragElement) {
+      this.dragElement.style.pointerEvents = 'auto';
+    }
+
+    if (this.dragCard) {
+      this.dragCard.dragPos = this.dragCard.heapPos;
+      this.modelService.update();
+    }
+
+    this.dragElement = null;
+    this.isDragging = false;
+    this.dragCard = null;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  mouseUpCard(event: any, card: Card) {
+    console.log('upCard', event);
+
     if (card.dropZone && this.dragCard) {
       this.dragCard.slot = card.slot;
       this.dragCard.orientation -= card.slot;
@@ -137,38 +149,33 @@ export class LeafComponent implements OnInit {
       if (bin) {
         bin.card = null;
       }
-
       this.bins[this.dragCard.slot].card = this.dragCard;
+      this.modelService.update();
     }
     this.isDragging = false;
     this.dragCard = null;
-    console.log('upCard', evt, card);
   }
 
   mouseLeave(evt: any) {
     console.log('leave', evt);
   }
 
-  setDragDelta(event: any) {
-    const deltaX = event.clientX - this.initialX;
-    const deltaY = event.clientY - this.initialY;
+  setDragDelta(newX: number, newY: number) {
+    const deltaX = newX - this.initialX;
+    const deltaY = newY - this.initialY;
     if (this.dragCard) {
-      this.dragCard.dragPos = [
-        this.dragCard?.heapPos?.[0] || 0 + deltaX,
-        this.dragCard?.heapPos?.[1] || 0 + deltaY,
-      ];
+      this.dragCard.dragPos = {
+        x: (this.dragCard?.heapPos?.x || 0) + deltaX * this.dragScaleFactor,
+        y: (this.dragCard?.heapPos?.y || 0) + deltaY * this.dragScaleFactor,
+      };
+      this.modelService.update();
     }
   }
+
   mouseMove(event: any) {
     if (this.isDragging) {
-      console.log('Move', event);
-      this.setDragDelta;
+      // console.log('Move', event);
+      this.setDragDelta(event.clientX, event.clientY);
     }
   }
-  spinClick(card: Card) {
-    console.log('spin', card);
-    card.orientation = (card.orientation + 1) % 4;
-  }
 }
-
-console.log('grab', event);

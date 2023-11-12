@@ -1,0 +1,33 @@
+<div mat-dialog-title class="dialog-title-with-close-button">
+  <h1>{{ data.title || 'Are you sure?' }}</h1>
+  <button
+    mat-icon-button
+    color="primary"
+    class="dialog-close-button"
+    (click)="dialogRef.close(false)"
+  >
+    <mat-icon>cancel</mat-icon>
+  </button>
+</div>
+<mat-dialog-content class="info-box">
+  <p class="mat-body">{{ data.body }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button
+    *ngIf="data.noOptionTitle"
+    mat-button
+    class="action-button"
+    (click)="dialogRef.close(false)"
+    cdkFocusInitial
+  >
+    data.noOptionTitle
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    class="action-button"
+    (click)="dialogRef.close(true)"
+  >
+    {{ data.yesOptionTitle || 'YES' }}
+  </button>
+</mat-dialog-actions>

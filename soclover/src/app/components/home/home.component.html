@@ -1,0 +1,82 @@
+<div class="background">
+  <!-- <div class="titlebox">
+    <span style="flex:1"></span>
+    <div class="title">{{ TITLE }}</div>
+
+    <span style="flex:1"></span>
+  </div> -->
+
+  <div style="height: 40px;"></div>
+
+  <div class="logon">
+    <div class="outer">
+      <div>
+        <span style="flex:1"></span>
+        <mat-form-field>
+          <input
+            matInput
+            placeholder="YourName"
+            [formControl]="name"
+            required
+          />
+        </mat-form-field>
+
+        <span style="flex:1"></span>
+      </div>
+    </div>
+
+    <div class="table">
+      <div class="door">
+        {{ players[northSeat]?.name }}
+        <img
+          [ngClass]="{
+            logonimg: true,
+            light: disable(northSeat)
+          }"
+          src="assets/Enter.svg"
+          (click)="logon(northSeat)"
+        />
+      </div>
+
+      <div class="middle">
+        <div class="door">
+          {{ players[westSeat]?.name }}
+
+          <img
+            [ngClass]="{
+              logonimg: true,
+              light: disable(westSeat)
+            }"
+            src="assets/Enter.svg"
+            (click)="logon(westSeat)"
+          />
+        </div>
+        <span style="width:40px"></span>
+        <div class="door">
+          {{ players[eastSeat]?.name }}
+
+          <img
+            [ngClass]="{
+              logonimg: true,
+              light: disable(eastSeat)
+            }"
+            src="assets/Enter.svg"
+            (click)="logon(eastSeat)"
+          />
+        </div>
+      </div>
+      <div class="door">
+        {{ players[southSeat]?.name }}
+        <img
+          [ngClass]="{
+            logonimg: true,
+            light: disable(southSeat)
+          }"
+          src="assets/Enter.svg"
+          (click)="logon(southSeat)"
+        />
+      </div>
+    </div>
+  </div>
+  <!-- <button mat-raised-button class="resetbut" (click)="reset()">RESET</button> -->
+</div>

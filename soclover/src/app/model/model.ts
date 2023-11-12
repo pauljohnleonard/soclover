@@ -1,13 +1,13 @@
-export type Card = {
-  words: string[];
+import { Card } from '@soclover/lib-soclover';
+
+export type CardUpdate = {
   orientation: number;
   slot: number;
+  dragPos?: { x: number; y: number };
+};
 
-  // UI properties
-  dropZone?: boolean;
-  heapPos?: number[];
-  dragPos?: number[];
-  heapSlot?: number;
+export type HandUpdate = {
+  cards: CardUpdate[];
 };
 
 export const dropZones: Card[] = [
@@ -36,6 +36,3 @@ export const dropZones: Card[] = [
     dropZone: true,
   },
 ];
-export type Hand = {
-  cards: Card[];
-};
