@@ -1,48 +1,51 @@
-import { Player, DecryptoMessage, MessageType } from '@games/lib-decrypto';
-import { Game } from './game';
+import { Game, MessageType, SocloverMessage } from '@soclover/lib-soclover';
 import { Room } from './room';
 import { RoomConnection } from './room-connection';
+import { GameController } from './game-controller';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const seedrandom = require('seedrandom');
 
 const videoUrl = `https://us02web.zoom.us/j/708254000`;
 
 export class DecryptoRoom extends Room {
-  game: Game;
+  gameController: GameController;
   name: string;
 
   constructor(name) {
     super();
     this.name = name;
-    this.game = new Game();
+    this.gameController = new GameController();
     // this.game.videoUrl = `https://meet.jit.si/decryptoclub-room1`;
-    this.game.videoUrl = videoUrl;
+    this.gameController.videoUrl = videoUrl;
   }
 
   playerInRoom(name: string) {
-    const existing = this.game.players.find(player => player.name === name);
+    const existing = this.gameController.game.players.find(
+      (player) => player.name === name
+    );
   }
 
-  processMessage(message: DecryptoMessage, fromConnection: RoomConnection) {
+  processMessage(message: SocloverMessage, fromConnection: RoomConnection) {
     console.log(JSON.stringify(message));
     try {
-      const sendingPlayer = this.game.players.find(
-        user => user.name === message.sender
+      const sendingPlayer = this.gameController.game.players.find(
+        (user) => user.name === message.sender
       );
 
       switch (message.type) {
         case MessageType.SEND_READY:
           sendingPlayer.ready = true;
-          this.game.playerReady();
+          this.gameController.playerReady();
           break;
 
         case MessageType.SEND_LOGOUT:
-          this.game.playerLeave(message.sender);
+          this.gameController.playerLeave(message.sender);
           break;
 
         case MessageType.SEND_LOGON:
           console.log('Logon', message.sender);
           if (!sendingPlayer) {
-            const newPlayer = this.game.newPlayer(message.sender);
+            const newPlayer = this.gameController.newPlayer(message.sender);
             fromConnection.player = newPlayer;
           } else {
             fromConnection.player = sendingPlayer;
@@ -53,29 +56,30 @@ export class DecryptoRoom extends Room {
           this.broadcastStateToConection(fromConnection);
           break;
 
-        case MessageType.JOIN_TEAM:
-          sendingPlayer.team = message.team;
-          break;
+        // case MessageType.JOIN_TEAM:
+        //   sendingPlayer.team = message.team;
+        //   break;
 
-        case MessageType.SEND_GUESS:
-          this.game.addGuess(message);
-          break;
+        // case MessageType.SEND_GUESS:
+        //   this.game.addGuess(message);
+        //   break;
 
-        case MessageType.SEND_CLUES:
-          this.game.setClues(message);
-          break;
+        // case MessageType.SEND_CLUES:
+        //   this.game.setClues(message);
+        //   break;
 
-        case MessageType.ALL_CHAT:
-          this.broadcastAll(message);
-          return;
+        // case MessageType.ALL_CHAT:
+        //   this.broadcastAll(message);
+        //   return;
 
-        case MessageType.TEAM_CHAT:
-          this.broadcastTeam(message);
-          return;
+        // case MessageType.TEAM_CHAT:
+        //   this.broadcastTeam(message);
+        //   return;
 
-        case MessageType.SEND_CONTINUE:
-          this.game.continue(message);
-          break;
+        // case MessageType.SEND_CONTINUE:
+        //   this.game.continue(message);
+        //   break;
+
         case MessageType.SEED:
           seedrandom(message.seed, { global: true });
           console.log(
@@ -98,20 +102,20 @@ export class DecryptoRoom extends Room {
   }
 
   reset() {
-    const reset: DecryptoMessage = {
+    const reset: SocloverMessage = {
       sender: 'SYSTEM',
-      type: MessageType.RESET
+      type: MessageType.RESET,
+      // seed: Math.random(),
     };
 
     this.broadcastAll(reset);
 
-    this.connections.forEach(c => {
+    this.connections.forEach((c) => {
       c.player = undefined;
     });
 
     console.log(' NEW GAME -----------------------------------------------  ');
-    this.game = new Game();
-    this.game.videoUrl = videoUrl;
+    this.gameController.newGame();
   }
 
   broadcastStateToAll() {
@@ -121,24 +125,23 @@ export class DecryptoRoom extends Room {
   }
 
   broadcastStateToConection(connection: RoomConnection) {
-    const message: DecryptoMessage = {
+    const message: SocloverMessage = {
       sender: 'SYSTEM',
       type: MessageType.STATE,
-      game: this.game
+      game: this.gameController.game,
     };
 
-    if (!connection) {
-    } else {
+    if (connection) {
       connection.sendMessage(message);
     }
   }
 
-  broadcastTeam(message) {
-    const me = this.game.playerFromName(message.sender);
-    for (const c of this.connections) {
-      if (c.player && c.player.team === me.team) c.sendMessage(message);
-    }
-  }
+  // broadcastTeam(message) {
+  //   const me = this.game.playerFromName(message.sender);
+  //   for (const c of this.connections) {
+  //     if (c.player && c.player.team === me.team) c.sendMessage(message);
+  //   }
+  // }
 
   broadcastAll(message) {
     for (const c of this.connections) {

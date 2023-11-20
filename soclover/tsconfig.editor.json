@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "../lib-frontend/src/lib/connection.service.ts"],
   "compilerOptions": {
     "types": ["jest", "node"]
   }

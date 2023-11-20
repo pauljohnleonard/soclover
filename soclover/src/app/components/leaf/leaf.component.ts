@@ -2,8 +2,18 @@ import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { ModelService } from '../../model/model.service';
 import { dropZones } from '../../model/model';
 import { cloneDeep } from 'lodash';
-import { Card, Hand } from '@soclover/lib-soclover';
+import {
+  Card,
+  Hand,
+  SocloverStageEnum,
+  SocloverState,
+} from '@soclover/lib-soclover';
+import { NgxSpinnerService } from 'ngx-spinner';
 
+// enum State {
+//   Setup = 'Setup',
+//   Solve = 'Solve',
+// }
 type Bin = { binX: number; slot: number; binY: number; card: Card | null };
 @Component({
   selector: 'soclover-leaf',
@@ -11,6 +21,8 @@ type Bin = { binX: number; slot: number; binY: number; card: Card | null };
   styleUrls: ['./leaf.component.scss'],
 })
 export class LeafComponent implements OnInit {
+  loading = true;
+  state: SocloverState | null = null;
   cx = 70;
   rad = 35;
   tweakY = 20;
@@ -50,7 +62,37 @@ export class LeafComponent implements OnInit {
   dragScaleFactor = 1.0;
   dragElement: any;
 
-  constructor(public modelService: ModelService, public elRef: ElementRef) {
+  constructor(
+    public modelService: ModelService,
+    public elRef: ElementRef,
+    private spinner: NgxSpinnerService
+  ) {
+    this.modelService.stateSubject.subscribe((state: SocloverState | null) => {
+      if (!state) {
+        return;
+      }
+      this.state = state;
+      this.rebuild();
+    });
+  }
+
+  rebuild() {
+    if (!this.state) {
+      throw new Error('state not set');
+    }
+
+    if (this.state.stage === SocloverStageEnum.SETUP) {
+      this.initSetup();
+    } else if (this.state.stage === SocloverStageEnum.SOLVE) {
+      this.initSolve();
+    }
+  }
+
+  initSetup() {
+    this.modelService.fetchMyhand();
+  }
+
+  initSolve() {
     this.hand = this.modelService.getPuzzle();
     for (let i = 0; i < 5; i++) {
       this.hand.cards[i].heapPos = cloneDeep(this.heapPos[i]);
@@ -64,9 +106,12 @@ export class LeafComponent implements OnInit {
 
   ngOnInit() {
     this.setViewportDimensions();
+    this.spinner.show();
+    // this.init();
   }
 
   @HostListener('window:resize', ['$event'])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onResize(event: Event) {
     this.setViewportDimensions();
   }
@@ -76,7 +121,7 @@ export class LeafComponent implements OnInit {
     const viewportWidth = window.innerWidth;
     const scaleFactor = Math.min(viewportHeight, viewportWidth) / 350;
     this.transform = `scale(${scaleFactor})`;
-    console.log('scale', scaleFactor);
+    // console.log('scale', scaleFactor);
     this.dragScaleFactor = 1.0 / scaleFactor;
   }
 

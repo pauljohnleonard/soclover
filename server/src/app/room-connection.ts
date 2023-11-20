@@ -1,4 +1,4 @@
-import { DecryptoMessage, Player } from '@games/lib-decrypto';
+import { Player, SocloverMessage } from '@soclover/lib-soclover';
 import { Room } from './room';
 
 export class RoomConnection {
@@ -11,7 +11,7 @@ export class RoomConnection {
 
     ws.on('message', (str: string) => {
       try {
-        const message: DecryptoMessage = JSON.parse(str);
+        const message: SocloverMessage = JSON.parse(str);
         console.log('received: %s', str);
         this.room.processMessage(message, this);
       } catch (err) {
@@ -30,7 +30,7 @@ export class RoomConnection {
     });
   }
 
-  sendMessage(mess: DecryptoMessage) {
+  sendMessage(mess: SocloverMessage) {
     try {
       const str = JSON.stringify(mess, null, 2);
       this.ws.send(str);

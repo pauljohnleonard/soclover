@@ -1,6 +1,6 @@
 import { SocloverMessage, MessageType } from '@soclover/lib-soclover';
 
-import { DecryptoRoom } from './decrypto-room';
+import { DecryptoRoom } from './soclover-room';
 import { Room } from './room';
 import { RoomConnection } from './room-connection';
 

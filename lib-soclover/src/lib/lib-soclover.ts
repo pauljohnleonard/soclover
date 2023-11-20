@@ -1,3 +1,5 @@
+import { Player } from './player';
+
 export type Card = {
   words: string[];
   orientation: number;
@@ -20,14 +22,38 @@ export type Patch = {
   orientation?: number;
 };
 
-export type SocloverMessage = {
+export interface Message {
   sender?: string;
   room?: string;
   type: MessageType;
+}
+export interface SocloverMessage extends Message {
+  seed?: unknown;
   patch?: Patch;
-};
+  game?: Game;
+}
 
 export enum MessageType {
   SEND_LOGON = 'SEND_LOGON',
   SEND_LOGOUT = 'LOGOUT',
+  STATE = 'STATE',
+  RESET = 'RESET',
+  SEED = 'SEED',
+  SEND_READY = 'SEND_READY',
+  GET_STATE = 'GET_STATE',
+  CONNECTION_LOSS = 'CONNECTION_LOSS',
+  GET_MYHAND = 'GET_MYHAND',
 }
+
+export enum SocloverStageEnum {
+  SETUP = 'SETUP',
+  SOLVE = 'SOLVE',
+}
+
+export type SocloverState = {
+  stage: SocloverStageEnum;
+};
+
+export type Game = {
+  players: Player[];
+};

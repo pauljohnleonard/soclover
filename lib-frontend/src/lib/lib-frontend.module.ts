@@ -5,8 +5,9 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 @NgModule({
   imports: [CommonModule, MatDialogModule, MatIconModule],
-  declarations: [MydialogComponent]
+  declarations: [MydialogComponent],
 })
 export class LibFrontendModule {}
-export { AuthService } from './auth.service';
-export { LoginGuardService } from './login-guard.service';
+
+export * from './users';
+export * from './connection.service';

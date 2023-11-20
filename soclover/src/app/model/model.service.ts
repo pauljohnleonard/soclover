@@ -1,7 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Hand, Patch } from '@soclover/lib-soclover';
+import {
+  Game,
+  Hand,
+  MessageType,
+  Patch,
+  SocloverMessage,
+} from '@soclover/lib-soclover';
 
 import { cloneDeep } from 'lodash';
+import { ConnectionService } from '@soclover/lib-frontend';
+import { User } from '@soclover/lib-frontend';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ModelService {
@@ -10,53 +19,88 @@ export class ModelService {
   lastUpdate = 0;
   timer: any;
   debounce = 500;
-  getNewHand(): Hand {
-    const hand: Hand = {
-      cards: [
-        {
-          words: ['0a', '0b', '0c', '0d'],
-          orientation: 0,
-          slot: -5,
-        },
-        {
-          words: ['1a', '1b', '1c', '1d'],
-          orientation: 0,
-          slot: -4,
-        },
-        {
-          words: ['2a', '2b', '2c', '2d'],
-          orientation: 0,
-          slot: -2,
-        },
-        {
-          words: ['3a', '3b', '3c', '3d'],
-          orientation: 0,
-          slot: -3,
-        },
-        {
-          words: ['4a', '4b', '4c', '4d'],
-          orientation: 0,
-          slot: -1,
-        },
-      ],
-    };
-    return hand;
+  user?: User;
+
+  subject$ = new BehaviorSubject<any>(null);
+  game: Game | undefined;
+
+  constructor(public connection: ConnectionService) {
+    this.connection.messageSubject.subscribe((message) => {
+      const messageTyped = message as SocloverMessage;
+      if (!message) {
+        return;
+      }
+
+      console.log('message', message);
+      switch (message.type) {
+        case MessageType.STATE:
+          this.game = messageTyped.game;
+          this.subject$.next(message.type);
+          break;
+      }
+    });
   }
 
-  setPuzzle() {
-    this.currentHand = this.getNewHand();
-    this.guessHand = cloneDeep(this.currentHand);
-  }
+  // getNewHand(): Hand {
+  //   const hand: Hand = {
+  //     cards: [
+  //       {
+  //         words: ['0a', '0b', '0c', '0d'],
+  //         orientation: 0,
+  //         slot: -5,
+  //       },
+  //       {
+  //         words: ['1a', '1b', '1c', '1d'],
+  //         orientation: 0,
+  //         slot: -4,
+  //       },
+  //       {
+  //         words: ['2a', '2b', '2c', '2d'],
+  //         orientation: 0,
+  //         slot: -2,
+  //       },
+  //       {
+  //         words: ['3a', '3b', '3c', '3d'],
+  //         orientation: 0,
+  //         slot: -3,
+  //       },
+  //       {
+  //         words: ['4a', '4b', '4c', '4d'],
+  //         orientation: 0,
+  //         slot: -1,
+  //       },
+  //     ],
+  //   };
+  //   return hand;
+  // }
 
-  getPuzzle() {
-    if (!this.guessHand) {
-      this.setPuzzle();
-    }
-    return this.guessHand;
-  }
+  // setPuzzle() {
+  //   this.currentHand = this.getNewHand();
+  //   this.guessHand = cloneDeep(this.currentHand);
+  // }
+
+  // getPuzzle() {
+  //   if (!this.guessHand) {
+  //     this.setPuzzle();
+  //   }
+  //   return this.guessHand;
+  // }
+
+  // fetchMyhand() {
+  //   if (!this.user) {
+  //     throw new Error('user not set');
+  //   }
+
+  //   const message: SocloverMessage = {
+  //     type: MessageType.GET_MYHAND,
+  //     // room: this.room,
+  //     sender: this.user.name,
+  //   };
+  //   this.connection.doSend(message);
+  // }
 
   _update() {
-    let patchArray: { index: number; patch: Patch }[] = [];
+    const patchArray: { index: number; patch: Patch }[] = [];
     for (let i = 0; i < 5; i++) {
       const patch: Patch = {};
 

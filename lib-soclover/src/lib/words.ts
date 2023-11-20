@@ -1,18 +1,20 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 
 class Words {
-  allWords: Array<string>;
-  availWords = {};
+  allWords!: Array<string>;
+  availWords!: { [key: string]: any };
 
   constructor() {
-    const str = fs.readFileSync('assets/words.txt', 'utf-8');
+    // console.log(process.env.PWD);
+    const str = fs.readFileSync('lib-soclover/src/assets/words.txt', 'utf-8');
     this.allWords = str.split('\n');
     console.log(` Using a set of ${this.allWords.length} words `);
   }
 
   makeAvaliable() {
     this.availWords = {};
-    this.allWords.forEach(word => {
+    this.allWords.forEach((word) => {
       this.availWords[word] = true;
     });
   }

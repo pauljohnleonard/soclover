@@ -1,10 +1,10 @@
-import { DecryptoMessage } from '@games/lib-decrypto';
+import { SocloverMessage } from '@soclover/lib-soclover';
 import { RoomConnection } from './room-connection';
 
 export abstract class Room {
   connections: RoomConnection[] = [];
 
-  abstract processMessage(message: DecryptoMessage, connection: RoomConnection);
+  abstract processMessage(message: SocloverMessage, connection: RoomConnection);
 
   addConnection(ws): RoomConnection {
     const newConnection = new RoomConnection(ws, this);
@@ -13,6 +13,6 @@ export abstract class Room {
   }
 
   cutConnection(c: RoomConnection) {
-    this.connections = this.connections.filter(x => x !== c);
+    this.connections = this.connections.filter((x) => x !== c);
   }
 }

@@ -6,12 +6,17 @@ import { appRoutes } from './app.routes';
 import { LeafComponent } from './components/leaf/leaf.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
-
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 @NgModule({
   declarations: [AppComponent, LeafComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    NgxSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatIconModule,
     RouterModule.forRoot(appRoutes, { initialNavigation: 'enabledBlocking' }),
   ],

@@ -1,16 +1,18 @@
 import { WaitingRoom } from './app/waitingroom';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const WebSocket = require('ws');
 
 const PORT = 3005;
 
-console.log(' DECRYPTO decryto-server --- starting');
+console.log(' SOCLOVER server --- starting');
 
 const wss = new WebSocket.Server({ port: PORT });
 
 const waitingRoom = new WaitingRoom();
-wss.on('connection', ws => {
+wss.on('connection', (ws) => {
+  console.log(' SOCLOVER server --- connection');
   waitingRoom.addConnection(ws); // enter waiting room
 });
 
-console.log(` DECRYPTO decryto-server --- started server on ${PORT}`);
+console.log(` SOCLOVER server --- started server on ${PORT}`);

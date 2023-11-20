@@ -1,16 +1,19 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
-import { of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { AuthService, User } from '@soclover/lib-frontend';
+import { Component, OnInit } from '@angular/core';
+
+import { ConnectionService, User } from '@soclover/lib-frontend';
 import { Router } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
-  selector: 'socolver-home',
+  standalone: true,
+  selector: 'soclover-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
+  imports: [MatFormFieldModule, ReactiveFormsModule, MatInputModule],
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit {
   TITLE = '';
 
   name = new FormControl('', [
@@ -19,7 +22,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     Validators.maxLength(9),
   ]);
 
-  constructor(public auth: AuthService, public router: Router) {
+  constructor(public connection: ConnectionService, public router: Router) {
     const userStr = sessionStorage.getItem('user');
 
     try {
@@ -27,14 +30,14 @@ export class HomeComponent implements OnInit, OnDestroy {
         const user: User = JSON.parse(userStr);
         this.name.setValue(user.name);
       }
-    } catch (err) {}
+    } catch (err) {
+      null;
+    }
   }
-
-  ngOnDestroy(): void {}
 
   ngOnInit(): void {
     console.log(' init HOME');
-    this.splash();
+    // this.splash();
 
     this.name.valueChanges.subscribe((val) => {
       if (!val) return;
@@ -50,23 +53,22 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  async splash() {
-    for (const c of ['B', 'r', 'i', 'd', 'g', 'e']) {
-      await of(c).pipe(delay(500)).toPromise();
+  // async splash() {
+  //   for (const c of ['B', 'r', 'i', 'd', 'g', 'e']) {
+  //     await of(c).pipe(delay(500)).toPromise();
 
-      this.TITLE += c;
-    }
-  }
+  //     this.TITLE += c;
+  //   }
+  // }
 
-  logon() {
+  async logon() {
     if (!this.name.value) {
       return;
     }
-    this.auth.logon(this.name.value).subscribe((user) => {
-      if (user) {
-        sessionStorage.setItem('user', JSON.stringify(user));
-        this.router.navigateByUrl('/room');
-      }
-    });
+    const user = this.connection.logon(this.name.value);
+    if (user) {
+      sessionStorage.setItem('user', JSON.stringify(user));
+      this.router.navigateByUrl('/leaf');
+    }
   }
 }
