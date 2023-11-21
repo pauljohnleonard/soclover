@@ -1,4 +1,5 @@
-import { Game, Player } from '@soclover/lib-soclover';
+import { Game, Hand, Player } from '@soclover/lib-soclover';
+import { makeHand } from './makeHand';
 
 export class GameController {
   // codes: Codes[] = [];
@@ -30,7 +31,9 @@ export class GameController {
   }
 
   newPlayer(name: string): Player {
-    const newPlayer = new Player(name);
+    const hand: Hand = makeHand();
+    const newPlayer: Player = { name, hand, ready: false };
+
     this.game.players.push(newPlayer);
     return newPlayer;
   }

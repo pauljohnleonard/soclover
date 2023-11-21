@@ -1,4 +1,4 @@
-import { Game, MessageType, SocloverMessage } from '@soclover/lib-soclover';
+import { MessageType, SocloverMessage } from '@soclover/lib-soclover';
 import { Room } from './room';
 import { RoomConnection } from './room-connection';
 import { GameController } from './game-controller';
@@ -43,12 +43,22 @@ export class DecryptoRoom extends Room {
           break;
 
         case MessageType.SEND_LOGON:
-          console.log('Logon', message.sender);
-          if (!sendingPlayer) {
-            const newPlayer = this.gameController.newPlayer(message.sender);
-            fromConnection.player = newPlayer;
-          } else {
-            fromConnection.player = sendingPlayer;
+          {
+            console.log('Logon', message.sender);
+            if (!sendingPlayer) {
+              const newPlayer = this.gameController.newPlayer(message.sender);
+              fromConnection.player = newPlayer;
+            } else {
+              fromConnection.player = sendingPlayer;
+            }
+
+            const logonOk: SocloverMessage = {
+              sender: 'SYSTEM',
+              type: MessageType.LOGON_OK,
+              user: { name: fromConnection.player.name },
+            };
+
+            fromConnection.sendMessage(logonOk);
           }
           break;
 

@@ -1,3 +1,1 @@
-export * from './lib/lib-soclover';
-
-export * from './lib/player';
+export * from './lib/classes';

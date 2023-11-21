@@ -15,7 +15,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@soclover/lib-frontend": ["lib-frontend/src/index.ts"],
       "@soclover/lib-soclover": ["lib-soclover/src/index.ts"]
     }
   },

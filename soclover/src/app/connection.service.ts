@@ -1,8 +1,8 @@
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Injectable } from '@angular/core';
-import { User } from './users';
-import { Message, MessageType } from '@soclover/lib-soclover';
+
+import { Message, MessageType, User } from '@soclover/lib-soclover';
 import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
@@ -102,7 +102,7 @@ export class ConnectionService {
       type: MessageType.SEND_LOGON,
     };
     await this.doSend(message);
-    window.document.title = this.user.name;
+    window.document.title = this.user.name || 'No one';
     return null;
   }
 

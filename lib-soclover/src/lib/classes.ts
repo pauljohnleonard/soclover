@@ -1,15 +1,25 @@
-import { Player } from './player';
+export interface User {
+  name?: string;
+}
 
-export type Card = {
+export interface Card {
   words: string[];
-  orientation: number;
   slot: number;
+}
 
+export interface UICard {
+  card: Card;
   // UI properties
   dropZone?: boolean;
   heapPos?: { x: number; y: number };
   dragPos?: { x: number; y: number };
   heapSlot?: number;
+  orientation: number;
+  guessSlot: number;
+}
+
+export type UIHand = {
+  uiCards: UICard[];
 };
 
 export type Hand = {
@@ -28,6 +38,7 @@ export interface Message {
   type: MessageType;
 }
 export interface SocloverMessage extends Message {
+  user?: User;
   seed?: unknown;
   patch?: Patch;
   game?: Game;
@@ -43,6 +54,7 @@ export enum MessageType {
   GET_STATE = 'GET_STATE',
   CONNECTION_LOSS = 'CONNECTION_LOSS',
   GET_MYHAND = 'GET_MYHAND',
+  LOGON_OK = 'LOGON_OK',
 }
 
 export enum SocloverStageEnum {
@@ -53,6 +65,12 @@ export enum SocloverStageEnum {
 export type SocloverState = {
   stage: SocloverStageEnum;
 };
+
+export interface Player extends User {
+  name?: string;
+  ready: boolean;
+  hand: Hand;
+}
 
 export type Game = {
   players: Player[];

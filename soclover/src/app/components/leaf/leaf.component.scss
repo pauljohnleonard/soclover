@@ -1,3 +1,19 @@
 #bb:hover {
   cursor: pointer; /* Change the cursor to a hand pointer */
 }
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.blink-animation {
+  animation: blink 1s infinite; /* You can adjust the duration and other properties as needed */
+}

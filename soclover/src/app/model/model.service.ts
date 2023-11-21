@@ -1,21 +1,17 @@
 import { Injectable } from '@angular/core';
 import {
   Game,
-  Hand,
   MessageType,
-  Patch,
   SocloverMessage,
+  User,
 } from '@soclover/lib-soclover';
 
-import { cloneDeep } from 'lodash';
-import { ConnectionService } from '@soclover/lib-frontend';
-import { User } from '@soclover/lib-frontend';
 import { BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
+import { ConnectionService } from '../connection.service';
 
 @Injectable({ providedIn: 'root' })
 export class ModelService {
-  currentHand!: Hand;
-  guessHand!: Hand;
   lastUpdate = 0;
   timer: any;
   debounce = 500;
@@ -24,7 +20,7 @@ export class ModelService {
   subject$ = new BehaviorSubject<any>(null);
   game: Game | undefined;
 
-  constructor(public connection: ConnectionService) {
+  constructor(public connection: ConnectionService, public router: Router) {
     this.connection.messageSubject.subscribe((message) => {
       const messageTyped = message as SocloverMessage;
       if (!message) {
@@ -37,106 +33,46 @@ export class ModelService {
           this.game = messageTyped.game;
           this.subject$.next(message.type);
           break;
+        case MessageType.LOGON_OK:
+          this.user = messageTyped.user;
+          sessionStorage.setItem('user', JSON.stringify(this.user));
+          this.router.navigateByUrl('/leaf');
+          break;
       }
     });
   }
 
-  // getNewHand(): Hand {
-  //   const hand: Hand = {
-  //     cards: [
-  //       {
-  //         words: ['0a', '0b', '0c', '0d'],
-  //         orientation: 0,
-  //         slot: -5,
-  //       },
-  //       {
-  //         words: ['1a', '1b', '1c', '1d'],
-  //         orientation: 0,
-  //         slot: -4,
-  //       },
-  //       {
-  //         words: ['2a', '2b', '2c', '2d'],
-  //         orientation: 0,
-  //         slot: -2,
-  //       },
-  //       {
-  //         words: ['3a', '3b', '3c', '3d'],
-  //         orientation: 0,
-  //         slot: -3,
-  //       },
-  //       {
-  //         words: ['4a', '4b', '4c', '4d'],
-  //         orientation: 0,
-  //         slot: -1,
-  //       },
-  //     ],
-  //   };
-  //   return hand;
-  // }
-
-  // setPuzzle() {
-  //   this.currentHand = this.getNewHand();
-  //   this.guessHand = cloneDeep(this.currentHand);
-  // }
-
-  // getPuzzle() {
-  //   if (!this.guessHand) {
-  //     this.setPuzzle();
-  //   }
-  //   return this.guessHand;
-  // }
-
-  // fetchMyhand() {
-  //   if (!this.user) {
-  //     throw new Error('user not set');
-  //   }
-
-  //   const message: SocloverMessage = {
-  //     type: MessageType.GET_MYHAND,
-  //     // room: this.room,
-  //     sender: this.user.name,
-  //   };
-  //   this.connection.doSend(message);
-  // }
-
   _update() {
-    const patchArray: { index: number; patch: Patch }[] = [];
-    for (let i = 0; i < 5; i++) {
-      const patch: Patch = {};
-
-      const currentCard = this.currentHand.cards[i];
-      const guessCard = this.guessHand.cards[i];
-
-      if (currentCard.slot !== guessCard.slot) {
-        patch.slot = guessCard.slot;
-      }
-
-      if (currentCard.orientation !== guessCard.orientation) {
-        patch.orientation = guessCard.orientation;
-      }
-      if (
-        currentCard.dragPos?.x !== guessCard.dragPos?.x ||
-        currentCard.dragPos?.y !== guessCard.dragPos?.y
-      ) {
-        patch.dragPos = guessCard.dragPos;
-      }
-      if (Object.keys(patch).length > 0) {
-        patchArray.push({ index: i, patch });
-      }
-    }
-
-    if (patchArray.length === 0) {
-      return;
-    }
-
-    const now = Date.now();
-    console.log(JSON.stringify(patchArray, null, 2));
-
-    this.currentHand = cloneDeep(this.guessHand);
-
-    this.lastUpdate = now;
-    clearTimeout(this.timer);
-    this.timer = null;
+    // const patchArray: { index: number; patch: Patch }[] = [];
+    // for (let i = 0; i < 5; i++) {
+    //   const patch: Patch = {};
+    //   const currentCard = this.currentHand.cards[i];
+    //   const guessCard = this.guessHand.cards[i];
+    //   if (currentCard.slot !== guessCard.slot) {
+    //     patch.slot = guessCard.slot;
+    //   }
+    //   if (currentCard.orientation !== guessCard.orientation) {
+    //     patch.orientation = guessCard.orientation;
+    //   }
+    //   if (
+    //     currentCard.dragPos?.x !== guessCard.dragPos?.x ||
+    //     currentCard.dragPos?.y !== guessCard.dragPos?.y
+    //   ) {
+    //     patch.dragPos = guessCard.dragPos;
+    //   }
+    //   if (Object.keys(patch).length > 0) {
+    //     patchArray.push({ index: i, patch });
+    //   }
+    // }
+    // if (patchArray.length === 0) {
+    //   return;
+    // }
+    // const now = Date.now();
+    // console.log(JSON.stringify(patchArray, null, 2));
+    // this.currentHand = cloneDeep(this.guessHand);
+    // this.lastUpdate = now;
+    // clearTimeout(this.timer);
+    // this.timer = null;
   }
 
   update() {

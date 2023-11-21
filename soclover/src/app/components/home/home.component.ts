@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 
-import { ConnectionService, User } from '@soclover/lib-frontend';
 import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { ModelService } from '../../model/model.service';
+import { User } from '@soclover/lib-soclover';
+import { ConnectionService } from '../../connection.service';
 
 @Component({
   standalone: true,
@@ -22,13 +24,19 @@ export class HomeComponent implements OnInit {
     Validators.maxLength(9),
   ]);
 
-  constructor(public connection: ConnectionService, public router: Router) {
+  constructor(
+    public connection: ConnectionService,
+    public router: Router,
+    public modelService: ModelService
+  ) {
     const userStr = sessionStorage.getItem('user');
 
     try {
       if (userStr) {
         const user: User = JSON.parse(userStr);
-        this.name.setValue(user.name);
+        if (user.name) {
+          this.name.setValue(user.name);
+        }
       }
     } catch (err) {
       null;
@@ -65,10 +73,6 @@ export class HomeComponent implements OnInit {
     if (!this.name.value) {
       return;
     }
-    const user = this.connection.logon(this.name.value);
-    if (user) {
-      sessionStorage.setItem('user', JSON.stringify(user));
-      this.router.navigateByUrl('/leaf');
-    }
+    this.connection.logon(this.name.value);
   }
 }
