@@ -1,4 +1,4 @@
-import { Game, Hand, Player } from '@soclover/lib-soclover';
+import { Game, Hand, Player, SocloverMessage } from '@soclover/lib-soclover';
 import { makeHand } from './makeHand';
 
 export class GameController {
@@ -22,8 +22,9 @@ export class GameController {
     this.game = game;
   }
 
-  playerReady() {
-    // this.chooseFirstMasterIfNone();
+  setClues(message: SocloverMessage) {
+    const player = this.playerFromName(message.sender);
+    player.clues = message.clues;
   }
 
   playerLeave(name: string) {
@@ -32,7 +33,7 @@ export class GameController {
 
   newPlayer(name: string): Player {
     const hand: Hand = makeHand();
-    const newPlayer: Player = { name, hand, ready: false };
+    const newPlayer: Player = { name, hand };
 
     this.game.players.push(newPlayer);
     return newPlayer;

@@ -33,11 +33,6 @@ export class DecryptoRoom extends Room {
       );
 
       switch (message.type) {
-        case MessageType.SEND_READY:
-          sendingPlayer.ready = true;
-          this.gameController.playerReady();
-          break;
-
         case MessageType.SEND_LOGOUT:
           this.gameController.playerLeave(message.sender);
           break;
@@ -55,7 +50,7 @@ export class DecryptoRoom extends Room {
             const logonOk: SocloverMessage = {
               sender: 'SYSTEM',
               type: MessageType.LOGON_OK,
-              user: { name: fromConnection.player.name },
+              recipient: fromConnection.player.name,
             };
 
             fromConnection.sendMessage(logonOk);
@@ -65,30 +60,6 @@ export class DecryptoRoom extends Room {
         case MessageType.GET_STATE:
           this.broadcastStateToConection(fromConnection);
           break;
-
-        // case MessageType.JOIN_TEAM:
-        //   sendingPlayer.team = message.team;
-        //   break;
-
-        // case MessageType.SEND_GUESS:
-        //   this.game.addGuess(message);
-        //   break;
-
-        // case MessageType.SEND_CLUES:
-        //   this.game.setClues(message);
-        //   break;
-
-        // case MessageType.ALL_CHAT:
-        //   this.broadcastAll(message);
-        //   return;
-
-        // case MessageType.TEAM_CHAT:
-        //   this.broadcastTeam(message);
-        //   return;
-
-        // case MessageType.SEND_CONTINUE:
-        //   this.game.continue(message);
-        //   break;
 
         case MessageType.SEED:
           seedrandom(message.seed, { global: true });
@@ -100,11 +71,16 @@ export class DecryptoRoom extends Room {
 
           break;
 
+        case MessageType.SEND_CLUES:
+          this.gameController.setClues(message);
+          break;
+
         case MessageType.RESET:
           this.reset();
           break;
       }
 
+      // Fall through if state has changed and you want to broadcast it
       this.broadcastStateToAll();
     } catch (err) {
       console.error(err);

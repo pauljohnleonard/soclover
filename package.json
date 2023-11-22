@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "start": "nx s soclover",
-    "build": "nx b soclover"
+    "build": "nx b soclover",
+    "server": "nx serve server"
   },
   "private": true,
   "dependencies": {

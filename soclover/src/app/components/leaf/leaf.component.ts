@@ -315,4 +315,8 @@ export class LeafComponent implements OnInit, OnDestroy {
     event.preventDefault();
     event.stopPropagation();
   }
+
+  uploadClues(event: any) {
+    this.modelService.uploadClues(this.clues);
+  }
 }

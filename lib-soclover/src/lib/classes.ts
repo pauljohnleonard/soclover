@@ -34,14 +34,15 @@ export type Patch = {
 
 export interface Message {
   sender?: string;
+  recipient?: string;
   room?: string;
   type: MessageType;
 }
 export interface SocloverMessage extends Message {
-  user?: User;
   seed?: unknown;
   patch?: Patch;
   game?: Game;
+  clues?: string[];
 }
 
 export enum MessageType {
@@ -55,6 +56,7 @@ export enum MessageType {
   CONNECTION_LOSS = 'CONNECTION_LOSS',
   GET_MYHAND = 'GET_MYHAND',
   LOGON_OK = 'LOGON_OK',
+  SEND_CLUES = 'SEND_CLUES',
 }
 
 export enum SocloverStageEnum {
@@ -68,8 +70,8 @@ export type SocloverState = {
 
 export interface Player extends User {
   name?: string;
-  ready: boolean;
   hand: Hand;
+  clues?: string[];
 }
 
 export type Game = {

@@ -34,7 +34,7 @@ export class ModelService {
           this.subject$.next(message.type);
           break;
         case MessageType.LOGON_OK:
-          this.user = messageTyped.user;
+          this.user = { name: messageTyped.recipient };
           sessionStorage.setItem('user', JSON.stringify(this.user));
           this.router.navigateByUrl('/leaf');
           break;
@@ -90,5 +90,13 @@ export class ModelService {
         this._update();
       }, wait);
     }
+  }
+
+  uploadClues(clues: string[]) {
+    const message: SocloverMessage = {
+      type: MessageType.SEND_CLUES,
+      clues,
+    };
+    this.connection.doSend(message);
   }
 }

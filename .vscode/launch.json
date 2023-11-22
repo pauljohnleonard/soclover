@@ -4,6 +4,20 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "DEBUG Server",
+        "runtimeExecutable": "npm",
+        "runtimeArgs": ["run", "server"],
+        "console": "integratedTerminal",
+        "sourceMapPathOverrides": {
+          "webpack:///./src/*": "${workspaceFolder}/src/*",
+          "webpack://../*": "${workspaceFolder}/serve/*",
+          "webpack:///../../libs": "${workspaceFolder}/libs"
+        },
+        "args": ["--inspect-brk"]
+      },
 
     ]
 }
