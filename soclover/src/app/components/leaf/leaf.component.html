@@ -15,20 +15,56 @@
   (click)="catchAllClick($event)"
 >
   <defs>
-    <g fill="#000000" id="pen">
-      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-      <g
-        id="SVGRepo_tracerCarrier"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      ></g>
-      <g id="SVGRepo_iconCarrier">
-        <path
-          d="M 23.90625 3.96875 C 22.859375 3.96875 21.8125 4.375 21 5.1875 L 5.1875 21 L 5.125 21.3125 L 4.03125 26.8125 L 3.71875 28.28125 L 5.1875 27.96875 L 10.6875 26.875 L 11 26.8125 L 26.8125 11 C 28.4375 9.375 28.4375 6.8125 26.8125 5.1875 C 26 4.375 24.953125 3.96875 23.90625 3.96875 Z M 23.90625 5.875 C 24.410156 5.875 24.917969 6.105469 25.40625 6.59375 C 26.378906 7.566406 26.378906 8.621094 25.40625 9.59375 L 24.6875 10.28125 L 21.71875 7.3125 L 22.40625 6.59375 C 22.894531 6.105469 23.402344 5.875 23.90625 5.875 Z M 20.3125 8.71875 L 23.28125 11.6875 L 11.1875 23.78125 C 10.53125 22.5 9.5 21.46875 8.21875 20.8125 Z M 6.9375 22.4375 C 8.136719 22.921875 9.078125 23.863281 9.5625 25.0625 L 6.28125 25.71875 Z"
-        ></path>
-      </g>
+    <!--  TOOLS -->
+    <g fill="#000000" id="bin" style="cursor: pointer">
+      <rect
+        x="-7"
+        y="-7"
+        width="15"
+        height="15"
+        rx="2"
+        fill="transparent"
+      ></rect>
+
+      <use
+        xlink:href="assets/icons/delete.svg#delete"
+        transform="scale(0.5) translate(-11,-11)"
+      />
     </g>
 
+    <g id="spin" style="cursor: pointer">
+      <rect
+        x="-7"
+        y="-7"
+        width="15"
+        height="15"
+        rx="2"
+        fill="transparent"
+      ></rect>
+      <use
+        xlink:href="assets/icons/rotate_right.svg#rotate_right"
+        transform="scale(0.5) translate(-11,-11)"
+      />
+    </g>
+
+    <!--  BUTTONS -->
+    <g id="download">
+      <use xlink:href="assets/icons/download.svg#download" />
+    </g>
+
+    <g id="thinking">
+      <use xlink:href="assets/icons/cognition.svg#cognition" />
+    </g>
+
+    <g id="upload">
+      <use xlink:href="assets/icons/upload.svg#upload" />
+    </g>
+
+    <g id="refresh" style="cursor: pointer">
+      <use xlink:href="assets/icons/restart.svg#restart" />
+    </g>
+
+    <!-- PETAL -->
     <circle id="mycircle" [attr.cx]="cx" cy="0" [attr.r]="rad" fill="#390" />
 
     <g id="petal">
@@ -52,6 +88,7 @@
       />
     </g>
 
+    <!-- CARDS -->
     <g id="card">
       <rect
         [attr.x]="cardPad"
@@ -84,205 +121,173 @@
         fill="#366e39"
       />
     </g>
-    <g
-      fill="#000000"
-      id="bin"
-      transform="translate(-6,-6) scale(0.03)"
-      style="cursor: grab"
-    >
-      <rect
-        x="50.5"
-        y="50.5"
-        width="300"
-        height="407"
-        rx="11"
-        fill="transparent"
-      ></rect>
+  </defs>
 
-      <g>
-        <g>
-          <path
-            d="M87.748,388.784c0.461,11.01,9.521,19.699,20.539,19.699h191.911c11.018,0,20.078-8.689,20.539-19.699l13.705-289.316 H74.043L87.748,388.784z M247.655,171.329c0-4.61,3.738-8.349,8.35-8.349h13.355c4.609,0,8.35,3.738,8.35,8.349v165.293 c0,4.611-3.738,8.349-8.35,8.349h-13.355c-4.61,0-8.35-3.736-8.35-8.349V171.329z M189.216,171.329 c0-4.61,3.738-8.349,8.349-8.349h13.355c4.609,0,8.349,3.738,8.349,8.349v165.293c0,4.611-3.737,8.349-8.349,8.349h-13.355 c-4.61,0-8.349-3.736-8.349-8.349V171.329L189.216,171.329z M130.775,171.329c0-4.61,3.738-8.349,8.349-8.349h13.356 c4.61,0,8.349,3.738,8.349,8.349v165.293c0,4.611-3.738,8.349-8.349,8.349h-13.356c-4.61,0-8.349-3.736-8.349-8.349V171.329z"
-          ></path>
-          <path
-            d="M343.567,21.043h-88.535V4.305c0-2.377-1.927-4.305-4.305-4.305h-92.971c-2.377,0-4.304,1.928-4.304,4.305v16.737H64.916 c-7.125,0-12.9,5.776-12.9,12.901V74.47h304.451V33.944C356.467,26.819,350.692,21.043,343.567,21.043z"
-          ></path>
-        </g>
+  <g transform="translate(0,50)">
+    <g [attr.transform]="'translate(120 120)'">
+      <g transform="rotate(45)">
+        <ng-container *ngFor="let petalData of petalDatas">
+          <g [attr.transform]="petalData.rotate">
+            <use xlink:href="#petal" />
+            <use
+              xlink:href="#textbox"
+              [attr.stroke]="focusPetal === petalData.i ? 'black' : null"
+              stroke-width="0.3"
+              (click)="selectPetal(petalData.i, $event)"
+            />
+            <text
+              [attr.x]="petalTextWidth / 2"
+              [attr.y]="petalTextHeight / 2"
+              [attr.transform]="petalData.transform"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              fill="black"
+              [attr.font-size]="fontSize"
+              font-family="Arial"
+              font-weight="600"
+            >
+              {{ clues[petalData.i] }}
+              <tspan
+                class="blink-animation"
+                *ngIf="focusPetal === petalData.i"
+                fill="#fff"
+              >
+                &#9611;
+              </tspan>
+            </text>
+          </g>
+        </ng-container>
+
+        <circle cx="0" cy="0" [attr.r]="rHub" fill="#390" />
       </g>
     </g>
 
-    <g id="spin" transform="translate(-8.2,-8.2) scale(0.08)">
-      <rect
-        x="0"
-        y="0"
-        width="200"
-        height="200"
-        rx="11"
-        fill="transparent"
-        style="cursor: alias"
-      ></rect>
-      <path
-        d="M202.403,95.22c0,46.312-33.237,85.002-77.109,93.484v25.663l-69.76-40l69.76-40v23.494 c27.176-7.87,47.109-32.964,47.109-62.642c0-35.962-29.258-65.22-65.22-65.22s-65.22,29.258-65.22,65.22 c0,9.686,2.068,19.001,6.148,27.688l-27.154,12.754c-5.968-12.707-8.994-26.313-8.994-40.441C11.964,42.716,54.68,0,107.184,0 S202.403,42.716,202.403,95.22z"
-      ></path>
-    </g>
-
-    <!-- <line x1="0" y1="0" x2="0" y2="150" stroke="red" stroke-width="2" /> -->
-  </defs>
-
-  <g [attr.transform]="'translate(120 120)'">
-    <g transform="rotate(45)">
-      <ng-container *ngFor="let petalData of petalDatas">
-        <g [attr.transform]="petalData.rotate">
-          <use xlink:href="#petal" />
-          <use
-            xlink:href="#textbox"
-            [attr.stroke]="focusPetal === petalData.i ? 'black' : null"
-            stroke-width="0.3"
-            (click)="selectPetal(petalData.i, $event)"
-          />
-          <text
-            [attr.x]="petalTextWidth / 2"
-            [attr.y]="petalTextHeight / 2"
-            [attr.transform]="petalData.transform"
-            text-anchor="middle"
-            dominant-baseline="middle"
-            fill="black"
-            [attr.font-size]="fontSize"
-            font-family="Arial"
-            font-weight="600"
-          >
-            {{ clues[petalData.i] }}
-            <tspan
-              class="blink-animation"
-              *ngIf="focusPetal === petalData.i"
-              fill="#fff"
+    <g [attr.transform]="'translate(120 120)'">
+      <ng-container *ngFor="let card of cards; let card_i = index">
+        <g
+          *ngIf="card.displaySlot !== undefined"
+          [attr.transform]="
+            card.displaySlot < 0
+              ? 'translate(' + card.dragPos?.x + ',' + card.dragPos?.y + ')'
+              : ''
+          "
+          (mousedown)="mouseDownCard($event, card)"
+          (mouseup)="mouseUpCard($event, card)"
+        >
+          <g transform="rotate(45)">
+            <g
+              [attr.transform]="
+                card.displaySlot >= 0
+                  ? 'rotate(' + card.displaySlot * 90 + ')'
+                  : ''
+              "
             >
-              &#9611;
-            </tspan>
-          </text>
+              <ng-container *ngIf="!card.dropZone">
+                <use xlink:href="#card" />
+              </ng-container>
+
+              <use
+                id="cardDropZone"
+                *ngIf="card.dropZone"
+                xlink:href="#dropZone"
+              />
+
+              <ng-container *ngFor="let word of card.words; let word_i = index">
+                <g
+                  [attr.transform]="
+                    'rotate(' +
+                    (word_i + card.orientation) * 90 +
+                    ' ' +
+                    (cardPad + cardWidth) / 2 +
+                    ' ' +
+                    (cardPad + cardWidth) / 2 +
+                    ') translate(' +
+                    (cardPad + cardWidth / 2) +
+                    ',' +
+                    wordNudgeIn +
+                    ')'
+                  "
+                >
+                  <text
+                    x="0"
+                    y="0"
+                    [attr.transform]="
+                      (word_i +
+                        (card.displaySlot >= 0 ? card.displaySlot : 0) +
+                        1 +
+                        card.orientation) %
+                        4 >
+                      1
+                        ? 'rotate( 180 0 -1)'
+                        : ''
+                    "
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    fill="black"
+                    [attr.font-size]="fontSize"
+                    font-family="Arial"
+                    font-weight="600"
+                  >
+                    {{ card.words[word_i] }}
+                  </text>
+                </g>
+              </ng-container>
+            </g>
+          </g>
         </g>
       </ng-container>
 
-      <circle cx="0" cy="0" [attr.r]="rHub" fill="#390" />
+      <ng-container *ngFor="let tool of tools">
+        <ng-container *ngIf="tool.card">
+          <g transform="translate(-10,0)">
+            <use
+              xlink:href="#bin"
+              [attr.x]="tool.binX"
+              [attr.y]="tool.binY"
+              (click)="toolClick(tool, 'bin')"
+            />
+
+            <use
+              xlink:href="#spin"
+              [attr.x]="tool.spinX"
+              [attr.y]="tool.spinY"
+              (click)="toolClick(tool, 'spin')"
+            />
+          </g>
+        </ng-container>
+      </ng-container>
     </g>
   </g>
 
-  <g [attr.transform]="'translate(120 120)'">
-    <ng-container *ngFor="let card of cards; let card_i = index">
+  <g transform="translate(15,15)">
+    <ng-container *ngFor="let button of buttons; let i = index">
       <g
-        [attr.transform]="
-          card.guessSlot < 0
-            ? 'translate(' + card.dragPos?.x + ',' + card.dragPos?.y + ')'
-            : ''
-        "
-        (mousedown)="mouseDownCard($event, card)"
-        (mouseup)="mouseUpCard($event, card)"
+        [attr.transform]="'translate(' + 40 * (i + 0.2) + ',0)'"
+        style="cursor: pointer"
+        (click)="buttonClick($event, button)"
       >
-        <g transform="rotate(45)">
-          <g
-            [attr.transform]="
-              card.guessSlot >= 0 ? 'rotate(' + card.guessSlot * 90 + ')' : ''
-            "
-          >
-            <ng-container *ngIf="!card.dropZone">
-              <use xlink:href="#card" (click)="spinClick(card)" />
-            </ng-container>
-
-            <use
-              id="cardDropZone"
-              *ngIf="card.dropZone"
-              xlink:href="#dropZone"
-            />
-
-            <ng-container
-              *ngFor="let word of card.card.words; let word_i = index"
-            >
-              <g
-                [attr.transform]="
-                  'rotate(' +
-                  (word_i + card.orientation) * 90 +
-                  ' ' +
-                  (cardPad + cardWidth) / 2 +
-                  ' ' +
-                  (cardPad + cardWidth) / 2 +
-                  ') translate(' +
-                  (cardPad + cardWidth / 2) +
-                  ',' +
-                  wordNudgeIn +
-                  ')'
-                "
-              >
-                <text
-                  x="0"
-                  y="0"
-                  [attr.transform]="
-                    (word_i +
-                      (card.guessSlot >= 0 ? card.guessSlot : 0) +
-                      1 +
-                      card.orientation) %
-                      4 >
-                    1
-                      ? 'rotate( 180 0 -1)'
-                      : ''
-                  "
-                  text-anchor="middle"
-                  dominant-baseline="middle"
-                  fill="black"
-                  [attr.font-size]="fontSize"
-                  font-family="Arial"
-                  font-weight="600"
-                >
-                  {{ card.card.words[word_i] }}
-                </text>
-              </g>
-            </ng-container>
-          </g>
-        </g>
+        <rect
+          width="30"
+          height="30"
+          rx="11"
+          fill="#fff"
+          stroke="#000"
+          stroke-width="0.5"
+        />
+        <use [attr.xlink:href]="'#' + button.id" x="3" y="3" />
+        <text
+          x="15"
+          y="-5"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          fill="black"
+          [attr.font-size]="fontSize"
+          font-family="Arial"
+          font-weight="600"
+        >
+          {{ button.text }}
+        </text>
       </g>
     </ng-container>
-
-    <ng-container *ngFor="let bin of bins">
-      <use
-        *ngIf="bin.card"
-        xlink:href="#bin"
-        [attr.x]="bin.binX"
-        [attr.y]="bin.binY"
-        (click)="binClick(bin)"
-      />
-    </ng-container>
   </g>
-
-  <g
-    transform="translate(200,15)"
-    style="cursor: pointer"
-    (click)="uploadClues($event)"
-  >
-    <rect
-      x="-3"
-      y="-3"
-      width="30"
-      height="30"
-      rx="11"
-      fill="#fff"
-      stroke="#000"
-      stroke-width="1"
-    />
-    <path
-      d="M5 10c-.6 0-1-.4-1-1 0-3.9 3.1-7 7-7 3 0 5.7 2 6.7 4.9.1.5-.1 1.1-.7 1.2-.5.2-1.1-.1-1.3-.6C15.1 5.4 13.2 4 11 4 8.2 4 6 6.2 6 9c0 .6-.4 1-1 1z"
-    ></path>
-    <path
-      d="M18 18c-.6 0-1-.4-1-1s.4-1 1-1c2.2 0 4-1.8 4-4s-1.8-4-4-4c-.3 0-.7 0-1 .1-.5.1-1.1-.2-1.2-.7s.2-1.1.7-1.2c.5-.1 1-.2 1.5-.2 3.3 0 6 2.7 6 6s-2.7 6-6 6zM8 18H5c-.6 0-1-.4-1-1s.4-1 1-1h3c.6 0 1 .4 1 1s-.4 1-1 1z"
-    ></path>
-    <path
-      d="M18 18h-2c-.6 0-1-.4-1-1s.4-1 1-1h2c.6 0 1 .4 1 1s-.4 1-1 1zM5 18c-2.8 0-5-2.2-5-5s2.2-5 5-5c.6 0 1 .4 1 1s-.4 1-1 1c-1.7 0-3 1.3-3 3s1.3 3 3 3c.6 0 1 .4 1 1s-.4 1-1 1zm7 4c-.6 0-1-.4-1-1V11c0-.6.4-1 1-1s1 .4 1 1v10c0 .6-.4 1-1 1z"
-    ></path>
-    <path
-      d="M9 15c-.3 0-.5-.1-.7-.3-.4-.4-.4-1 0-1.4l3-3c.4-.4 1-.4 1.4 0s.4 1 0 1.4l-3 3c-.2.2-.4.3-.7.3z"
-    ></path>
-    <path
-      d="M15 15c-.3 0-.5-.1-.7-.3l-3-3c-.4-.4-.4-1 0-1.4s1-.4 1.4 0l3 3c.4.4.4 1 0 1.4-.2.2-.4.3-.7.3z"
-    ></path>
-  </g>
-
-  <!-- <use xlink:href="#pen" /> -->
 </svg>

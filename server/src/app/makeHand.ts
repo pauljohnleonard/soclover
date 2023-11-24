@@ -7,7 +7,7 @@ export function makeHand(): Hand {
     cards: [],
   };
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 5; i++) {
     const card = makeCard(i);
     hand.cards.push(card);
   }
@@ -19,6 +19,8 @@ export function makeCard(slot): Card {
   const card: Card = {
     words: [],
     slot,
+    orientation: 0,
+    guessSlot: 0,
   };
 
   for (let i = 0; i < 4; i++) {

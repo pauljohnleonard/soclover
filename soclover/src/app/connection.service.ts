@@ -12,8 +12,13 @@ export class ConnectionService {
   messageSubject = new BehaviorSubject<Message | undefined>(undefined);
 
   user?: User | null;
+  clientID: string;
+  constructor(public router: Router) {
+    this.clientID =
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+  }
 
-  constructor(public router: Router) {}
   async connect() {
     try {
       this.ws = new WebSocket(environment.SERVER_URL);
@@ -35,8 +40,14 @@ export class ConnectionService {
 
       this.ws.onmessage = (evt) => {
         const mess: Message = JSON.parse(evt.data);
-        console.log('RECIEVED:\n', JSON.stringify(mess, null, 2));
-        this.messageSubject.next(mess);
+        // console.log('RECIEVED:\n', JSON.stringify(mess, null, 2));
+        if (mess.clientID === this.clientID) {
+          console.log(
+            '  RECIEVED  OWN MESSAGE ----------------------------------- '
+          );
+        } else {
+          this.messageSubject.next(mess);
+        }
       };
 
       this.ws.onerror = (evt) => {
@@ -71,10 +82,11 @@ export class ConnectionService {
     if (this.user) {
       message.sender = this.user.name;
     }
-    console.log('SENT: \n' + JSON.stringify(message, null, 2));
+    // console.log('SENT: \n' + JSON.stringify(message, null, 2));
     if (!this.ws) {
       throw Error('ws not set');
     }
+    message.clientID = this.clientID;
     this.ws.send(JSON.stringify(message, null, 2));
   }
 
@@ -90,6 +102,8 @@ export class ConnectionService {
     if (!this.ws) {
       throw Error('ws not set');
     }
+
+    message.clientID = this.clientID;
     this.ws.send(JSON.stringify(message, null, 2));
   }
 

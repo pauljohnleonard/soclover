@@ -44,7 +44,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(' init HOME');
+    // console.log(' init HOME');
     // this.splash();
 
     this.name.valueChanges.subscribe((val) => {

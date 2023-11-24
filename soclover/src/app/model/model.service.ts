@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import {
+  Card,
   Game,
   MessageType,
+  Patch,
+  Player,
   SocloverMessage,
   User,
 } from '@soclover/lib-soclover';
@@ -17,8 +20,9 @@ export class ModelService {
   debounce = 500;
   user?: User;
 
-  subject$ = new BehaviorSubject<any>(null);
+  subject$ = new BehaviorSubject<SocloverMessage | null>(null);
   game: Game | undefined;
+  myPlayer?: Player;
 
   constructor(public connection: ConnectionService, public router: Router) {
     this.connection.messageSubject.subscribe((message) => {
@@ -27,67 +31,65 @@ export class ModelService {
         return;
       }
 
-      console.log('message', message);
+      // console.log('message', message);
       switch (message.type) {
         case MessageType.STATE:
+          console.log('GAME', messageTyped.game);
           this.game = messageTyped.game;
-          this.subject$.next(message.type);
+          this.myPlayer = this.game?.players.find(
+            (player) => player.name === this.user?.name
+          );
+
+          this.subject$.next(message);
           break;
         case MessageType.LOGON_OK:
           this.user = { name: messageTyped.recipient };
           sessionStorage.setItem('user', JSON.stringify(this.user));
           this.router.navigateByUrl('/leaf');
           break;
+
+        case MessageType.PATCH:
+          console.log('PATCH', messageTyped);
+          break;
       }
     });
   }
 
-  _update() {
-    // const patchArray: { index: number; patch: Patch }[] = [];
-    // for (let i = 0; i < 5; i++) {
-    //   const patch: Patch = {};
-    //   const currentCard = this.currentHand.cards[i];
-    //   const guessCard = this.guessHand.cards[i];
-    //   if (currentCard.slot !== guessCard.slot) {
-    //     patch.slot = guessCard.slot;
-    //   }
-    //   if (currentCard.orientation !== guessCard.orientation) {
-    //     patch.orientation = guessCard.orientation;
-    //   }
-    //   if (
-    //     currentCard.dragPos?.x !== guessCard.dragPos?.x ||
-    //     currentCard.dragPos?.y !== guessCard.dragPos?.y
-    //   ) {
-    //     patch.dragPos = guessCard.dragPos;
-    //   }
-    //   if (Object.keys(patch).length > 0) {
-    //     patchArray.push({ index: i, patch });
-    //   }
-    // }
-    // if (patchArray.length === 0) {
-    //   return;
-    // }
-    // const now = Date.now();
-    // console.log(JSON.stringify(patchArray, null, 2));
-    // this.currentHand = cloneDeep(this.guessHand);
-    // this.lastUpdate = now;
-    // clearTimeout(this.timer);
-    // this.timer = null;
+  _updateUI(card: Card, player: Player | undefined) {
+    if (!player || !player.name) {
+      return;
+    }
+
+    const patch: SocloverMessage = {
+      card,
+      playerName: player.name,
+      type: MessageType.PATCH,
+    };
+
+    const now = Date.now();
+    console.log(JSON.stringify(patch, null, 2));
+    this.lastUpdate = now;
+    clearTimeout(this.timer);
+    this.timer = null;
+    this.connection.doSend(patch);
   }
 
-  update() {
+  updateUI(card: Card, player: Player | undefined) {
+    if (!player) {
+      return;
+    }
     const now = Date.now();
     const delta = now - this.lastUpdate;
     // console.log('delta', delta);
 
     if (delta > this.debounce) {
       // console.log('update');
-      this._update();
+      this._updateUI(card, player);
     } else if (!this.timer) {
       const wait = now + this.debounce - this.lastUpdate;
       // console.log('deffered update', wait);
       this.timer = setTimeout(() => {
-        this._update();
+        this._updateUI(card, player);
       }, wait);
     }
   }
@@ -96,6 +98,13 @@ export class ModelService {
     const message: SocloverMessage = {
       type: MessageType.SEND_CLUES,
       clues,
+    };
+    this.connection.doSend(message);
+  }
+
+  newHand() {
+    const message: SocloverMessage = {
+      type: MessageType.NEW_HAND,
     };
     this.connection.doSend(message);
   }

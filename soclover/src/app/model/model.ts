@@ -1,4 +1,4 @@
-import { UICard } from '@soclover/lib-soclover';
+import { Card } from '@soclover/lib-soclover';
 
 export type CardUpdate = {
   orientation: number;
@@ -10,27 +10,35 @@ export type HandUpdate = {
   cards: CardUpdate[];
 };
 
-export const dropZones: UICard[] = [
+export const dropZones: Card[] = [
   {
-    card: { words: [], slot: 0 },
+    words: [],
+    slot: 0,
+    displaySlot: 0,
     orientation: 0,
     dropZone: true,
     guessSlot: 0,
   },
   {
-    card: { words: [], slot: 1 },
+    words: [],
+    slot: 1,
+    displaySlot: 1,
     orientation: 0,
     dropZone: true,
     guessSlot: 1,
   },
   {
-    card: { words: [], slot: 2 },
+    words: [],
+    slot: 2,
     orientation: 0,
+    displaySlot: 2,
     dropZone: true,
     guessSlot: 2,
   },
   {
-    card: { words: [], slot: 3 },
+    words: [],
+    slot: 3,
+    displaySlot: 3,
     orientation: 0,
     dropZone: true,
     guessSlot: 3,

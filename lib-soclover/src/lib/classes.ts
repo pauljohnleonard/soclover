@@ -5,31 +5,27 @@ export interface User {
 export interface Card {
   words: string[];
   slot: number;
-}
 
-export interface UICard {
-  card: Card;
-  // UI properties
-  dropZone?: boolean;
-  heapPos?: { x: number; y: number };
+  // shared UI properties
+
   dragPos?: { x: number; y: number };
   heapSlot?: number;
   orientation: number;
   guessSlot: number;
-}
 
-export type UIHand = {
-  uiCards: UICard[];
-};
+  // local UI properties
+  heapPos?: { x: number; y: number };
+  displaySlot?: number;
+  dropZone?: boolean;
+}
 
 export type Hand = {
   cards: Card[];
 };
 
 export type Patch = {
-  slot?: number;
-  dragPos?: { x: number; y: number };
-  orientation?: number;
+  card: Card;
+  name: string;
 };
 
 export interface Message {
@@ -37,12 +33,15 @@ export interface Message {
   recipient?: string;
   room?: string;
   type: MessageType;
+  clientID?: string;
 }
 export interface SocloverMessage extends Message {
   seed?: unknown;
   patch?: Patch;
   game?: Game;
   clues?: string[];
+  card?: Card;
+  playerName?: string;
 }
 
 export enum MessageType {
@@ -57,6 +56,8 @@ export enum MessageType {
   GET_MYHAND = 'GET_MYHAND',
   LOGON_OK = 'LOGON_OK',
   SEND_CLUES = 'SEND_CLUES',
+  NEW_HAND = 'NEW_HAND',
+  PATCH = 'PATCH',
 }
 
 export enum SocloverStageEnum {

@@ -33,8 +33,17 @@ export class DecryptoRoom extends Room {
       );
 
       switch (message.type) {
+        case MessageType.PATCH:
+          this.gameController.setPatch(message);
+          this.broadcastOthers(message, fromConnection);
+          return;
+
         case MessageType.SEND_LOGOUT:
           this.gameController.playerLeave(message.sender);
+          break;
+
+        case MessageType.NEW_HAND:
+          this.gameController.newGame(message.sender);
           break;
 
         case MessageType.SEND_LOGON:
@@ -132,6 +141,14 @@ export class DecryptoRoom extends Room {
   broadcastAll(message) {
     for (const c of this.connections) {
       c.sendMessage(message);
+    }
+  }
+
+  broadcastOthers(message, fromConnection) {
+    for (const c of this.connections) {
+      if (c !== fromConnection) {
+        c.sendMessage(message);
+      }
     }
   }
 

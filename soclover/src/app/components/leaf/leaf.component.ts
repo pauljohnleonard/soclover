@@ -6,104 +6,93 @@ import {
   OnInit,
 } from '@angular/core';
 import { ModelService } from '../../model/model.service';
-import { SocloverState, UICard, UIHand } from '@soclover/lib-soclover';
+import { Player, SocloverState, Card, Hand } from '@soclover/lib-soclover';
 import { NgxSpinnerService } from 'ngx-spinner';
 
+import { cloneDeep } from 'lodash';
+import { dropZones } from '../../model/model';
+import { Button, LeafData, Tool } from './leafData';
+import {
+  animate,
+  keyframes,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 // enum State {
 //   Setup = 'Setup',
 //   Solve = 'Solve',
 // }
-type Bin = { binX: number; slot: number; binY: number; card: UICard | null };
+
 @Component({
   selector: 'soclover-leaf',
   templateUrl: './leaf.component.html',
   styleUrls: ['./leaf.component.scss'],
+  animations: [
+    trigger('transformAnimation0', [
+      transition(
+        '* => *',
+        animate(
+          '500ms',
+          keyframes([
+            style({ transform: '{{ previousTransform0 }}', offset: 0 }),
+            style({ transform: '{{ newTransform0 }}', offset: 1.0 }),
+          ])
+        )
+      ),
+    ]),
+  ],
 })
-export class LeafComponent implements OnInit, OnDestroy {
+export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   loading = true;
+  solving = false;
   state: SocloverState | null = null;
-  cx = 70;
-  rad = 35;
-  tweakY = 20;
-  rHub = 70;
-  holeBorder = 20;
-  transform!: string;
-  cardWidth = 70;
-  cardPad = 2;
-  cardRad = 6;
-  holeRad = 10;
-  // hand!: UIHand;
-  myHand!: UIHand;
-  guessHand!: UIHand;
-  fontSize = 7;
-  wordNudgeIn = 9;
-  wordPad = 6;
-  spinX = this.cardWidth / 2 + 1;
-  spinY = this.cardWidth / 2 + 1;
-  heapPos = [
-    { x: 150, y: -100 },
-    { x: 150, y: 0 },
-    { x: 150, y: 100 },
-    { x: 50, y: 100 },
-    { x: -50, y: 100 },
-  ];
-  binX = 40;
-  dragCard!: UICard | null;
-  cards: UICard[] = [];
+
+  // hand!: Hand;
+  myHand!: Hand;
+  guessHand!: Hand;
+
+  dragCard!: Card | null;
+  cards: Card[] = [];
   isDragging = false;
   initialX!: number;
   initialY!: number;
-  petalTextHeight = 15;
-  petalTextWidth = 90;
-  petalTextTransform = `rotate(90) translate(-${this.petalTextWidth / 2}, -90)`;
-  petalTextTransformFlip = `rotate(-90) translate(${
-    -this.petalTextWidth / 2
-  }, 75)`;
 
-  petalDatas = [
-    { rotate: 'rotate(0)', transform: this.petalTextTransformFlip, i: 0 },
-    { rotate: 'rotate(90)', transform: this.petalTextTransformFlip, i: 1 },
-    { rotate: 'rotate(180)', transform: this.petalTextTransform, i: 2 },
-    { rotate: 'rotate(270)', transform: this.petalTextTransform, i: 3 },
-  ];
-  bins: Bin[] = [
-    { binY: this.cardWidth * 1.5, binX: 0, slot: 0, card: null },
-    { binX: -this.cardWidth * 1.5, binY: 0, slot: 1, card: null },
-    { binY: -this.cardWidth * 1.5, binX: 0, slot: 2, card: null },
-    { binX: this.cardWidth * 1.5, binY: 0, slot: 3, card: null },
-  ];
-  dragScaleFactor = 1.0;
   dragElement: any;
-  clues: string[] = ['Clue 0', 'Clue 1', 'Clue 2', 'Clue3'];
   focusPetal: number | undefined;
   textCursor = '|';
   timer: any;
+  focusPlayer?: Player;
+
+  clues!: string[];
 
   constructor(
     public modelService: ModelService,
     public elRef: ElementRef,
     private spinner: NgxSpinnerService
   ) {
-    this.modelService.subject$.subscribe(() => {
-      if (
-        !this.myHand &&
-        this.modelService.game?.players.find(
-          (player) => (player.name = this.modelService?.user?.name)
-        )
-      ) {
+    super();
+    this.modelService.subject$.subscribe((message) => {
+      if (message?.type === 'STATE') {
         this.initMyhand();
       }
+      this.makeButtons();
     });
+  }
 
-    // this.timer = setInterval(() => {
-    //   if (this.textCursor) {
-    //     this.textCursor = '';
-    //   } else {
-    //     this.textCursor = '_';
-    //   }
-    // }, 500);
+  ngOnInit() {
+    this.setViewportDimensions();
+    this.spinner.show();
+    // this.init();
+  }
 
-    this.modelService.update();
+  private setViewportDimensions() {
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const scaleFactor = Math.min(viewportHeight, viewportWidth) / 350;
+    this.transform = `scale(${scaleFactor})`;
+    // console.log('scale', scaleFactor);
+    this.dragScaleFactor = 1.0 / scaleFactor;
   }
 
   ngOnDestroy() {
@@ -112,26 +101,79 @@ export class LeafComponent implements OnInit, OnDestroy {
   }
 
   initMyhand() {
-    const hand = this.modelService.game?.players.find(
-      (player) => (player.name = this.modelService?.user?.name)
-    )?.hand;
+    console.log(' INIT MY HAND ');
 
-    if (!hand) {
-      throw Error('hand not set');
+    if (this.modelService.myPlayer?.hand) {
+      this.myHand = this.modelService.myPlayer.hand;
+
+      this.cards = this.myHand.cards;
+
+      this.cards.forEach((card) => {
+        card.displaySlot = card.slot;
+      });
     }
-    this.myHand = {
-      uiCards: hand.cards.map((card) => {
-        const uiCard: UICard = {
-          card,
-          orientation: 0,
-          guessSlot: card.slot,
-        };
-        return uiCard;
-      }),
-    };
-
-    this.cards = this.myHand.uiCards;
     this.loading = false;
+    this.clues = ['', '', '', ''];
+    this.makeButtons();
+  }
+
+  initSolve(player: Player) {
+    this.focusPlayer = player;
+
+    const hand: Hand = player.hand;
+
+    for (let i = 0; i < 5; i++) {
+      hand.cards[i].heapPos =
+        hand.cards[i].heapPos || cloneDeep(this.heapPos[i]);
+      hand.cards[i].dragPos = cloneDeep(this.heapPos[i]);
+      hand.cards[i].heapSlot = hand.cards[i].heapSlot || i + 1;
+      hand.cards[i].guessSlot = hand.cards[i].guessSlot || -(i + 1);
+      hand.cards[i].displaySlot = hand.cards[i].guessSlot;
+    }
+
+    this.clues = player.clues || [];
+    // console.log('initSolve', JSON.stringify(hand, null, 2));
+    // this.modelService.updateUI(this.clues, this.focusPlayer);
+
+    this.cards = dropZones.concat(hand.cards);
+  }
+
+  makeButtons() {
+    this.buttons = [];
+
+    if (this.clues?.filter((c) => !!c).length === 4) {
+      this.buttons.push({
+        text: 'Submit',
+        id: 'upload',
+        tag: 'upload',
+        player: null,
+      });
+    }
+
+    this.buttons.push({
+      text: 'New',
+      id: 'refresh',
+      tag: 'refresh',
+      player: null,
+    });
+
+    for (const player of this.modelService.game?.players || []) {
+      this.buttons.push({
+        text: player.name || 'Nobody',
+        id:
+          player?.clues?.filter((c) => !!c).length === 4
+            ? 'download'
+            : 'thinking',
+        tag: 'player',
+        player: player,
+      });
+    }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onResize(event: Event) {
+    this.setViewportDimensions();
   }
 
   selectPetal(petal: number, event: any) {
@@ -146,67 +188,27 @@ export class LeafComponent implements OnInit, OnDestroy {
     this.focusPetal = undefined;
   }
 
-  initGuessing() {
-    this.initSolve();
-    this.loading = false;
-    this.spinner.hide();
-  }
-
-  // initSetup() {
-  //   this.modelService.fetchMyhand();
-  // }
-
-  initSolve() {
-    // // this.hand = this.modelService.getPuzzle();
-    // for (let i = 0; i < 5; i++) {
-    //   this.hand.uiCards[i].heapPos = cloneDeep(this.heapPos[i]);
-    //   this.hand.uiCards[i].dragPos = cloneDeep(this.heapPos[i]);
-    //   this.hand.uiCards[i].heapSlot = i + 1;
-    //   this.hand.uiCards[i].guessSlot = -(i + 1);
-    // }
-    // this.modelService.update();
-    // this.cards = dropZones.concat(this.hand.uiCards);
-  }
-
-  ngOnInit() {
-    this.setViewportDimensions();
-    this.spinner.show();
-    // this.init();
-  }
-
-  @HostListener('window:resize', ['$event'])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onResize(event: Event) {
-    this.setViewportDimensions();
-  }
-
-  private setViewportDimensions() {
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-    const scaleFactor = Math.min(viewportHeight, viewportWidth) / 350;
-    this.transform = `scale(${scaleFactor})`;
-    // console.log('scale', scaleFactor);
-    this.dragScaleFactor = 1.0 / scaleFactor;
-  }
-
-  spinClick(card: UICard) {
+  spinClick(card: Card) {
     console.log('spin', card);
     card.orientation = (card.orientation + 1) % 4;
-    this.modelService.update();
+    this.modelService.updateUI(card, this.focusPlayer);
   }
 
-  binClick(bin: Bin) {
-    const card = bin.card;
-    if (card) {
+  toolClick(tool: Tool, cmd: 'bin' | 'spin') {
+    const card = tool.card;
+    if (card && cmd === 'bin') {
       card.guessSlot = -(card.heapSlot || 0);
-      bin.card = null;
+      card.displaySlot = card.guessSlot;
+      tool.card = null;
       card.dragPos = card.heapPos;
-      this.modelService.update();
+      this.modelService.updateUI(card, this.focusPlayer);
+    } else if (card && cmd === 'spin') {
+      this.spinClick(card);
     }
   }
 
   // --- drag and drop ---
-  mouseDownCard(event: any, card: UICard) {
+  mouseDownCard(event: any, card: Card) {
     if (card.dropZone) {
       return;
     }
@@ -237,7 +239,7 @@ export class LeafComponent implements OnInit, OnDestroy {
 
     if (this.dragCard) {
       this.dragCard.dragPos = this.dragCard.heapPos;
-      this.modelService.update();
+      this.modelService.updateUI(this.dragCard, this.focusPlayer);
     }
 
     this.dragElement = null;
@@ -247,19 +249,20 @@ export class LeafComponent implements OnInit, OnDestroy {
     event.stopPropagation();
   }
 
-  mouseUpCard(event: any, card: UICard) {
+  mouseUpCard(event: any, card: Card) {
     console.log('upCard', event);
 
     if (card.dropZone && this.dragCard) {
       this.dragCard.guessSlot = card.guessSlot;
+      this.dragCard.displaySlot = card.guessSlot;
       this.dragCard.orientation -= card.guessSlot;
       this.dragCard.orientation = (this.dragCard.orientation + 4) % 4;
-      const bin = this.bins.find((bin) => bin.card === this.dragCard);
+      const bin = this.tools.find((bin) => bin.card === this.dragCard);
       if (bin) {
         bin.card = null;
       }
-      this.bins[this.dragCard.guessSlot].card = this.dragCard;
-      this.modelService.update();
+      this.tools[this.dragCard.guessSlot].card = this.dragCard;
+      this.modelService.updateUI(card, this.focusPlayer);
     }
     this.isDragging = false;
     this.dragCard = null;
@@ -277,7 +280,7 @@ export class LeafComponent implements OnInit, OnDestroy {
         x: (this.dragCard?.heapPos?.x || 0) + deltaX * this.dragScaleFactor,
         y: (this.dragCard?.heapPos?.y || 0) + deltaY * this.dragScaleFactor,
       };
-      this.modelService.update();
+      this.modelService.updateUI(this.dragCard, this.focusPlayer);
     }
   }
 
@@ -312,11 +315,25 @@ export class LeafComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.makeButtons();
     event.preventDefault();
     event.stopPropagation();
   }
 
-  uploadClues(event: any) {
-    this.modelService.uploadClues(this.clues);
+  buttonClick(event: unknown, button: Button) {
+    console.log('buttonClick', button);
+    if (button.tag === 'upload') {
+      this.modelService.uploadClues(this.clues);
+    } else if (button.tag === 'refresh') {
+      this.modelService.newHand();
+    } else if (button.player) {
+      this.initSolve(button.player);
+    } else {
+      console.log('buttonClick', ' FIXME');
+    }
+  }
+
+  newGame() {
+    this.modelService.newHand();
   }
 }

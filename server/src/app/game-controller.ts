@@ -1,10 +1,11 @@
 import { Game, Hand, Player, SocloverMessage } from '@soclover/lib-soclover';
 import { makeHand } from './makeHand';
-
+import { cloneDeep } from 'lodash';
 export class GameController {
   // codes: Codes[] = [];
   game: Game;
   videoUrl!: string;
+  history: Game[] = [];
 
   constructor() {
     this.newGame();
@@ -14,12 +15,30 @@ export class GameController {
     null;
   }
 
-  newGame() {
-    const game: Game = {
-      players: [],
-    };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  newGame(sender?: string) {
+    let newGame: Game;
 
-    this.game = game;
+    if (this.game) {
+      this.history.push(this.game);
+      newGame = cloneDeep(this.game);
+      newGame.players.forEach((player) => {
+        if (!sender || player.name === sender) {
+          player.hand = makeHand();
+          player.clues = ['', '', '', '', ''];
+        }
+      });
+    } else {
+      newGame = {
+        players: [],
+      };
+    }
+
+    this.game = newGame;
+  }
+
+  setPatch(message: SocloverMessage) {
+    console.log('setPatch', message);
   }
 
   setClues(message: SocloverMessage) {
