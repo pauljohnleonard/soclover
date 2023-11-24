@@ -17,7 +17,7 @@ export const dropZones: Card[] = [
     displaySlot: 0,
     orientation: 0,
     dropZone: true,
-    guessSlot: 0,
+    hasUI: false,
   },
   {
     words: [],
@@ -25,7 +25,7 @@ export const dropZones: Card[] = [
     displaySlot: 1,
     orientation: 0,
     dropZone: true,
-    guessSlot: 1,
+    hasUI: false,
   },
   {
     words: [],
@@ -33,7 +33,7 @@ export const dropZones: Card[] = [
     orientation: 0,
     displaySlot: 2,
     dropZone: true,
-    guessSlot: 2,
+    hasUI: false,
   },
   {
     words: [],
@@ -41,6 +41,6 @@ export const dropZones: Card[] = [
     displaySlot: 3,
     orientation: 0,
     dropZone: true,
-    guessSlot: 3,
+    hasUI: false,
   },
 ];

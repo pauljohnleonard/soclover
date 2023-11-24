@@ -7,17 +7,19 @@ import {
   Player,
   SocloverMessage,
   User,
+  cardUImembers,
 } from '@soclover/lib-soclover';
 
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { ConnectionService } from '../connection.service';
+import { cloneDeep } from 'lodash';
 
 @Injectable({ providedIn: 'root' })
 export class ModelService {
   lastUpdate = 0;
   timer: any;
-  debounce = 500;
+  debounce = 200;
   user?: User;
 
   subject$ = new BehaviorSubject<SocloverMessage | null>(null);
@@ -34,7 +36,7 @@ export class ModelService {
       // console.log('message', message);
       switch (message.type) {
         case MessageType.STATE:
-          console.log('GAME', messageTyped.game);
+          console.log('STATE CHANGE', messageTyped.game);
           this.game = messageTyped.game;
           this.myPlayer = this.game?.players.find(
             (player) => player.name === this.user?.name
@@ -42,6 +44,7 @@ export class ModelService {
 
           this.subject$.next(message);
           break;
+
         case MessageType.LOGON_OK:
           this.user = { name: messageTyped.recipient };
           sessionStorage.setItem('user', JSON.stringify(this.user));
@@ -50,9 +53,33 @@ export class ModelService {
 
         case MessageType.PATCH:
           console.log('PATCH', messageTyped);
+          this.applyPatch(messageTyped);
+          this.subject$.next(message);
           break;
       }
     });
+  }
+
+  applyPatch(message: SocloverMessage) {
+    const player = this.game?.players.find(
+      (player) => player.name === message.playerName
+    );
+
+    if (!player) {
+      return;
+    }
+
+    const card = player.hand.cards.find(
+      (card) => card.slot === message?.card?.slot
+    );
+
+    if (!card) {
+      return;
+    }
+
+    for (const key of Object.keys(message.card || {})) {
+      (card as any)[key] = (message.card as any)[key];
+    }
   }
 
   _updateUI(card: Card, player: Player | undefined) {
@@ -60,14 +87,20 @@ export class ModelService {
       return;
     }
 
+    const patchCard: any = {};
+
+    for (const key of cardUImembers) {
+      patchCard[key] = (card as any)[key];
+    }
+
     const patch: SocloverMessage = {
-      card,
+      card: patchCard,
       playerName: player.name,
       type: MessageType.PATCH,
     };
 
     const now = Date.now();
-    console.log(JSON.stringify(patch, null, 2));
+    console.log('Send patch:', JSON.stringify(patch, null, 2));
     this.lastUpdate = now;
     clearTimeout(this.timer);
     this.timer = null;

@@ -45,12 +45,7 @@ import {
 })
 export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   loading = true;
-  solving = false;
   state: SocloverState | null = null;
-
-  // hand!: Hand;
-  myHand!: Hand;
-  guessHand!: Hand;
 
   dragCard!: Card | null;
   cards: Card[] = [];
@@ -73,9 +68,14 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   ) {
     super();
     this.modelService.subject$.subscribe((message) => {
-      if (message?.type === 'STATE') {
+      if (message?.type === 'STATE' && !this.focusPlayer) {
         this.initMyhand();
+      } else if (message?.type === 'PATCH') {
+        if (this.focusPlayer && message.playerName === this.focusPlayer?.name) {
+          this.initSolve({ player: this.focusPlayer, patching: true });
+        }
       }
+
       this.makeButtons();
     });
   }
@@ -102,11 +102,9 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
 
   initMyhand() {
     console.log(' INIT MY HAND ');
-
+    this.focusPlayer = undefined;
     if (this.modelService.myPlayer?.hand) {
-      this.myHand = this.modelService.myPlayer.hand;
-
-      this.cards = this.myHand.cards;
+      this.cards = this.modelService.myPlayer.hand.cards;
 
       this.cards.forEach((card) => {
         card.displaySlot = card.slot;
@@ -117,25 +115,29 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
     this.makeButtons();
   }
 
-  initSolve(player: Player) {
+  initSolve({ player, patching }: { player: Player; patching: boolean }) {
     this.focusPlayer = player;
-
-    const hand: Hand = player.hand;
+    const cards: Card[] = cloneDeep(player.hand.cards);
 
     for (let i = 0; i < 5; i++) {
-      hand.cards[i].heapPos =
-        hand.cards[i].heapPos || cloneDeep(this.heapPos[i]);
-      hand.cards[i].dragPos = cloneDeep(this.heapPos[i]);
-      hand.cards[i].heapSlot = hand.cards[i].heapSlot || i + 1;
-      hand.cards[i].guessSlot = hand.cards[i].guessSlot || -(i + 1);
-      hand.cards[i].displaySlot = hand.cards[i].guessSlot;
+      const card = cards[i];
+      if (!card.hasUI) {
+        card.heapPos = cloneDeep(this.heapPos[i]);
+        card.dragPos = cloneDeep(this.heapPos[i]);
+        card.heapSlot = i + 1;
+        card.displaySlot = -(i + 1);
+        card.hasUI = true;
+        if (!patching) {
+          this.modelService.updateUI(card, player);
+        }
+      }
     }
 
     this.clues = player.clues || [];
     // console.log('initSolve', JSON.stringify(hand, null, 2));
     // this.modelService.updateUI(this.clues, this.focusPlayer);
 
-    this.cards = dropZones.concat(hand.cards);
+    this.cards = dropZones.concat(cards);
   }
 
   makeButtons() {
@@ -188,28 +190,26 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
     this.focusPetal = undefined;
   }
 
-  spinClick(card: Card) {
-    console.log('spin', card);
-    card.orientation = (card.orientation + 1) % 4;
-    this.modelService.updateUI(card, this.focusPlayer);
-  }
-
   toolClick(tool: Tool, cmd: 'bin' | 'spin') {
     const card = tool.card;
     if (card && cmd === 'bin') {
-      card.guessSlot = -(card.heapSlot || 0);
-      card.displaySlot = card.guessSlot;
+      card.displaySlot = -(card.heapSlot || 0);
       tool.card = null;
       card.dragPos = card.heapPos;
       this.modelService.updateUI(card, this.focusPlayer);
     } else if (card && cmd === 'spin') {
-      this.spinClick(card);
+      console.log('spin', card);
+      card.orientation = (card.orientation + 1) % 4;
+      this.modelService.updateUI(card, this.focusPlayer);
     }
   }
 
   // --- drag and drop ---
   mouseDownCard(event: any, card: Card) {
-    if (card.dropZone) {
+    if (
+      card.dropZone ||
+      (card.displaySlot !== undefined && card.displaySlot >= 0)
+    ) {
       return;
     }
     console.log('downCard', event, card);
@@ -253,15 +253,18 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
     console.log('upCard', event);
 
     if (card.dropZone && this.dragCard) {
-      this.dragCard.guessSlot = card.guessSlot;
-      this.dragCard.displaySlot = card.guessSlot;
-      this.dragCard.orientation -= card.guessSlot;
+      console.log('upCard 2');
+
+      this.dragCard.displaySlot = card.displaySlot;
+      this.dragCard.orientation -= card.displaySlot || 0;
       this.dragCard.orientation = (this.dragCard.orientation + 4) % 4;
       const bin = this.tools.find((bin) => bin.card === this.dragCard);
       if (bin) {
         bin.card = null;
       }
-      this.tools[this.dragCard.guessSlot].card = this.dragCard;
+      if (this.dragCard.displaySlot) {
+        this.tools[this.dragCard.displaySlot].card = this.dragCard;
+      }
       this.modelService.updateUI(card, this.focusPlayer);
     }
     this.isDragging = false;
@@ -327,7 +330,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
     } else if (button.tag === 'refresh') {
       this.modelService.newHand();
     } else if (button.player) {
-      this.initSolve(button.player);
+      this.initSolve({ player: button.player, patching: false });
     } else {
       console.log('buttonClick', ' FIXME');
     }

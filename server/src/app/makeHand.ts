@@ -20,7 +20,8 @@ export function makeCard(slot): Card {
     words: [],
     slot,
     orientation: 0,
-    guessSlot: 0,
+    displaySlot: 0,
+    hasUI: false,
   };
 
   for (let i = 0; i < 4; i++) {

@@ -8,16 +8,26 @@ export interface Card {
 
   // shared UI properties
 
+  hasUI: boolean;
   dragPos?: { x: number; y: number };
   heapSlot?: number;
   orientation: number;
-  guessSlot: number;
 
   // local UI properties
   heapPos?: { x: number; y: number };
   displaySlot?: number;
   dropZone?: boolean;
 }
+
+export const cardUImembers = [
+  'slot',
+  'hasUI',
+  'dragPos',
+  'heapSlot',
+  'orientation',
+  'heapPos',
+  'displaySlot',
+];
 
 export type Hand = {
   cards: Card[];
