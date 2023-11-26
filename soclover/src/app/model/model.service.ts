@@ -3,10 +3,10 @@ import {
   Card,
   Game,
   MessageType,
-  Patch,
   Player,
   SocloverMessage,
   User,
+  applyPatch,
   cardUImembers,
 } from '@soclover/lib-soclover';
 
@@ -52,49 +52,48 @@ export class ModelService {
           break;
 
         case MessageType.PATCH:
-          console.log('PATCH', messageTyped);
-          this.applyPatch(messageTyped);
-          this.subject$.next(message);
+          if (this.game) {
+            console.log('PATCH', messageTyped);
+            applyPatch(messageTyped, this.game);
+            this.subject$.next(message);
+          }
+          break;
+
+        case MessageType.SELECT_SOLVE:
+          if (this.game) {
+            console.log('SELECT SOLVE', messageTyped);
+            this.subject$.next(message);
+          }
           break;
       }
     });
   }
 
-  applyPatch(message: SocloverMessage) {
-    const player = this.game?.players.find(
-      (player) => player.name === message.playerName
-    );
-
-    if (!player) {
-      return;
-    }
-
-    const card = player.hand.cards.find(
-      (card) => card.slot === message?.card?.slot
-    );
-
-    if (!card) {
-      return;
-    }
-
-    for (const key of Object.keys(message.card || {})) {
-      (card as any)[key] = (message.card as any)[key];
-    }
+  selectSolve(player: Player) {
+    const mess: SocloverMessage = {
+      playerName: player.name,
+      type: MessageType.SELECT_SOLVE,
+    };
+    this.connection.doSend(mess);
   }
 
-  _updateUI(card: Card, player: Player | undefined) {
+  _updateUI(player: Player | undefined) {
     if (!player || !player.name) {
       return;
     }
 
-    const patchCard: any = {};
+    const cards: Card[] = cloneDeep(player.hand.cards);
 
-    for (const key of cardUImembers) {
-      patchCard[key] = (card as any)[key];
+    for (const card of cards) {
+      for (const key of Object.keys(card)) {
+        if (!cardUImembers.includes(key)) {
+          delete (card as any)[key];
+        }
+      }
     }
 
     const patch: SocloverMessage = {
-      card: patchCard,
+      cards,
       playerName: player.name,
       type: MessageType.PATCH,
     };
@@ -107,22 +106,24 @@ export class ModelService {
     this.connection.doSend(patch);
   }
 
-  updateUI(card: Card, player: Player | undefined) {
+  updateUI(player: Player) {
     if (!player) {
       return;
     }
+
     const now = Date.now();
+
     const delta = now - this.lastUpdate;
     // console.log('delta', delta);
 
     if (delta > this.debounce) {
       // console.log('update');
-      this._updateUI(card, player);
+      this._updateUI(player);
     } else if (!this.timer) {
       const wait = now + this.debounce - this.lastUpdate;
       // console.log('deffered update', wait);
       this.timer = setTimeout(() => {
-        this._updateUI(card, player);
+        this._updateUI(player);
       }, wait);
     }
   }

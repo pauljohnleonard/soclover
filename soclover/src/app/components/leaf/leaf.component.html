@@ -9,8 +9,8 @@
   transform-origin="0 0"
   [attr.transform]="transform"
   (mousemove)="mouseMove($event)"
-  (mousedown)="mouseDown($event)"
   (mouseup)="mouseUp($event)"
+  (mousedown)="mouseDown($event)"
   (mouseleave)="mouseLeave($event)"
   (click)="catchAllClick($event)"
 >
@@ -56,6 +56,14 @@
       <use xlink:href="assets/icons/cognition.svg#cognition" />
     </g>
 
+    <g id="wrong" transform="translate(-11,-11) scale(4) ">
+      <use xlink:href="assets/icons/close.svg#close" fill="red" />
+    </g>
+
+    <g id="solving">
+      <use xlink:href="assets/icons/question_mark.svg#question_mark" />
+    </g>
+
     <g id="upload">
       <use xlink:href="assets/icons/upload.svg#upload" />
     </g>
@@ -97,7 +105,6 @@
         [attr.height]="cardWidth - cardPad"
         [attr.rx]="cardRad"
         fill="#fff"
-        style="cursor: grab"
       />
 
       <rect
@@ -107,7 +114,7 @@
         [attr.height]="cardWidth - cardPad - holeBorder * 2"
         [attr.rx]="cardRad"
         fill="#366e39"
-        style="cursor: grab"
+        [attr.style]="focusPlayer ? 'cursor:grab' : 'default'"
       />
     </g>
 
@@ -163,40 +170,33 @@
     </g>
 
     <g [attr.transform]="'translate(120 120)'">
+      <ng-container *ngFor="let slot of dropZones">
+        <g (mouseup)="focusPlayer ? mouseUpDrop($event, slot) : null">
+          <g transform="rotate(45)">
+            <g [attr.transform]="zoneTransformSpin(slot)">
+              <use id="cardDropZone" xlink:href="#dropZone" />
+            </g>
+          </g>
+        </g>
+      </ng-container>
+
       <ng-container *ngFor="let card of cards; let card_i = index">
         <g
-          *ngIf="card.displaySlot !== undefined"
-          [attr.transform]="
-            card.displaySlot < 0
-              ? 'translate(' + card.dragPos?.x + ',' + card.dragPos?.y + ')'
-              : ''
-          "
-          (mousedown)="mouseDownCard($event, card)"
-          (mouseup)="mouseUpCard($event, card)"
+          [attr.transform]="cardTransformPosition(card)"
+          (mousedown)="focusPlayer ? mouseDownCard($event, card) : null"
+          (mouseup)="focusPlayer ? mouseUpCard($event, card) : null"
         >
           <g transform="rotate(45)">
-            <g
-              [attr.transform]="
-                card.displaySlot >= 0
-                  ? 'rotate(' + card.displaySlot * 90 + ')'
-                  : ''
-              "
-            >
-              <ng-container *ngIf="!card.dropZone">
+            <g [attr.transform]="cardTransformSpin(card)">
+              <ng-container>
                 <use xlink:href="#card" />
               </ng-container>
-
-              <use
-                id="cardDropZone"
-                *ngIf="card.dropZone"
-                xlink:href="#dropZone"
-              />
 
               <ng-container *ngFor="let word of card.words; let word_i = index">
                 <g
                   [attr.transform]="
                     'rotate(' +
-                    (word_i + card.orientation) * 90 +
+                    (word_i + card.guessOrientation) * 90 +
                     ' ' +
                     (cardPad + cardWidth) / 2 +
                     ' ' +
@@ -211,16 +211,7 @@
                   <text
                     x="0"
                     y="0"
-                    [attr.transform]="
-                      (word_i +
-                        (card.displaySlot >= 0 ? card.displaySlot : 0) +
-                        1 +
-                        card.orientation) %
-                        4 >
-                      1
-                        ? 'rotate( 180 0 -1)'
-                        : ''
-                    "
+                    [attr.transform]="wordTransformFlip(card, word_i)"
                     text-anchor="middle"
                     dominant-baseline="middle"
                     fill="black"
@@ -232,29 +223,34 @@
                   </text>
                 </g>
               </ng-container>
+
+              <use xlink:href="#wrong" *ngIf="card.wrong" />
             </g>
           </g>
         </g>
-      </ng-container>
+        <g
+          transform="translate(-10,0)"
+          *ngIf="
+            focusPlayer &&
+            card.guessSlot !== undefined &&
+            card.guessSlot >= 0 &&
+            !card.draggee
+          "
+        >
+          <use
+            xlink:href="#bin"
+            [attr.x]="tools[card.guessSlot].binX"
+            [attr.y]="tools[card.guessSlot].binY"
+            (click)="toolClick(card, 'bin')"
+          />
 
-      <ng-container *ngFor="let tool of tools">
-        <ng-container *ngIf="tool.card">
-          <g transform="translate(-10,0)">
-            <use
-              xlink:href="#bin"
-              [attr.x]="tool.binX"
-              [attr.y]="tool.binY"
-              (click)="toolClick(tool, 'bin')"
-            />
-
-            <use
-              xlink:href="#spin"
-              [attr.x]="tool.spinX"
-              [attr.y]="tool.spinY"
-              (click)="toolClick(tool, 'spin')"
-            />
-          </g>
-        </ng-container>
+          <use
+            xlink:href="#spin"
+            [attr.x]="tools[card.guessSlot].spinX"
+            [attr.y]="tools[card.guessSlot].spinY"
+            (click)="toolClick(card, 'spin')"
+          />
+        </g>
       </ng-container>
     </g>
   </g>

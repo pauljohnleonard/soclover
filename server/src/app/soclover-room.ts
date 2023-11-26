@@ -46,6 +46,11 @@ export class DecryptoRoom extends Room {
           this.gameController.newGame(message.sender);
           break;
 
+        case MessageType.SELECT_SOLVE:
+          this.gameController.setFocusPlayer(message);
+          this.broadcastOthers(message, fromConnection);
+          return;
+
         case MessageType.SEND_LOGON:
           {
             console.log('Logon', message.sender);

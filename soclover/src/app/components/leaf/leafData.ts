@@ -1,4 +1,4 @@
-import { Card, Player } from '@soclover/lib-soclover';
+import { Card, Hand, Player } from '@soclover/lib-soclover';
 
 export type Button = {
   text: string;
@@ -90,4 +90,15 @@ export class LeafData {
   ];
   dragScaleFactor = 1.0;
   buttons: Button[] = [];
+
+  dropZones = [0, 1, 2, 3];
+
+  defaultClues(cards: Card[]) {
+    return [
+      `${cards[0].words[1]}-${cards[3].words[2]}`,
+      `${cards[1].words[1]}-${cards[0].words[2]}`,
+      `${cards[1].words[2]}-${cards[2].words[1]}`,
+      `${cards[2].words[2]}-${cards[3].words[1]}`,
+    ];
+  }
 }

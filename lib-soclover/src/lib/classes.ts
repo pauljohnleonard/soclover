@@ -5,37 +5,29 @@ export interface User {
 export interface Card {
   words: string[];
   slot: number;
+  heapSlot: number;
 
   // shared UI properties
-
-  hasUI: boolean;
   dragPos?: { x: number; y: number };
-  heapSlot?: number;
-  orientation: number;
+  guessOrientation: number;
+  guessSlot?: number;
+  draggee?: string;
 
-  // local UI properties
-  heapPos?: { x: number; y: number };
-  displaySlot?: number;
-  dropZone?: boolean;
+  // local hacks
+  wrong: boolean;
 }
 
 export const cardUImembers = [
   'slot',
-  'hasUI',
   'dragPos',
-  'heapSlot',
-  'orientation',
-  'heapPos',
-  'displaySlot',
+  'guessOrientation',
+  'guessSlot',
+  'draggee',
 ];
 
 export type Hand = {
+  hasUI: boolean;
   cards: Card[];
-};
-
-export type Patch = {
-  card: Card;
-  name: string;
 };
 
 export interface Message {
@@ -47,10 +39,10 @@ export interface Message {
 }
 export interface SocloverMessage extends Message {
   seed?: unknown;
-  patch?: Patch;
+  // patch?: Patch;
   game?: Game;
   clues?: string[];
-  card?: Card;
+  cards?: Card[];
   playerName?: string;
 }
 
@@ -68,6 +60,7 @@ export enum MessageType {
   SEND_CLUES = 'SEND_CLUES',
   NEW_HAND = 'NEW_HAND',
   PATCH = 'PATCH',
+  SELECT_SOLVE = 'SELECT_SOLVE',
 }
 
 export enum SocloverStageEnum {
@@ -86,5 +79,6 @@ export interface Player extends User {
 }
 
 export type Game = {
+  focusPlayerName?: string;
   players: Player[];
 };

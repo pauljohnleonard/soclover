@@ -1,4 +1,10 @@
-import { Game, Hand, Player, SocloverMessage } from '@soclover/lib-soclover';
+import {
+  Game,
+  Hand,
+  Player,
+  SocloverMessage,
+  applyPatch,
+} from '@soclover/lib-soclover';
 import { makeHand } from './makeHand';
 import { cloneDeep } from 'lodash';
 export class GameController {
@@ -9,6 +15,10 @@ export class GameController {
 
   constructor() {
     this.newGame();
+  }
+
+  setFocusPlayer(message: SocloverMessage) {
+    this.game.focusPlayerName = message.playerName;
   }
 
   reset() {
@@ -38,6 +48,7 @@ export class GameController {
   }
 
   setPatch(message: SocloverMessage) {
+    applyPatch(message, this.game);
     console.log('setPatch', message);
   }
 

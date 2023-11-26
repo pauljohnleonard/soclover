@@ -1,17 +1,50 @@
+import fs from 'fs';
+import path from 'path';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs');
 
 class Words {
   allWords!: Array<string>;
   availWords!: { [key: string]: boolean };
 
   constructor() {
-    // console.log(process.env.PWD);
-    const str = fs.readFileSync('server/src/assets/words_Extra.txt', 'utf-8');
-    this.allWords = str.split('\n');
+    // Rest of the constructor code...
 
+    this.allWords = this.loadAllWords();
+
+    console.log(`Loaded ${this.allWords.length} words`);
     this.makeAvaliable();
-    console.log(` Using a set of ${this.allWords.length} words `);
+
+    // Rest of the constructor code...
+  }
+
+  loadAllWords(): string[] {
+    const assetsFolderPath = 'server/src/assets';
+    const files = fs.readdirSync(assetsFolderPath);
+    console.log(files);
+    const words = {};
+
+    files.forEach((file) => {
+      if (file.endsWith('.words')) {
+        const filePath = assetsFolderPath + '/' + file;
+        console.log(filePath);
+        const stats = fs.statSync(filePath);
+
+        if (stats.isFile()) {
+          console.log(`Processing file: ${filePath}`);
+          const fileContent = fs.readFileSync(filePath, 'utf-8');
+          const list = fileContent.split('\n');
+          // console.log(`Found ${words.length} words`);
+          for (let word of list) {
+            word = word.trim();
+            word = this.capitalizeWord(word);
+            if (!words[word]) {
+              words[word] = true;
+            }
+          }
+        }
+      }
+    });
+    return Object.keys(words);
   }
 
   makeAvaliable() {
