@@ -3,7 +3,7 @@ import { WaitingRoom } from './app/waitingroom';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const WebSocket = require('ws');
 
-const PORT = 3005;
+const PORT = 3055;
 
 console.log(' SOCLOVER server --- starting');
 

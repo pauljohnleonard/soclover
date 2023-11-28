@@ -9,15 +9,27 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+
+import { CustomKeyboardComponent } from './components/custom-keyboard/custom-keyboard.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { HomeComponent } from './components/home/home.component';
 @NgModule({
-  declarations: [AppComponent, LeafComponent],
+  declarations: [
+    AppComponent,
+    LeafComponent,
+    HomeComponent,
+    CustomKeyboardComponent,
+  ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     NgxSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatFormFieldModule,
+    ReactiveFormsModule,
     MatIconModule,
+
     RouterModule.forRoot(appRoutes, { initialNavigation: 'enabledBlocking' }),
   ],
   providers: [],

@@ -18,14 +18,17 @@ class Words {
   }
 
   loadAllWords(): string[] {
-    const assetsFolderPath = 'server/src/assets';
-    const files = fs.readdirSync(assetsFolderPath);
+    const assetFolderPath = path.join(__dirname, 'assets/');
+
+    console.log(assetFolderPath);
+
+    const files = fs.readdirSync(assetFolderPath);
     console.log(files);
     const words = {};
 
     files.forEach((file) => {
       if (file.endsWith('.words')) {
-        const filePath = assetsFolderPath + '/' + file;
+        const filePath = assetFolderPath + '/' + file;
         console.log(filePath);
         const stats = fs.statSync(filePath);
 

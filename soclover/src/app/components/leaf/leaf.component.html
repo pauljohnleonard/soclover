@@ -134,13 +134,15 @@
     <g [attr.transform]="'translate(120 120)'">
       <g transform="rotate(45)">
         <ng-container *ngFor="let petalData of petalDatas">
-          <g [attr.transform]="petalData.rotate">
+          <g
+            [attr.transform]="petalData.rotate"
+            (click)="selectPetal(petalData.i, $event)"
+          >
             <use xlink:href="#petal" />
             <use
               xlink:href="#textbox"
               [attr.stroke]="focusPetal === petalData.i ? 'black' : null"
               stroke-width="0.3"
-              (click)="selectPetal(petalData.i, $event)"
             />
             <text
               [attr.x]="petalTextWidth / 2"
@@ -287,3 +289,7 @@
     </ng-container>
   </g>
 </svg>
+
+<div class="options">
+  <img src="assets/icons/settings.svg" />
+</div>

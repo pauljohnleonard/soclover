@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  CHAT_URL: 'wss://server.drpjl.com/decrypto'
+  SERVER_URL: 'wss://soclover-server.drpjl.com/soclover',
 };

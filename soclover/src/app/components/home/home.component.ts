@@ -1,28 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 
 import { Router } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
+import { FormControl, Validators } from '@angular/forms';
+
 import { ModelService } from '../../model/model.service';
 import { User } from '@soclover/lib-soclover';
 import { ConnectionService } from '../../connection.service';
+import { environment } from 'environments/environment';
 
 @Component({
-  standalone: true,
   selector: 'soclover-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [MatFormFieldModule, ReactiveFormsModule, MatInputModule],
 })
 export class HomeComponent implements OnInit {
+  @ViewChild('hiddenInput') hiddenInput!: ElementRef;
+
   TITLE = '';
+
+  environment = environment;
 
   name = new FormControl('', [
     Validators.required,
     Validators.minLength(2),
     Validators.maxLength(9),
   ]);
+  text: string | undefined;
 
   constructor(
     public connection: ConnectionService,
@@ -74,5 +77,15 @@ export class HomeComponent implements OnInit {
       return;
     }
     this.connection.logon(this.name.value);
+
+    await this.connection.waitTillReady();
+
+    this.text = JSON.stringify(this.connection.ws);
+  }
+
+  showKeyboard() {
+    console.log('showKeyboard');
+    // this.hiddenInput.nativeElement.focus();
+    this.hiddenInput.nativeElement.click();
   }
 }

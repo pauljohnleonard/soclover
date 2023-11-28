@@ -12,10 +12,14 @@
         "platform": "node",
         "outputPath": "dist/server",
         "format": ["cjs"],
-        "bundle": false,
+        "bundle": true,
         "main": "server/src/main.ts",
         "tsConfig": "server/tsconfig.app.json",
-        "assets": ["server/src/assets"],
+        "assets": [{
+          "input":"server/src/assets",
+          "output":"assets",
+          "glob": "**/*.!(ts)"}
+        ],
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,

@@ -203,6 +203,13 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   selectPetal(petal: number, event: any) {
     this.focusPetal = petal;
     console.log('petal', petal);
+    console.log('event', event.target);
+    // if (event.target instanceof HTMLElement) {
+    //   console.log('focus');
+
+    event.target.focus();
+    // }
+
     event.preventDefault();
     event.stopPropagation();
   }
@@ -223,6 +230,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
       this.modelService.updateUI(this.focusPlayer);
     } else if (card && cmd === 'spin') {
       console.log('spin', card);
+      card.wrong = false;
       card.guessOrientation = (card.guessOrientation + 1) % 4;
       this.modelService.updateUI(this.focusPlayer);
     }

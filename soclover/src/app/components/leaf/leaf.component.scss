@@ -17,3 +17,9 @@
 .blink-animation {
   animation: blink 1s infinite; /* You can adjust the duration and other properties as needed */
 }
+
+.options {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}

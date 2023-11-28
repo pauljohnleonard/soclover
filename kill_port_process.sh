@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PORTS="3005"
+PORTS="3055"
 
 for PORT in ${PORTS}; do
   PROCESS=$(lsof -i -P | grep LISTEN | grep :${PORT} | awk '{print $2}')

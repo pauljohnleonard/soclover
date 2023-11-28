@@ -1,0 +1,9 @@
+<div id="keyboard">
+  <ng-container *ngFor="let row of rows">
+    <div class="row">
+      <ng-container *ngFor="let key of row">
+        <div class="key" (click)="keyClicked(key)" [innerHTML]="key"></div>
+      </ng-container>
+    </div>
+  </ng-container>
+</div>

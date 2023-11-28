@@ -10,7 +10,7 @@ export class ConnectionService {
   ws?: WebSocket;
   readySubject = new BehaviorSubject<boolean>(false);
   messageSubject = new BehaviorSubject<Message | undefined>(undefined);
-
+  statusSubject = new BehaviorSubject<any>('initializing');
   user?: User | null;
   clientID: string;
   constructor(public router: Router) {
@@ -31,10 +31,11 @@ export class ConnectionService {
         console.log(
           'DISCONNECTED -------------------------------------------------------------------  '
         );
-        const message: Message = {
-          type: MessageType.CONNECTION_LOSS,
-        };
-        this.messageSubject.next(message);
+        this.statusSubject.next('disconnected');
+        // const message: Message = {
+        //   type: MessageType.CONNECTION_LOSS,
+        // };
+        // this.messageSubject.next(message);
         delete this.ws;
       };
 
@@ -55,13 +56,11 @@ export class ConnectionService {
           '  WS        ERROR ----------------------------------- ',
           evt
         );
-        const message: Message = {
-          type: MessageType.CONNECTION_LOSS,
-        };
-        this.messageSubject.next(message);
+        this.statusSubject.next('error');
         delete this.ws;
       };
     } catch (err) {
+      this.statusSubject.next(err);
       console.error(err);
     }
   }
