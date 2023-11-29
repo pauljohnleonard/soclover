@@ -36,7 +36,7 @@ export class ModelService {
       // console.log('message', message);
       switch (message.type) {
         case MessageType.STATE:
-          console.log('STATE CHANGE', messageTyped.game);
+          // console.log('STATE CHANGE', messageTyped.game);
           this.game = messageTyped.game;
           this.myPlayer = this.game?.players.find(
             (player) => player.name === this.user?.name
@@ -48,7 +48,7 @@ export class ModelService {
         case MessageType.LOGON_OK:
           this.user = { name: messageTyped.recipient };
           sessionStorage.setItem('user', JSON.stringify(this.user));
-          this.router.navigateByUrl('/leaf');
+          this.router.navigateByUrl('/board');
           break;
 
         case MessageType.PATCH:
@@ -99,7 +99,7 @@ export class ModelService {
     };
 
     const now = Date.now();
-    console.log('Send patch:', JSON.stringify(patch, null, 2));
+    // console.log('Send patch:', JSON.stringify(patch, null, 2));
     this.lastUpdate = now;
     clearTimeout(this.timer);
     this.timer = null;

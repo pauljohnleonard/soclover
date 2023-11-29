@@ -1,9 +1,15 @@
-<div id="keyboard">
-  <ng-container *ngFor="let row of rows">
-    <div class="row">
-      <ng-container *ngFor="let key of row">
-        <div class="key" (click)="keyClicked(key)" [innerHTML]="key"></div>
-      </ng-container>
-    </div>
-  </ng-container>
+<div class="mykeyboard-container">
+  <div class="mykeyboard">
+    <ng-container *ngFor="let row of rows">
+      <div class="row">
+        <ng-container *ngFor="let key of row">
+          <div
+            class="key"
+            (click)="keyClicked(key.code, $event)"
+            [innerHTML]="key.disp"
+          ></div>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
 </div>

@@ -5,6 +5,7 @@ export type Button = {
   id: string;
   tag: string;
   player: Player | null;
+  click: () => void;
 };
 
 export type Tool = {
@@ -22,7 +23,7 @@ export class LeafData {
   tweakY = 20;
   rHub = 70;
   holeBorder = 20;
-  transform!: string;
+  containerScale!: string;
   cardWidth = 70;
   cardPad = 2;
   cardRad = 6;
@@ -32,13 +33,7 @@ export class LeafData {
   wordPad = 6;
   spinX = this.cardWidth / 2 + 1;
   spinY = this.cardWidth / 2 + 1;
-  heapPos = [
-    { x: 150, y: -100 },
-    { x: 150, y: 0 },
-    { x: 150, y: 100 },
-    { x: 50, y: 100 },
-    { x: -50, y: 100 },
-  ];
+
   binX = 40;
 
   petalTextHeight = 15;
@@ -89,16 +84,19 @@ export class LeafData {
     },
   ];
   dragScaleFactor = 1.0;
-  buttons: Button[] = [];
 
+  clueFontSize = '10px';
+  cardFontSize = '10px';
   dropZones = [0, 1, 2, 3];
 
-  defaultClues(cards: Card[]) {
-    return [
-      `${cards[0].words[1]}-${cards[3].words[2]}`,
-      `${cards[1].words[1]}-${cards[0].words[2]}`,
-      `${cards[1].words[2]}-${cards[2].words[1]}`,
-      `${cards[2].words[2]}-${cards[3].words[1]}`,
-    ];
-  }
+  boardWidth = 240;
+  boardHeight = 500;
+  petalMainTranslate = `translate(0, 68)`;
+  heapPos = [
+    { x: -70, y: -190 },
+    { x: 70, y: -190 },
+    { x: -70, y: 90 },
+    { x: 70, y: 90 },
+    { x: 0, y: 140 },
+  ];
 }

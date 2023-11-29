@@ -1,5 +1,6 @@
 // custom-keyboard.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { UiService } from '../../ui.service';
 
 @Component({
   selector: 'soclover-custom-keyboard',
@@ -8,22 +9,35 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CustomKeyboardComponent implements OnInit {
   inputValue = '';
-  rows: string[][] = [];
+  rows: { disp: string; code: string }[][] = [];
+  scale = 'scale(1)';
+
+  constructor(public uiService: UiService) {}
   ngOnInit() {
     const keyboardLayout = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
     for (const item of keyboardLayout) {
-      this.rows.push(item.split(''));
+      const row = [];
+      for (const tok of item.split('')) {
+        row.push({ disp: tok, code: tok });
+      }
+      this.rows.push(row);
     }
 
-    this.rows[0].push('-');
-    this.rows[1].push('DEL');
-    this.rows[2].push('&nbsp;&nbsp;&nbsp;&#10004;&nbsp;&nbsp;&nbsp;');
+    this.rows[1].push({ disp: '-', code: '-' });
+    this.rows[2] = [{ disp: 'DEL', code: 'Delete' }].concat(this.rows[2]);
+    this.rows[2].push({
+      disp: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#10004;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+      code: 'Enter',
+    });
 
     // Define the layout of the keyboard
   }
 
-  keyClicked(key: string) {
+  keyClicked(key: string, event: any) {
     console.log(key);
+    this.uiService.handleKeyboardEvent(key);
+    event.preventDefault();
+    event.stopPropagation();
     // Handle special keys or perform additional actions if needed
     if (key === 'Space') {
       this.inputValue += ' ';
@@ -32,5 +46,13 @@ export class CustomKeyboardComponent implements OnInit {
     } else {
       this.inputValue += key;
     }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onResize(event: Event) {
+    const viewportWidth = window.innerWidth;
+    const scaleFactor = viewportWidth / 1280;
+    this.scale = `scale(${scaleFactor})`;
   }
 }

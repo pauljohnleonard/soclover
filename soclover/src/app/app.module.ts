@@ -13,12 +13,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { CustomKeyboardComponent } from './components/custom-keyboard/custom-keyboard.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './components/home/home.component';
+import { ButtonsComponent } from './components/buttons/buttons.component';
+import { BoardComponent } from './components/board/board.component';
 @NgModule({
   declarations: [
     AppComponent,
     LeafComponent,
     HomeComponent,
     CustomKeyboardComponent,
+    ButtonsComponent,
+    BoardComponent,
   ],
   imports: [
     BrowserModule,

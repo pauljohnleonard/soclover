@@ -1,0 +1,13 @@
+<div class="top-container">
+  <soclover-leaf class="leaf"> </soclover-leaf>
+  <soclover-buttons class="buttons"> </soclover-buttons>
+  <soclover-custom-keyboard
+    class="keyboard"
+    *ngIf="uiService.setting && layoutService.isTouchDevice"
+  ></soclover-custom-keyboard>
+</div>
+
+<!--
+<div class="options">
+  <img src="assets/icons/settings.svg" />
+</div> -->

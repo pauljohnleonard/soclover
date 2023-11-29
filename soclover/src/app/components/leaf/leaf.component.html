@@ -1,17 +1,16 @@
-<p *ngIf="loading">Loading...</p>
-
 <svg
   *ngIf="!loading"
   xmlns="http://www.w3.org/2000/svg"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-  width="800"
-  height="600"
+  [attr.width]="boardWidth"
+  [attr.height]="boardHeight"
   transform-origin="0 0"
-  [attr.transform]="transform"
-  (mousemove)="mouseMove($event)"
-  (mouseup)="mouseUp($event)"
+  [attr.transform]="containerScale"
+  (mousemove)="!isTouch ? mouseMove($event) : null"
+  (mouseup)="!isTouch ? mouseUp($event) : null"
+  (touchmove)="touchMove($event)"
+  (touchend)="touchEnd($event)"
   (mousedown)="mouseDown($event)"
-  (mouseleave)="mouseLeave($event)"
   (click)="catchAllClick($event)"
 >
   <defs>
@@ -130,13 +129,15 @@
     </g>
   </defs>
 
-  <g transform="translate(0,50)">
+  <rect width="100%" height="100%" fill="#dcd" />
+  <!--    PETALS -->
+  <g [attr.transform]="petalMainTranslate">
     <g [attr.transform]="'translate(120 120)'">
       <g transform="rotate(45)">
         <ng-container *ngFor="let petalData of petalDatas">
           <g
             [attr.transform]="petalData.rotate"
-            (click)="selectPetal(petalData.i, $event)"
+            (click)="!focusPlayer ? selectPetal(petalData.i, $event) : null"
           >
             <use xlink:href="#petal" />
             <use
@@ -151,7 +152,7 @@
               text-anchor="middle"
               dominant-baseline="middle"
               fill="black"
-              [attr.font-size]="fontSize"
+              [attr.font-size]="clueFontSize"
               font-family="Arial"
               font-weight="600"
             >
@@ -173,10 +174,16 @@
 
     <g [attr.transform]="'translate(120 120)'">
       <ng-container *ngFor="let slot of dropZones">
-        <g (mouseup)="focusPlayer ? mouseUpDrop($event, slot) : null">
+        <g
+          (mouseup)="focusPlayer && !isTouch ? mouseUpDrop($event, slot) : null"
+        >
           <g transform="rotate(45)">
             <g [attr.transform]="zoneTransformSpin(slot)">
-              <use id="cardDropZone" xlink:href="#dropZone" />
+              <use
+                id="cardDropZone"
+                xlink:href="#dropZone"
+                [attr.data-slot]="slot"
+              />
             </g>
           </g>
         </g>
@@ -185,8 +192,11 @@
       <ng-container *ngFor="let card of cards; let card_i = index">
         <g
           [attr.transform]="cardTransformPosition(card)"
-          (mousedown)="focusPlayer ? mouseDownCard($event, card) : null"
-          (mouseup)="focusPlayer ? mouseUpCard($event, card) : null"
+          (mousedown)="
+            focusPlayer && !isTouch ? mouseDownCard($event, card) : null
+          "
+          (mouseup)="focusPlayer && !isTouch ? mouseUpCard($event) : null"
+          (touchstart)="focusPlayer ? touchStartCard($event, card) : null"
         >
           <g transform="rotate(45)">
             <g [attr.transform]="cardTransformSpin(card)">
@@ -217,7 +227,7 @@
                     text-anchor="middle"
                     dominant-baseline="middle"
                     fill="black"
-                    [attr.font-size]="fontSize"
+                    [attr.font-size]="cardFontSize"
                     font-family="Arial"
                     font-weight="600"
                   >
@@ -256,42 +266,4 @@
       </ng-container>
     </g>
   </g>
-
-  <g transform="translate(15,15)">
-    <ng-container *ngFor="let button of buttons; let i = index">
-      <g
-        [attr.transform]="'translate(' + 40 * (i + 0.2) + ',0)'"
-        style="cursor: pointer"
-        (click)="buttonClick($event, button)"
-      >
-        <rect
-          width="30"
-          height="30"
-          rx="11"
-          fill="#fff"
-          stroke="#000"
-          stroke-width="0.5"
-        />
-        <use [attr.xlink:href]="'#' + button.id" x="3" y="3" />
-        <text
-          x="15"
-          y="-5"
-          text-anchor="middle"
-          dominant-baseline="middle"
-          fill="black"
-          [attr.font-size]="fontSize"
-          font-family="Arial"
-          font-weight="600"
-        >
-          {{ button.text }}
-        </text>
-      </g>
-    </ng-container>
-  </g>
 </svg>
-
-<div class="options">
-  <img src="assets/icons/settings.svg" />
-</div>
-
-<soclover-custom-keyboard></soclover-custom-keyboard>

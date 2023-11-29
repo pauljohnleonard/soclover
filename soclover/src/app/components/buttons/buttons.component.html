@@ -1,0 +1,90 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  width="100vw"
+  height="55"
+  transform-origin="0 0"
+>
+  <rect
+    *ngIf="uiService.showButtons"
+    width="100%"
+    height="100%"
+    fill="pink"
+    stroke="#000"
+    stroke-width="0.5"
+  />
+  <defs>
+    <!--  BUTTONS -->
+    <g id="download">
+      <use xlink:href="assets/icons/download.svg#download" />
+    </g>
+
+    <g id="thinking">
+      <use xlink:href="assets/icons/cognition.svg#cognition" />
+    </g>
+
+    <g id="wrong" transform="translate(-11,-11) scale(4) ">
+      <use xlink:href="assets/icons/close.svg#close" fill="red" />
+    </g>
+
+    <g id="solving">
+      <use xlink:href="assets/icons/question_mark.svg#question_mark" />
+    </g>
+
+    <g id="upload">
+      <use xlink:href="assets/icons/upload.svg#upload" />
+    </g>
+
+    <g id="refresh" style="cursor: pointer">
+      <use xlink:href="assets/icons/restart.svg#restart" />
+    </g>
+  </defs>
+
+  <g transform="translate(15,15)">
+    <text
+      x="-3"
+      y="14"
+      text-anchor="middle"
+      dominant-baseline="middle"
+      fill="black"
+      [attr.font-size]="buttonFontSize"
+      font-family="Arial"
+      font-weight="800"
+      (click)="uiService.toggleButtons()"
+    >
+      {{ uiService.showButtons ? '<' : '>' }}
+    </text>
+
+    <ng-container *ngIf="uiService.showButtons">
+      <ng-container *ngFor="let button of uiService.buttons; let i = index">
+        <g
+          [attr.transform]="'translate(' + 40 * (i + 0.2) + ',0)'"
+          style="cursor: pointer"
+          (click)="button.click()"
+        >
+          <rect
+            width="30"
+            height="30"
+            rx="11"
+            fill="#fff"
+            stroke="#000"
+            stroke-width="0.5"
+          />
+          <use [attr.xlink:href]="'#' + button.id" x="3" y="3" />
+          <text
+            x="15"
+            y="-5"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            fill="black"
+            [attr.font-size]="buttonFontSize"
+            font-family="Arial"
+            font-weight="600"
+          >
+            {{ button.text }}
+          </text>
+        </g>
+      </ng-container>
+    </ng-container>
+  </g>
+</svg>
