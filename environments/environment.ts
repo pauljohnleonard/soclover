@@ -1,4 +1,4 @@
-const localserver = false;
+const localserver = true;
 
 // const 34.250.162.78
 export const environment = {

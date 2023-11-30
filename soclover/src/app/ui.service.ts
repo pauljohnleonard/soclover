@@ -162,12 +162,14 @@ export class UiService {
   }
 
   defaultClues(cards: Card[]) {
-    return [
-      `${cards[0].words[1]}-${cards[3].words[2]}`,
-      `${cards[1].words[1]}-${cards[0].words[2]}`,
-      `${cards[1].words[2]}-${cards[2].words[1]}`,
-      `${cards[2].words[2]}-${cards[3].words[1]}`,
-    ];
+    return ['', '', '', ''];
+
+    // return [
+    //   `${cards[0].words[1]}-${cards[3].words[2]}`,
+    //   `${cards[1].words[1]}-${cards[0].words[2]}`,
+    //   `${cards[1].words[2]}-${cards[2].words[1]}`,
+    //   `${cards[2].words[2]}-${cards[3].words[1]}`,
+    // ];
   }
 
   toggleButtons() {

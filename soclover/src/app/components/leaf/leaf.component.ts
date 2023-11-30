@@ -8,7 +8,7 @@ import {
 import { ModelService } from '../../model/model.service';
 import { Card } from '@soclover/lib-soclover';
 import { NgxSpinnerService } from 'ngx-spinner';
-
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { LeafData } from './leafData';
 import {
   animate,
@@ -20,6 +20,7 @@ import {
 import { UiService } from '../../ui.service';
 import { LayoutService } from '../../layout.service';
 
+@UntilDestroy()
 @Component({
   selector: 'soclover-leaf',
   templateUrl: './leaf.component.html',
@@ -60,9 +61,12 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.layoutService.subject$.pipe(untilDetroy(this), (layout) => {});
+    this.layoutService.subject$
+      .pipe(untilDestroyed(this))
+      .subscribe((layout) => {
+        this.setViewportDimensions();
+      });
 
-    this.setViewportDimensions();
     this.spinner.show();
     // this.init();
   }
@@ -245,9 +249,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
 
   mouseUp(event: any) {
     console.log('up', event);
-    this.doDropCard();
-    event.preventDefault();
-    event.stopPropagation();
+    this.doDropCard(event, -1);
   }
 
   mouseUpCard(event: any) {
@@ -272,25 +274,26 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   //   this.dragCard = null;
   // }
 
-  doDropCard(zone?: number) {
+  doDropCard(event: any, zone: number) {
     if (this.dragElement) {
       this.dragElement.style.pointerEvents = 'auto';
       this.dragElement = null;
+      event.preventDefault();
+      event.stopPropagation();
     }
 
     if (!this.dragCard || !this.uiService.focusPlayer) return;
 
     console.log('doDropCard 2');
-
-    this.dragCard.guessSlot = zone;
-    this.dragCard.guessOrientation -= zone || 0;
-    this.dragCard.guessOrientation = (this.dragCard.guessOrientation + 4) % 4;
-    const bin = this.tools.find((bin) => bin.card === this.dragCard);
-    if (bin) {
-      bin.card = null;
-    }
-
-    if (zone === undefined) {
+    if (zone >= 0) {
+      this.dragCard.guessSlot = zone;
+      this.dragCard.guessOrientation -= zone || 0;
+      this.dragCard.guessOrientation = (this.dragCard.guessOrientation + 4) % 4;
+      const bin = this.tools.find((bin) => bin.card === this.dragCard);
+      if (bin) {
+        bin.card = null;
+      }
+    } else {
       this.dragCard.dragPos = this.heapPos[this.dragCard.heapSlot];
     }
 
@@ -304,7 +307,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   mouseUpDrop(event: any, zone: number) {
     console.log('upDrop', event);
 
-    this.doDropCard(zone);
+    this.doDropCard(event, zone);
     this.isDragging = false;
     this.dragCard = null;
   }
@@ -340,14 +343,13 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
 
     console.log('Target Element:', targetElement);
 
-    if (targetElement && this.dragCard) {
-      event.preventDefault();
-      const str = targetElement.dataset['slot'];
-      if (str !== undefined) {
-        const zone = +str;
-        console.error('slotIndex', zone);
-        this.doDropCard(zone);
-      }
+    const str = targetElement.dataset['slot'];
+    if (str !== undefined) {
+      const zone = +str;
+      console.error('slotIndex', zone);
+      this.doDropCard(event, zone);
+    } else {
+      this.doDropCard(event, -1);
     }
 
     this.isDragging = false;
