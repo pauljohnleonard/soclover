@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { ModelService } from '../../model/model.service';
-import { Card } from '@soclover/lib-soclover';
+import { Card, Leaf } from '@soclover/lib-soclover';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { LeafData } from './leafData';
@@ -47,7 +47,6 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   initialX!: number;
   initialY!: number;
   dragElement: any;
-
   timer: any;
 
   constructor(
@@ -68,7 +67,8 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
       });
 
     this.spinner.show();
-    // this.init();
+
+    console.log('LeafComponent', this.leaf);
   }
 
   private setViewportDimensions() {
@@ -94,7 +94,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   // SVG layout helpers
 
   cardTransformPosition(card: Card): string {
-    if (this.uiService.focusPlayer) {
+    if (!this.uiService.setting) {
       if (card.draggee) {
         return 'translate(' + card.dragPos?.x + ',' + card.dragPos?.y + ')';
       } else if (card.guessSlot !== undefined && card.guessSlot >= 0) {
@@ -116,7 +116,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   wordTransformFlip(card: Card, word_i: number): string {
     let slot = 0;
 
-    if (this.uiService.focusPlayer) {
+    if (!this.uiService.setting) {
       if (card.guessSlot !== undefined && card.guessSlot >= 0) {
         slot = card.guessSlot;
       }
@@ -130,7 +130,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   }
 
   cardTransformSpin(card: Card): string {
-    if (!this.uiService.focusPlayer) {
+    if (this.uiService.setting) {
       return 'rotate(' + card.slot * 90 + ')';
     } else {
       if (!card.draggee) {
@@ -174,40 +174,43 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   }
 
   toolClick(card: Card, cmd: 'bin' | 'spin') {
-    if (!this.uiService.focusPlayer) {
+    if (!this.uiService.focusLeaf || this.setting) {
       return;
     }
+
     if (card && cmd === 'bin') {
       card.guessSlot = -1;
       card.dragPos = this.heapPos[card.heapSlot];
       card.wrong = false;
-      this.modelService.updateUI(this.uiService.focusPlayer);
     } else if (card && cmd === 'spin') {
       console.log('spin', card);
       card.wrong = false;
       card.guessOrientation = (card.guessOrientation + 1) % 4;
-      this.modelService.updateUI(this.uiService.focusPlayer);
+    } else {
+      return;
     }
+
+    this.modelService.updateLeafUI(this.uiService.focusLeaf);
   }
 
   // --- drag and drop ---
   mouseDownCard(event: any, card: Card) {
     console.log('downCard', event, card);
 
-    if (this.uiService.focusPlayer) {
+    if (this.uiService.focusLeaf) {
       if (card.guessSlot !== undefined && card.guessSlot >= 0) {
         return;
       }
 
       this.dragCard = card;
-      card.draggee = this.modelService.myPlayer?.name || '';
+      card.draggee = this.modelService.myPlayer?.playerName || '';
       this.dragElement = event.target;
       this.dragElement.style.pointerEvents = 'none';
       this.isDragging = true;
       this.initialX = event.clientX;
       this.initialY = event.clientY;
       this.setDragDelta(event.clientX, event.clientY);
-      this.modelService.updateUI(this.uiService.focusPlayer);
+      this.modelService.updateLeafUI(this.uiService.focusLeaf);
       event.preventDefault();
       event.stopPropagation();
     }
@@ -217,13 +220,13 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   touchStartCard(event: any, card: Card) {
     console.log('touchStartCard', event, card);
 
-    if (this.uiService.focusPlayer) {
+    if (this.uiService.focusLeaf) {
       if (card.guessSlot !== undefined && card.guessSlot >= 0) {
         return;
       }
 
       this.dragCard = card;
-      card.draggee = this.modelService.myPlayer?.name || '';
+      card.draggee = this.modelService.myPlayer?.playerName || '';
       this.dragElement = event.target;
       this.dragElement.style.pointerEvents = 'none';
       this.isDragging = true;
@@ -233,7 +236,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
         event.changedTouches[0].clientX,
         event.changedTouches[0].clientY
       );
-      this.modelService.updateUI(this.uiService.focusPlayer);
+      this.modelService.updateLeafUI(this.uiService.focusLeaf);
       event.preventDefault();
       event.stopPropagation();
     }
@@ -255,9 +258,9 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   mouseUpCard(event: any) {
     console.log('upCard', event);
 
-    if (this.dragCard && this.uiService.focusPlayer) {
+    if (this.dragCard && this.uiService.focusLeaf) {
       this.dragCard.draggee = '';
-      this.modelService.updateUI(this.uiService.focusPlayer);
+      this.modelService.updateLeafUI(this.uiService.focusLeaf);
     }
     this.isDragging = false;
     this.dragCard = null;
@@ -282,7 +285,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
       event.stopPropagation();
     }
 
-    if (!this.dragCard || !this.uiService.focusPlayer) return;
+    if (!this.dragCard || !this.uiService.focusLeaf) return;
 
     console.log('doDropCard 2');
     if (zone >= 0) {
@@ -301,7 +304,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
       this.tools[this.dragCard.guessSlot].card = this.dragCard;
     }
     this.dragCard.draggee = '';
-    this.modelService.updateUI(this.uiService.focusPlayer);
+    this.modelService.updateLeafUI(this.uiService.focusLeaf);
   }
 
   mouseUpDrop(event: any, zone: number) {
@@ -313,7 +316,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   }
 
   mouseMove(event: any) {
-    console.log('Move', event);
+    // console.log('Move', event);
 
     if (this.isDragging) {
       this.setDragDelta(event.clientX, event.clientY);
@@ -359,7 +362,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
   setDragDelta(newX: number, newY: number) {
     const deltaX = newX - this.initialX;
     const deltaY = newY - this.initialY;
-    if (this.dragCard && this.uiService.focusPlayer) {
+    if (this.dragCard && this.uiService.focusLeaf) {
       this.dragCard.dragPos = {
         x:
           (this.heapPos[this.dragCard.heapSlot]?.x || 0) +
@@ -368,7 +371,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
           (this.heapPos[this.dragCard.heapSlot].y || 0) +
           deltaY * this.dragScaleFactor,
       };
-      this.modelService.updateUI(this.uiService.focusPlayer);
+      this.modelService.updateLeafUI(this.uiService.focusLeaf);
     }
   }
 
@@ -376,21 +379,33 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
     return this.layoutService.isTouchDevice;
   }
   get focusPlayer() {
-    return this.uiService.focusPlayer;
+    return this.uiService.focusLeaf;
+  }
+
+  get leaf(): Leaf | undefined {
+    return this.uiService.focusLeaf;
   }
 
   get cards() {
-    return this.uiService.cards;
+    if (!this.uiService.focusLeaf) {
+      throw new Error('No focusLeaf (get cards)');
+    }
+    return this.uiService.focusLeaf.cards;
   }
 
-  get clues() {
-    return this.uiService.clues;
-  }
+  // get clues() {
+  //   return this.uiService.clues;
+  // }
 
   get loading() {
     return this.uiService.loading;
   }
+
   get focusPetal() {
     return this.uiService.focusPetal;
+  }
+
+  get setting() {
+    return this.uiService.setting;
   }
 }

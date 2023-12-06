@@ -1,13 +1,14 @@
 import {
+  Card,
   Game,
-  Hand,
-  Player,
+  Leaf,
   SocloverMessage,
   applyPatch,
 } from '@soclover/lib-soclover';
 import { makeHand } from './makeHand';
 import { cloneDeep } from 'lodash';
-import { CloverStore } from './cloverStore';
+import { MongoDB } from './db/db';
+
 export class GameController {
   game: Game;
   videoUrl!: string;
@@ -24,24 +25,8 @@ export class GameController {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  newGame(sender?: string) {
-    let newGame: Game;
-
-    if (this.game) {
-      newGame = cloneDeep(this.game);
-      newGame.players.forEach((player) => {
-        if (!sender || player.name === sender) {
-          player.hand = makeHand();
-          player.clues = ['', '', '', '', ''];
-        }
-      });
-    } else {
-      newGame = {
-        players: [],
-      };
-    }
-
-    this.game = newGame;
+  newGame() {
+    this.game = { leafs: [] };
   }
 
   setPatch(message: SocloverMessage) {
@@ -49,28 +34,35 @@ export class GameController {
     console.log('setPatch', message);
   }
 
-  setClues(message: SocloverMessage) {
-    const player = this.playerFromName(message.sender);
-    player.clues = message.clues;
-    CloverStore.saveHand(player);
+  async addLeafToGame(message: SocloverMessage) {
+    message.leaf.submitted = true;
+    this.game.leafs.push(message.leaf);
+
+    await MongoDB.instance.saveHand(message.leaf);
   }
 
   playerLeave(name: string) {
-    this.game.players = this.game.players.filter((item) => item.name !== name);
+    this.game.leafs = this.game.leafs.filter(
+      (item) => item.playerName !== name
+    );
   }
 
-  newPlayer(name: string): Player {
-    const hand: Hand = makeHand();
-    const newPlayer: Player = { name, hand };
+  newLeaf(playerName: string): Leaf {
+    const cards: Card[] = makeHand();
+    const newLeaf: Leaf = {
+      playerName,
+      cards,
+      clues: ['', '', '', ''],
+      submitted: false,
+    };
 
-    this.game.players.push(newPlayer);
-    return newPlayer;
+    return newLeaf;
   }
 
-  playerFromName(name: string): Player {
-    for (const player of this.game.players) {
-      if (player.name === name) {
-        return player;
+  leafFromPlayerName(name: string): Leaf {
+    for (const leaf of this.game.leafs) {
+      if (leaf.playerName === name) {
+        return leaf;
       }
     }
     throw Error(` ${name} was not found in players `);

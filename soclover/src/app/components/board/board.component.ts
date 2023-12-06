@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { UiService } from '../../ui.service';
 import { LayoutService } from '../../layout.service';
+import { ModelService } from '../../model/model.service';
 
 @Component({
   selector: 'soclover-board',
@@ -10,6 +11,7 @@ import { LayoutService } from '../../layout.service';
 export class BoardComponent {
   constructor(
     public uiService: UiService,
-    public layoutService: LayoutService
+    public layoutService: LayoutService,
+    public modelService: ModelService
   ) {}
 }

@@ -2,7 +2,7 @@ import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Injectable } from '@angular/core';
 
-import { Message, MessageType, User } from '@soclover/lib-soclover';
+import { Message, MessageType } from '@soclover/lib-soclover';
 import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
@@ -10,9 +10,10 @@ export class ConnectionService {
   ws?: WebSocket;
   readySubject = new BehaviorSubject<boolean>(false);
   messageSubject = new BehaviorSubject<Message | undefined>(undefined);
-  statusSubject = new BehaviorSubject<any>('initializing');
-  user?: User | null;
+  statusSubject = new BehaviorSubject<any>('');
+  name!: string;
   clientID: string;
+  error: any;
   constructor(public router: Router) {
     this.clientID =
       Math.random().toString(36).substring(2, 15) +
@@ -21,6 +22,7 @@ export class ConnectionService {
 
   async connect() {
     try {
+      this.statusSubject.next('Connecting');
       this.ws = new WebSocket(environment.SERVER_URL);
 
       this.ws.onopen = (evt) => {
@@ -28,40 +30,27 @@ export class ConnectionService {
       };
 
       this.ws.onclose = (evt) => {
-        console.log(
-          'DISCONNECTED -------------------------------------------------------------------  '
-        );
-        this.statusSubject.next('disconnected');
-        // const message: Message = {
-        //   type: MessageType.CONNECTION_LOSS,
-        // };
-        // this.messageSubject.next(message);
+        console.log('evt:', evt);
+        this.statusSubject.next('Disconnected (closed)');
         delete this.ws;
       };
 
       this.ws.onmessage = (evt) => {
         const mess: Message = JSON.parse(evt.data);
-        // console.log('RECIEVED:\n', JSON.stringify(mess, null, 2));
-        if (mess.clientID === this.clientID) {
-          console.log(
-            '  RECIEVED  OWN MESSAGE ----------------------------------- '
-          );
-        } else {
+        if (mess.clientID !== this.clientID) {
           this.messageSubject.next(mess);
         }
       };
 
       this.ws.onerror = (evt) => {
-        console.log(
-          '  WS        ERROR ----------------------------------- ',
-          evt
-        );
-        this.statusSubject.next('error');
+        console.log('Error', evt);
+        this.error = "Connection error - can't connect to server";
+        this.statusSubject.next('Disconnected (error)');
         delete this.ws;
       };
     } catch (err) {
       this.statusSubject.next(err);
-      console.error(err);
+      console.error('Err:', err);
     }
   }
 
@@ -78,8 +67,8 @@ export class ConnectionService {
   async doSend(message: Message) {
     await this.waitTillReady();
 
-    if (this.user) {
-      message.sender = this.user.name;
+    if (this.name) {
+      message.sender = this.name;
     }
     // console.log('SENT: \n' + JSON.stringify(message, null, 2));
     if (!this.ws) {
@@ -90,13 +79,13 @@ export class ConnectionService {
   }
 
   async doSendSync(message: Message): Promise<any> {
-    if (!this.user) {
-      throw Error('user not set');
+    if (!this.name) {
+      throw Error('user name not set');
     }
 
     await this.waitTillReady();
-    if (this.user.name) {
-      message.sender = this.user.name;
+    if (this.name) {
+      message.sender = this.name;
     }
     if (!this.ws) {
       throw Error('ws not set');
@@ -106,26 +95,28 @@ export class ConnectionService {
     this.ws.send(JSON.stringify(message, null, 2));
   }
 
-  async logon(name: string): Promise<User | null> {
-    if (this.user) return this.user;
+  async logon(name: string) {
+    if (this.ws) {
+      return this.name || '';
+    }
     await this.connect();
-    this.user = { name };
+    this.name = name;
     const message: Message = {
-      sender: this.user.name,
+      sender: this.name,
       type: MessageType.SEND_LOGON,
     };
     await this.doSend(message);
-    window.document.title = this.user.name || 'No one';
+    window.document.title = this.name || 'No one';
     return null;
   }
 
   async disconnect() {
-    if (this.user) {
+    if (this.name) {
       const message: Message = {
         type: MessageType.SEND_LOGOUT,
       };
       await this.doSendSync(message);
-      this.user = null;
+      this.name = '';
     }
     if (this.ws) {
       this.ws.close();
@@ -134,9 +125,9 @@ export class ConnectionService {
   }
 
   async getState() {
-    if (!this.user) return;
+    if (!this.name) return;
     const message: Message = {
-      sender: this.user.name,
+      sender: this.name,
       type: MessageType.GET_STATE,
     };
 
@@ -145,7 +136,7 @@ export class ConnectionService {
 
   canActivate(): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-      if (this.user) {
+      if (this.name) {
         resolve(true);
       } else {
         resolve(false);

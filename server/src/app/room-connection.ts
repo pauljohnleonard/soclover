@@ -1,8 +1,8 @@
-import { Player, SocloverMessage } from '@soclover/lib-soclover';
+import { SocloverMessage } from '@soclover/lib-soclover';
 import { Room } from './room';
 
 export class RoomConnection {
-  player: Player;
+  playerName: string;
   ws: any;
   room: Room;
   constructor(ws, room: Room) {
@@ -37,5 +37,9 @@ export class RoomConnection {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  getPlayerNames() {
+    return this.room.connections.map((c) => c.playerName);
   }
 }

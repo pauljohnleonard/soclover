@@ -3,14 +3,13 @@ import {
   Card,
   Game,
   MessageType,
-  Player,
+  Leaf,
   SocloverMessage,
-  User,
   applyPatch,
   cardUImembers,
 } from '@soclover/lib-soclover';
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { ConnectionService } from '../connection.service';
 import { cloneDeep } from 'lodash';
@@ -20,69 +19,76 @@ export class ModelService {
   lastUpdate = 0;
   timer: any;
   debounce = 200;
-  user?: User;
 
   subject$ = new BehaviorSubject<SocloverMessage | null>(null);
   game: Game | undefined;
-  myPlayer?: Player;
+  myPlayer?: Leaf;
+
+  newLeafSubject$ = new Subject<Leaf>();
 
   constructor(public connection: ConnectionService, public router: Router) {
-    this.connection.messageSubject.subscribe((message) => {
-      const messageTyped = message as SocloverMessage;
-      if (!message) {
+    this.connection.messageSubject.subscribe((rawMessage) => {
+      const message = rawMessage as SocloverMessage;
+      if (!rawMessage) {
         return;
       }
 
       // console.log('message', message);
-      switch (message.type) {
+      switch (rawMessage.type) {
         case MessageType.STATE:
           // console.log('STATE CHANGE', messageTyped.game);
-          this.game = messageTyped.game;
-          this.myPlayer = this.game?.players.find(
-            (player) => player.name === this.user?.name
+          this.game = message.game;
+          this.myPlayer = this.game?.leafs.find(
+            (player) => player.playerName === this?.name
           );
 
-          this.subject$.next(message);
+          this.subject$.next(rawMessage);
           break;
 
         case MessageType.LOGON_OK:
-          this.user = { name: messageTyped.recipient };
-          sessionStorage.setItem('user', JSON.stringify(this.user));
-          this.router.navigateByUrl('/board');
+          if (!message.recipient) {
+            throw new Error('No recipient');
+          }
+          sessionStorage.setItem('userName', this.name);
+          this.router.navigateByUrl('/home');
           break;
 
         case MessageType.PATCH:
           if (this.game) {
-            console.log('PATCH', messageTyped);
-            applyPatch(messageTyped, this.game);
+            console.log('PATCH', message);
+            applyPatch(message, this.game);
             this.subject$.next(message);
           }
           break;
 
         case MessageType.SELECT_SOLVE:
           if (this.game) {
-            console.log('SELECT SOLVE', messageTyped);
-            this.subject$.next(message);
+            console.log('SELECT SOLVE', message);
+            this.subject$.next(rawMessage);
           }
+          break;
+
+        case MessageType.NEW_LEAF:
+          message.newLeaf ? this.newLeafSubject$.next(message.newLeaf) : null;
           break;
       }
     });
   }
 
-  selectSolve(player: Player) {
+  selectSolveLeaf(leaf: Leaf) {
     const mess: SocloverMessage = {
-      playerName: player.name,
+      playerName: leaf.playerName,
       type: MessageType.SELECT_SOLVE,
     };
     this.connection.doSend(mess);
   }
 
-  _updateUI(player: Player | undefined) {
-    if (!player || !player.name) {
+  _updateUI(leaf: Leaf | undefined) {
+    if (!leaf || !leaf.playerName) {
       return;
     }
 
-    const cards: Card[] = cloneDeep(player.hand.cards);
+    const cards: Card[] = cloneDeep(leaf.cards);
 
     for (const card of cards) {
       for (const key of Object.keys(card)) {
@@ -94,7 +100,7 @@ export class ModelService {
 
     const patch: SocloverMessage = {
       cards,
-      playerName: player.name,
+      playerName: leaf.playerName,
       type: MessageType.PATCH,
     };
 
@@ -106,8 +112,8 @@ export class ModelService {
     this.connection.doSend(patch);
   }
 
-  updateUI(player: Player) {
-    if (!player) {
+  updateLeafUI(leaf: Leaf) {
+    if (!leaf) {
       return;
     }
 
@@ -118,28 +124,34 @@ export class ModelService {
 
     if (delta > this.debounce) {
       // console.log('update');
-      this._updateUI(player);
+      this._updateUI(leaf);
     } else if (!this.timer) {
       const wait = now + this.debounce - this.lastUpdate;
       // console.log('deffered update', wait);
       this.timer = setTimeout(() => {
-        this._updateUI(player);
+        this._updateUI(leaf);
       }, wait);
     }
   }
 
-  uploadClues(clues: string[]) {
+  uploadLeaf(leaf: Leaf) {
     const message: SocloverMessage = {
-      type: MessageType.SEND_CLUES,
-      clues,
+      type: MessageType.SEND_LEAF_WITH_CLUES,
+      leaf,
     };
     this.connection.doSend(message);
   }
 
-  newHand() {
+  newLeaf() {
     const message: SocloverMessage = {
-      type: MessageType.NEW_HAND,
+      type: MessageType.NEW_LEAF,
     };
     this.connection.doSend(message);
+
+    return this.newLeafSubject$;
+  }
+
+  get name() {
+    return this.connection.name;
   }
 }

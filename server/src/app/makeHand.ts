@@ -1,24 +1,19 @@
-import { Card, Hand } from '@soclover/lib-soclover';
+import { Card } from '@soclover/lib-soclover';
 
 import { words } from './words';
 
-export function makeHand(): Hand {
-  const hand: Hand = {
-    cards: [],
-    hasUI: false,
-  };
-
+export function makeHand(): Card[] {
   const heapSlots = [0, 1, 2, 3, 4];
-
+  const cards: Card[] = [];
   shuffleArray(heapSlots);
 
   for (let i = 0; i < 5; i++) {
     const card = makeCard(i);
     card.heapSlot = heapSlots[i];
-    hand.cards.push(card);
+    cards.push(card);
   }
 
-  return hand;
+  return cards;
 }
 
 function shuffleArray(array) {

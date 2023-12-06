@@ -1,20 +1,14 @@
-<div style="height: 40px"></div>
+<div class="soclover top-container">
+  <h1>Players</h1>
 
-<div class="logon">
-  <div class="outer">
-    <div>
-      <span style="flex: 1"></span>
-      <mat-form-field>
-        <input matInput placeholder="YourName" [formControl]="name" required />
-      </mat-form-field>
+  <soclover-buttons class="buttons" [buttons]="uiService.gameButtons">
+  </soclover-buttons>
 
-      <span style="flex: 1"></span>
-    </div>
-    <button mat-raised-button (click)="logon()">Login</button>
+  <div *ngIf="!modelService.myPlayer?.clues">
+    <p>You have not made a leaf</p>
+
+    <button mat-raised-button (click)="uiService.makeNewLeaf()">
+      Make Leaf
+    </button>
   </div>
 </div>
-
-<!-- <h1>STATUS</h1>
-
-{{ environment.SERVER_URL }}
-<div>{{ connection.statusSubject.value }}</div> -->

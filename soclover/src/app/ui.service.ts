@@ -1,25 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Button } from './components/leaf/leafData';
 import { ModelService } from './model/model.service';
-import { Card, Player } from '@soclover/lib-soclover';
+import { Card, Leaf } from '@soclover/lib-soclover';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UiService {
-  focusPetal: number | undefined;
   showButtons = true;
   guessing = false;
-  cards: Card[] = [];
+  // cards: Card[] = [];
   loading = true;
-  clues!: string[];
-  buttons: Button[] = [];
-  focusPlayer?: Player;
-  setting = true;
-  isFullScreen = false;
 
-  constructor(public modelService: ModelService) {
-    this.openFullscreen();
+  gameButtons: Button[] = [];
+  myButtons: Button[] = [];
+  solveButtons: Button[] = [];
+
+  focusPetal: number | undefined;
+  focusLeaf!: Leaf | undefined;
+  setting = true;
+
+  constructor(public modelService: ModelService, public router: Router) {
     this.modelService.subject$.subscribe((message) => {
       if (this.modelService.myPlayer) {
         if (this.modelService?.myPlayer?.clues?.length === 4) {
@@ -28,32 +30,35 @@ export class UiService {
       }
 
       // Update the focus player
-      if (this.focusPlayer) {
-        const x = this.modelService.game?.players.find(
-          (player) => player.name === this.focusPlayer?.name
-        );
+      // if (this.focusLeaf) {
+      //   const x = this.modelService.game?.leafs.find(
+      //     (player) => player.playerName === this.focusLeaf?.playerName
+      //   );
 
-        if (x) {
-          this.focusPlayer = x;
-        }
-      }
+      //   if (x) {
+      //     this.focusLeaf = x;
+      //   }
+      // }
 
-      if (message?.type === 'STATE' && !this.focusPlayer) {
-        this.initMyhand();
-      } else if (message?.type === 'PATCH') {
-        if (this.focusPlayer && message.playerName === this.focusPlayer?.name) {
-          this.initSolve({ player: this.focusPlayer });
+      if (message?.type === 'PATCH') {
+        if (
+          this.focusLeaf &&
+          message.playerName === this.focusLeaf?.playerName
+        ) {
+          this.setSolveLeaf(this.focusLeaf);
         }
       } else if (message?.type === 'SELECT_SOLVE') {
-        if (!this.setting && message.playerName !== this.focusPlayer?.name) {
-          const realPlayer = this.modelService.game?.players.find(
-            (player) => player.name === message.playerName
-          );
-
-          if (realPlayer) {
-            this.focusPlayer = realPlayer;
-            this.initSolve({ player: this.focusPlayer });
-          }
+        if (
+          !this.setting &&
+          message.playerName !== this.focusLeaf?.playerName
+        ) {
+          // const realPlayer = this.modelService.game?.leafs.find(
+          //   (player) => player.playerName === message.playerName
+          // );
+          // if (realPlayer) {
+          //   this.focusLeaf = realPlayer;
+          //   this.setSolveLeaf(this.focusLeaf);
+          // }
         }
       }
 
@@ -61,96 +66,127 @@ export class UiService {
     });
   }
 
+  initSetting(leaf: Leaf) {
+    console.log('initSetting', leaf);
+    this.setting = true;
+    this.focusLeaf = leaf;
+  }
+
+  makeNewLeaf() {
+    console.log('makeNewLeaf');
+    this.focusLeaf = undefined;
+    this.modelService.newLeaf().subscribe((leaf) => {
+      this.focusLeaf = leaf;
+      this.setting = true;
+    });
+  }
+  // initSolve() {
+  //   this.setting = false;
+  //   this.focusLeaf = undefined;
+  // }
+
   makeButtons() {
-    this.buttons = [];
+    console.log('makeButtons', this.focusLeaf);
+    this.gameButtons = [];
+    this.myButtons = [];
 
-    if (this.setting) {
-      if (this.clues?.filter((c) => !!c).length === 4) {
-        this.buttons.push({
-          text: 'Submit',
-          id: 'upload',
-          tag: 'upload',
-          player: null,
-          click: () => {
-            this.modelService.uploadClues(this.clues);
-          },
-        });
-      }
+    const backButton: Button = {
+      text: '',
+      id: 'home',
+      tag: 'home',
+      click: () => {
+        this.router.navigateByUrl('/home');
+      },
+      player: null,
+    };
 
-      this.buttons.push({
-        text: 'New',
-        id: 'refresh',
-        tag: 'refresh',
+    this.myButtons = [backButton];
+    this.solveButtons = [backButton];
+
+    if (this.focusLeaf?.clues?.filter((c) => !!c).length === 4) {
+      this.myButtons.push({
+        text: 'Submit',
+        id: 'upload',
+        tag: 'upload',
         player: null,
         click: () => {
-          this.focusPlayer = undefined;
-          this.modelService.newHand();
+          this.focusLeaf ? this.modelService.uploadLeaf(this.focusLeaf) : null;
+          this.focusLeaf = undefined;
+          this.setting = false;
+          this.router.navigateByUrl('/home');
         },
       });
-    } else {
-      for (const player of this.modelService.game?.players || []) {
-        let id = 'thinking';
-        if (player.name === this.focusPlayer?.name) {
-          id = 'solving';
-        } else if (player?.clues?.filter((c) => !!c).length === 4) {
-          id = 'download';
-        }
-        const click = () => {
-          if (!this.focusPlayer || this.focusPlayer.name !== player.name) {
-            this.initSolve({ player });
-            this.modelService.selectSolve(player);
-          } else {
-            this.haveAGo();
-            console.log(JSON.stringify(this.cards, null, 2));
-            this.guessing = true;
-          }
-        };
-        const button: Button = {
-          text: player.name || 'Nobody',
-          id,
-          tag: 'player',
-          player: player,
-          click,
-        };
+    }
 
-        this.buttons.push(button);
+    this.myButtons.push({
+      text: 'New',
+      id: 'refresh',
+      tag: 'refresh',
+      player: null,
+      click: () => {
+        this.makeNewLeaf();
+      },
+    });
+
+    for (const leaf of this.modelService.game?.leafs || []) {
+      let id = 'thinking';
+      if (leaf.playerName === this.focusLeaf?.playerName) {
+        id = 'solving';
+      } else if (leaf.submitted) {
+        id = 'download';
       }
+      const click = () => {
+        if (!this.focusLeaf || this.focusLeaf.playerName !== leaf.playerName) {
+          this.setSolveLeaf(leaf);
+          this.modelService.selectSolveLeaf(leaf);
+        } else {
+          this.haveAGo();
+          console.log(JSON.stringify(this.focusLeaf.cards, null, 2));
+          this.guessing = true;
+        }
+      };
+      const button: Button = {
+        text: leaf.playerName || 'Nobody',
+        id,
+        tag: 'player',
+        player: leaf,
+        click,
+      };
+
+      this.gameButtons.push(button);
     }
   }
 
-  initMyhand() {
-    this.focusPlayer = undefined;
-    if (this.modelService.myPlayer?.hand) {
-      this.cards = this.modelService.myPlayer.hand.cards.slice(0, 4);
-      this.clues = this.defaultClues(this.cards);
-    }
-    this.loading = false;
+  // initMyhand(leaf:) {
 
-    this.makeButtons();
-  }
+  //   this.loading = false;
+  //   this.uiService.focusLeaf) {
+  //   this.makeButtons();
+  // }
 
-  initSolve({ player }: { player: Player }) {
-    this.focusPlayer = player;
+  setSolveLeaf(leaf: Leaf) {
+    this.router.navigateByUrl('/solve');
+    this.focusLeaf = leaf;
 
-    this.cards = player.hand.cards;
+    // this.cards = leaf.cards;
 
-    if (!player.hand.hasUI) {
+    if (!leaf.hasUI) {
       for (let i = 0; i < 5; i++) {
-        const card = this.cards[i];
+        const card = this.focusLeaf.cards[i];
         // card.dragPos = cloneDeep(this.heapPos[card.heapSlot]);
         card.guessSlot = -(i + 1);
       }
-      player.hand.hasUI = true;
-      this.modelService.updateUI(player);
+      leaf.hasUI = true;
+      this.modelService.updateLeafUI(leaf);
     }
 
-    this.clues = player.clues || [];
+    // this.clues = leaf.clues || [];
     this.makeButtons();
   }
 
   haveAGo() {
     let count = 0;
-    for (const card of this.cards) {
+    for (const card of this.focusLeaf?.cards || []) {
       card.wrong = false;
       if (card.guessSlot === undefined || card.guessSlot >= 0) {
         card.wrong =
@@ -176,55 +212,13 @@ export class UiService {
     this.showButtons = !this.showButtons;
   }
 
-  openFullscreen() {
-    const dd = document as any;
-    const elem = document.getElementById('world') as any;
-
-    if (!this.isFullScreen) {
-      console.log(' FULL SCREEN ');
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        /* Firefox */
-        elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullscreen) {
-        /* Chrome, Safari & Opera */
-        elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) {
-        /* IE/Edge */
-        elem.msRequestFullscreen();
-      }
-
-      // added thos because it was not updating the layout.
-      // setTimeout(() => {
-      //   this.video.resize(this.vidWidth, window.innerHeight);
-      //   this.appDiv.nativeElement.style.width =
-      //     window.innerWidth -
-      //     this.vidWidth -
-      //     this.dividerDiv.nativeElement.style.width +
-      //     'px';
-      // }, 1000);
-      this.isFullScreen = true;
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (dd.mozCancelFullScreen) {
-        /* Firefox */
-        dd.mozCancelFullScreen();
-      } else if (dd.webkitExitFullscreen) {
-        /* Chrome, Safari and Opera */
-        dd.webkitExitFullscreen();
-      } else if (dd.msExitFullscreen) {
-        /* IE/Edge */
-        dd.msExitFullscreen();
-      }
-      this.isFullScreen = false;
-    }
-  }
-
   handleKeyboardEvent(key: string): void {
     console.log('Key pressed globally:', key, this.focusPetal);
-    if (this.focusPetal === undefined) {
+    if (
+      this.focusPetal === undefined ||
+      this.focusLeaf === undefined ||
+      !this.setting
+    ) {
       return;
     }
 
@@ -235,12 +229,14 @@ export class UiService {
     } else if (key === 'Delete' || key === 'Backspace') {
       console.log('Delete or Backspace key pressed globally');
 
-      if (this.clues[this.focusPetal].length) {
-        this.clues[this.focusPetal] = this.clues[this.focusPetal].slice(0, -1);
+      if (this.focusLeaf.clues[this.focusPetal].length) {
+        this.focusLeaf.clues[this.focusPetal] = this.focusLeaf.clues[
+          this.focusPetal
+        ].slice(0, -1);
       }
     } else if (/^[a-zA-Z0-9\s-]$/.test(key)) {
       console.log('Printable character pressed globally:', key);
-      this.clues[this.focusPetal] += key;
+      this.focusLeaf.clues[this.focusPetal] += key;
     } else {
       return;
     }

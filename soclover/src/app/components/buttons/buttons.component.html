@@ -1,7 +1,7 @@
 <svg
   xmlns="http://www.w3.org/2000/svg"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-  width="100vw"
+  width="100%"
   height="55"
   transform-origin="0 0"
 >
@@ -9,9 +9,7 @@
     *ngIf="uiService.showButtons"
     width="100%"
     height="100%"
-    fill="pink"
-    stroke="#000"
-    stroke-width="0.5"
+    fill="transparent"
   />
   <defs>
     <!--  BUTTONS -->
@@ -38,10 +36,15 @@
     <g id="refresh" style="cursor: pointer">
       <use xlink:href="assets/icons/restart.svg#restart" />
     </g>
+
+    <g id="home" style="cursor: pointer">
+      <use xlink:href="assets/icons/home.svg#home" />
+    </g>
   </defs>
 
   <g transform="translate(15,15)">
     <text
+      *ngIf="showCloser"
       x="-3"
       y="14"
       text-anchor="middle"
@@ -56,7 +59,7 @@
     </text>
 
     <ng-container *ngIf="uiService.showButtons">
-      <ng-container *ngFor="let button of uiService.buttons; let i = index">
+      <ng-container *ngFor="let button of buttons; let i = index">
         <g
           [attr.transform]="'translate(' + 40 * (i + 0.2) + ',0)'"
           style="cursor: pointer"

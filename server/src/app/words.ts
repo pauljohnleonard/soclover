@@ -39,6 +39,7 @@ class Words {
           // console.log(`Found ${words.length} words`);
           for (let word of list) {
             word = word.trim();
+            if (word.length > 10) continue;
             word = this.capitalizeWord(word);
             if (!words[word]) {
               words[word] = true;

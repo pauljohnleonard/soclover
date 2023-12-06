@@ -1,7 +1,3 @@
-export interface User {
-  name?: string;
-}
-
 export interface Card {
   words: string[];
   slot: number;
@@ -25,10 +21,10 @@ export const cardUImembers = [
   'draggee',
 ];
 
-export type Hand = {
-  hasUI: boolean;
-  cards: Card[];
-};
+// export type Hand = {
+//   hasUI: boolean;
+//   cards: Card[];
+// };
 
 export interface Message {
   sender?: string;
@@ -44,6 +40,8 @@ export interface SocloverMessage extends Message {
   clues?: string[];
   cards?: Card[];
   playerName?: string;
+  newLeaf?: Leaf;
+  leaf?: Leaf;
 }
 
 export enum MessageType {
@@ -57,8 +55,8 @@ export enum MessageType {
   CONNECTION_LOSS = 'CONNECTION_LOSS',
   GET_MYHAND = 'GET_MYHAND',
   LOGON_OK = 'LOGON_OK',
-  SEND_CLUES = 'SEND_CLUES',
-  NEW_HAND = 'NEW_HAND',
+  SEND_LEAF_WITH_CLUES = 'SEND_LEAF_WITH_CLUES',
+  NEW_LEAF = 'NEW_LEAF',
   PATCH = 'PATCH',
   SELECT_SOLVE = 'SELECT_SOLVE',
 }
@@ -72,13 +70,15 @@ export type SocloverState = {
   stage: SocloverStageEnum;
 };
 
-export interface Player extends User {
-  name?: string;
-  hand: Hand;
-  clues?: string[];
+export interface Leaf {
+  playerName?: string;
+  cards: Card[];
+  clues: string[];
+  hasUI?: boolean;
+  submitted?: boolean;
 }
 
 export type Game = {
   focusPlayerName?: string;
-  players: Player[];
+  leafs: Leaf[];
 };

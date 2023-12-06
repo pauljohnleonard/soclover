@@ -14,6 +14,8 @@ import { CustomKeyboardComponent } from './components/custom-keyboard/custom-key
 import { ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './components/home/home.component';
 import { ButtonsComponent } from './components/buttons/buttons.component';
+
+import { LogonComponent } from './components/logon/logon.component';
 import { BoardComponent } from './components/board/board.component';
 @NgModule({
   declarations: [
@@ -22,6 +24,7 @@ import { BoardComponent } from './components/board/board.component';
     HomeComponent,
     CustomKeyboardComponent,
     ButtonsComponent,
+    LogonComponent,
     BoardComponent,
   ],
   imports: [
@@ -33,7 +36,6 @@ import { BoardComponent } from './components/board/board.component';
     MatFormFieldModule,
     ReactiveFormsModule,
     MatIconModule,
-
     RouterModule.forRoot(appRoutes, { initialNavigation: 'enabledBlocking' }),
   ],
   providers: [],

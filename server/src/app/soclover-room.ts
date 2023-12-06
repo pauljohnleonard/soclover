@@ -1,4 +1,4 @@
-import { MessageType, SocloverMessage } from '@soclover/lib-soclover';
+import { Leaf, MessageType, SocloverMessage } from '@soclover/lib-soclover';
 import { Room } from './room';
 import { RoomConnection } from './room-connection';
 import { GameController } from './game-controller';
@@ -7,7 +7,7 @@ const seedrandom = require('seedrandom');
 
 const videoUrl = `https://us02web.zoom.us/j/708254000`;
 
-export class DecryptoRoom extends Room {
+export class SocloverRoom extends Room {
   gameController: GameController;
   name: string;
 
@@ -20,17 +20,38 @@ export class DecryptoRoom extends Room {
   }
 
   playerInRoom(name: string) {
-    const existing = this.gameController.game.players.find(
-      (player) => player.name === name
+    const existing = this.gameController.game.leafs.find(
+      (leaf) => leaf.playerName === name
     );
   }
 
   processMessage(message: SocloverMessage, fromConnection: RoomConnection) {
     console.log(JSON.stringify(message));
     try {
-      const sendingPlayer = this.gameController.game.players.find(
-        (user) => user.name === message.sender
-      );
+      // const sendingPlayerName = this.connections.find(
+      //   (c) => c.playerName === message.sender
+      // );
+
+      if (message.type === MessageType.SEND_LOGON) {
+        console.log('Logon', message.sender);
+
+        if (!fromConnection.playerName) {
+          //   const newLeaaf = this.gameController.newLeaf(message.sender);
+          //   fromConnection.playerName = newLeaf;
+          // } else {
+          fromConnection.playerName = message.sender;
+        }
+
+        const logonOk: SocloverMessage = {
+          sender: 'SYSTEM',
+          type: MessageType.LOGON_OK,
+          recipient: fromConnection.playerName,
+        };
+
+        fromConnection.sendMessage(logonOk);
+
+        return;
+      }
 
       switch (message.type) {
         case MessageType.PATCH:
@@ -42,34 +63,19 @@ export class DecryptoRoom extends Room {
           this.gameController.playerLeave(message.sender);
           break;
 
-        case MessageType.NEW_HAND:
-          this.gameController.newGame(message.sender);
+        case MessageType.NEW_LEAF:
+          {
+            const newLeaf: Leaf = this.gameController.newLeaf(message.sender);
+            message.newLeaf = newLeaf;
+            message.clientID = null;
+            fromConnection.sendMessage(message);
+          }
           break;
 
         case MessageType.SELECT_SOLVE:
           this.gameController.setFocusPlayer(message);
           this.broadcastOthers(message, fromConnection);
           return;
-
-        case MessageType.SEND_LOGON:
-          {
-            console.log('Logon', message.sender);
-            if (!sendingPlayer) {
-              const newPlayer = this.gameController.newPlayer(message.sender);
-              fromConnection.player = newPlayer;
-            } else {
-              fromConnection.player = sendingPlayer;
-            }
-
-            const logonOk: SocloverMessage = {
-              sender: 'SYSTEM',
-              type: MessageType.LOGON_OK,
-              recipient: fromConnection.player.name,
-            };
-
-            fromConnection.sendMessage(logonOk);
-          }
-          break;
 
         case MessageType.GET_STATE:
           this.broadcastStateToConection(fromConnection);
@@ -85,8 +91,8 @@ export class DecryptoRoom extends Room {
 
           break;
 
-        case MessageType.SEND_CLUES:
-          this.gameController.setClues(message);
+        case MessageType.SEND_LEAF_WITH_CLUES:
+          this.gameController.addLeafToGame(message);
           break;
 
         case MessageType.RESET:
@@ -111,7 +117,7 @@ export class DecryptoRoom extends Room {
     this.broadcastAll(reset);
 
     this.connections.forEach((c) => {
-      c.player = undefined;
+      c.playerName = undefined;
     });
 
     console.log(' NEW GAME -----------------------------------------------  ');

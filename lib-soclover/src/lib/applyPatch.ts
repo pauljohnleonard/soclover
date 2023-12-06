@@ -1,8 +1,8 @@
 import { Game, SocloverMessage } from './classes';
 
 export function applyPatch(message: SocloverMessage, game: Game) {
-  const player = game.players.find(
-    (player) => player.name === message.playerName
+  const player = game.leafs.find(
+    (player) => player.playerName === message.playerName
   );
 
   if (!player) {
@@ -10,7 +10,7 @@ export function applyPatch(message: SocloverMessage, game: Game) {
   }
 
   for (const patchCard of message.cards || []) {
-    const card = player.hand.cards.find((card) => card.slot === patchCard.slot);
+    const card = player.cards.find((card) => card.slot === patchCard.slot);
 
     if (!card) {
       return;
@@ -21,5 +21,5 @@ export function applyPatch(message: SocloverMessage, game: Game) {
     }
   }
 
-  player.hand.hasUI = true;
+  player.hasUI = true;
 }

@@ -1,10 +1,10 @@
-import { Card, Hand, Player } from '@soclover/lib-soclover';
+import { Card, Leaf } from '@soclover/lib-soclover';
 
 export type Button = {
   text: string;
   id: string;
   tag: string;
-  player: Player | null;
+  player: Leaf | null;
   click: () => void;
 };
 

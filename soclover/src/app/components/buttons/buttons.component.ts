@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { UiService } from '../../ui.service';
+import { Button } from '../leaf/leafData';
 
 @Component({
   selector: 'soclover-buttons',
@@ -10,5 +11,7 @@ import { UiService } from '../../ui.service';
 export class ButtonsComponent {
   buttonFontSize = '10px';
 
+  @Input() buttons: Button[] = [];
+  @Input() showCloser = false;
   constructor(public uiService: UiService) {}
 }

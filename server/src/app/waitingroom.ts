@@ -1,11 +1,11 @@
 import { SocloverMessage, MessageType } from '@soclover/lib-soclover';
 
-import { DecryptoRoom } from './soclover-room';
+import { SocloverRoom } from './soclover-room';
 import { Room } from './room';
 import { RoomConnection } from './room-connection';
 
 export class WaitingRoom extends Room {
-  decryptorooms: { [name: string]: DecryptoRoom } = {};
+  decryptorooms: { [name: string]: SocloverRoom } = {};
 
   constructor() {
     super();
@@ -18,7 +18,7 @@ export class WaitingRoom extends Room {
           console.log('Logon', message.sender);
           if (!this.decryptorooms[message.room]) {
             console.log(' NEW ROOM ', message.room);
-            this.decryptorooms[message.room] = new DecryptoRoom(message.room);
+            this.decryptorooms[message.room] = new SocloverRoom(message.room);
           }
 
           fromConnection.room = this.decryptorooms[message.room];
