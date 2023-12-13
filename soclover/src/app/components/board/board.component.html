@@ -1,12 +1,7 @@
 <div class="slover">
   <div class="top-container">
     <soclover-leaf class="leaf"> </soclover-leaf>
-    <soclover-buttons
-      class="buttons"
-      [buttons]="
-        uiService.setting ? uiService.solveButtons : uiService.myButtons
-      "
-    >
+    <soclover-buttons class="buttons" [buttons]="uiService.leafViewButtons">
     </soclover-buttons>
     <soclover-custom-keyboard
       class="keyboard"

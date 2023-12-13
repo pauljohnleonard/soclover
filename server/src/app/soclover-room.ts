@@ -49,8 +49,6 @@ export class SocloverRoom extends Room {
         };
 
         fromConnection.sendMessage(logonOk);
-
-        return;
       }
 
       switch (message.type) {
@@ -63,13 +61,16 @@ export class SocloverRoom extends Room {
           this.gameController.playerLeave(message.sender);
           break;
 
-        case MessageType.NEW_LEAF:
-          {
-            const newLeaf: Leaf = this.gameController.newLeaf(message.sender);
-            message.newLeaf = newLeaf;
-            message.clientID = null;
-            fromConnection.sendMessage(message);
-          }
+        case MessageType.NEW_LEAF: {
+          const newLeaf: Leaf = this.gameController.newLeaf(message.sender);
+          message.newLeaf = newLeaf;
+          message.clientID = null;
+          fromConnection.sendMessage(message);
+          return;
+        }
+
+        case MessageType.NEW_GAME:
+          this.gameController.newGame();
           break;
 
         case MessageType.SELECT_SOLVE:
@@ -81,23 +82,23 @@ export class SocloverRoom extends Room {
           this.broadcastStateToConection(fromConnection);
           break;
 
-        case MessageType.SEED:
-          seedrandom(message.seed, { global: true });
-          console.log(
-            ' ---------------------------------------------------------------------  SEED>',
-            message.seed,
-            '<'
-          );
+        // case MessageType.SEED:
+        //   seedrandom(message.seed, { global: true });
+        //   console.log(
+        //     ' ---------------------------------------------------------------------  SEED>',
+        //     message.seed,
+        //     '<'
+        //   );
 
-          break;
+        //   break;
 
         case MessageType.SEND_LEAF_WITH_CLUES:
           this.gameController.addLeafToGame(message);
           break;
 
-        case MessageType.RESET:
-          this.reset();
-          break;
+        // case MessageType.RESET:
+        //   this.reset();
+        //   break;
       }
 
       // Fall through if state has changed and you want to broadcast it
@@ -107,22 +108,22 @@ export class SocloverRoom extends Room {
     }
   }
 
-  reset() {
-    const reset: SocloverMessage = {
-      sender: 'SYSTEM',
-      type: MessageType.RESET,
-      // seed: Math.random(),
-    };
+  // reset() {
+  //   const reset: SocloverMessage = {
+  //     sender: 'SYSTEM',
+  //     type: MessageType.RESET,
+  //     // seed: Math.random(),
+  //   };
 
-    this.broadcastAll(reset);
+  //   this.broadcastAll(reset);
 
-    this.connections.forEach((c) => {
-      c.playerName = undefined;
-    });
+  //   this.connections.forEach((c) => {
+  //     c.playerName = undefined;
+  //   });
 
-    console.log(' NEW GAME -----------------------------------------------  ');
-    this.gameController.newGame();
-  }
+  //   console.log(' NEW GAME -----------------------------------------------  ');
+  //   this.gameController.newGame();
+  // }
 
   broadcastStateToAll() {
     for (const c of this.connections) {

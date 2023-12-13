@@ -9,7 +9,7 @@ import { ModelService } from '../../model/model.service';
 import { Card, Leaf } from '@soclover/lib-soclover';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { LeafData } from './leafData';
+import { leafData } from '../../leafData';
 import {
   animate,
   keyframes,
@@ -40,14 +40,16 @@ import { LayoutService } from '../../layout.service';
     ]),
   ],
 })
-export class LeafComponent extends LeafData implements OnInit, OnDestroy {
+export class LeafComponent implements OnInit, OnDestroy {
+  leafData = leafData;
   dragCard!: Card | null;
-
+  containerScale!: string;
   isDragging = false;
   initialX!: number;
   initialY!: number;
   dragElement: any;
   timer: any;
+  petalMainTranslate = `translate(0, 68)`;
 
   constructor(
     public modelService: ModelService,
@@ -55,9 +57,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
     public layoutService: LayoutService,
     private spinner: NgxSpinnerService,
     public uiService: UiService
-  ) {
-    super();
-  }
+  ) {}
 
   ngOnInit() {
     this.layoutService.subject$
@@ -75,15 +75,15 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
     const scaleFactor = Math.min(
-      viewportWidth / this.boardWidth,
-      viewportHeight / this.boardHeight
+      viewportWidth / leafData.boardWidth,
+      viewportHeight / leafData.boardHeight
     );
     this.containerScale = `scale(${scaleFactor})`;
-    this.dragScaleFactor = 1.0 / scaleFactor;
+    leafData.dragScaleFactor = 1.0 / scaleFactor;
 
     // console.log('scaleFactor', scaleFactor);
     // console.log('viewportHeight', viewportHeight);
-    // console.log('this.boardHeight', this.boardHeight);
+    // console.log('leafData.boardHeight', leafData.boardHeight);
     this.petalMainTranslate = `translate(0, 118)`;
   }
 
@@ -102,9 +102,9 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
       } else {
         return (
           'translate(' +
-          this.heapPos[card.heapSlot].x +
+          leafData.heapPos[card.heapSlot].x +
           ',' +
-          this.heapPos[card.heapSlot].y +
+          leafData.heapPos[card.heapSlot].y +
           ')'
         );
       }
@@ -180,7 +180,7 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
 
     if (card && cmd === 'bin') {
       card.guessSlot = -1;
-      card.dragPos = this.heapPos[card.heapSlot];
+      card.dragPos = leafData.heapPos[card.heapSlot];
       card.wrong = false;
     } else if (card && cmd === 'spin') {
       console.log('spin', card);
@@ -292,16 +292,16 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
       this.dragCard.guessSlot = zone;
       this.dragCard.guessOrientation -= zone || 0;
       this.dragCard.guessOrientation = (this.dragCard.guessOrientation + 4) % 4;
-      const bin = this.tools.find((bin) => bin.card === this.dragCard);
+      const bin = leafData.tools.find((bin) => bin.card === this.dragCard);
       if (bin) {
         bin.card = null;
       }
     } else {
-      this.dragCard.dragPos = this.heapPos[this.dragCard.heapSlot];
+      this.dragCard.dragPos = leafData.heapPos[this.dragCard.heapSlot];
     }
 
     if (this.dragCard.guessSlot !== undefined) {
-      this.tools[this.dragCard.guessSlot].card = this.dragCard;
+      leafData.tools[this.dragCard.guessSlot].card = this.dragCard;
     }
     this.dragCard.draggee = '';
     this.modelService.updateLeafUI(this.uiService.focusLeaf);
@@ -365,11 +365,11 @@ export class LeafComponent extends LeafData implements OnInit, OnDestroy {
     if (this.dragCard && this.uiService.focusLeaf) {
       this.dragCard.dragPos = {
         x:
-          (this.heapPos[this.dragCard.heapSlot]?.x || 0) +
-          deltaX * this.dragScaleFactor,
+          (leafData.heapPos[this.dragCard.heapSlot]?.x || 0) +
+          deltaX * leafData.dragScaleFactor,
         y:
-          (this.heapPos[this.dragCard.heapSlot].y || 0) +
-          deltaY * this.dragScaleFactor,
+          (leafData.heapPos[this.dragCard.heapSlot].y || 0) +
+          deltaY * leafData.dragScaleFactor,
       };
       this.modelService.updateLeafUI(this.uiService.focusLeaf);
     }

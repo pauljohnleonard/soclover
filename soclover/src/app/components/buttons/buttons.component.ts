@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 import { UiService } from '../../ui.service';
-import { Button } from '../leaf/leafData';
+import { Button, leafData } from '../../leafData';
 
 @Component({
   selector: 'soclover-buttons',
@@ -14,4 +14,12 @@ export class ButtonsComponent {
   @Input() buttons: Button[] = [];
   @Input() showCloser = false;
   constructor(public uiService: UiService) {}
+
+  buttonTransform(button: Button, i: number): string {
+    if (!button.right) {
+      return 'translate(' + 40 * (i + 0.2) + ',0)';
+    }
+
+    return `translate(${leafData.boardWidth - 40},0)`;
+  }
 }

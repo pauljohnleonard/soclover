@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Button } from './components/leaf/leafData';
+import { Button } from './leafData';
 import { ModelService } from './model/model.service';
 import { Card, Leaf } from '@soclover/lib-soclover';
 import { Router } from '@angular/router';
@@ -13,13 +13,13 @@ export class UiService {
   // cards: Card[] = [];
   loading = true;
 
-  gameButtons: Button[] = [];
-  myButtons: Button[] = [];
-  solveButtons: Button[] = [];
+  homeButtons: Button[] = [];
+  private myButtons: Button[] = [];
 
   focusPetal: number | undefined;
   focusLeaf!: Leaf | undefined;
   setting = true;
+  backButton!: Button;
 
   constructor(public modelService: ModelService, public router: Router) {
     this.modelService.subject$.subscribe((message) => {
@@ -78,8 +78,10 @@ export class UiService {
     this.modelService.newLeaf().subscribe((leaf) => {
       this.focusLeaf = leaf;
       this.setting = true;
+      this.router.navigateByUrl('/makeleaf');
     });
   }
+
   // initSolve() {
   //   this.setting = false;
   //   this.focusLeaf = undefined;
@@ -87,27 +89,24 @@ export class UiService {
 
   makeButtons() {
     console.log('makeButtons', this.focusLeaf);
-    this.gameButtons = [];
+    this.homeButtons = [];
     this.myButtons = [];
 
-    const backButton: Button = {
+    this.backButton = {
       text: '',
       id: 'home',
-      tag: 'home',
       click: () => {
         this.router.navigateByUrl('/home');
       },
       player: null,
     };
 
-    this.myButtons = [backButton];
-    this.solveButtons = [backButton];
+    this.myButtons = [this.backButton];
 
     if (this.focusLeaf?.clues?.filter((c) => !!c).length === 4) {
       this.myButtons.push({
         text: 'Submit',
         id: 'upload',
-        tag: 'upload',
         player: null,
         click: () => {
           this.focusLeaf ? this.modelService.uploadLeaf(this.focusLeaf) : null;
@@ -118,43 +117,58 @@ export class UiService {
       });
     }
 
+    for (const leaf of this.modelService.game?.leafs || []) {
+      const click = () => {
+        this.setSolveLeaf(leaf);
+        this.modelService.selectSolveLeafBroadcast(leaf);
+      };
+      const button: Button = {
+        text: leaf.playerName || 'Nobody',
+        id: 'download',
+        player: leaf,
+        click,
+      };
+
+      this.homeButtons.push(button);
+    }
     this.myButtons.push({
       text: 'New',
       id: 'refresh',
-      tag: 'refresh',
       player: null,
       click: () => {
         this.makeNewLeaf();
       },
     });
 
-    for (const leaf of this.modelService.game?.leafs || []) {
-      let id = 'thinking';
-      if (leaf.playerName === this.focusLeaf?.playerName) {
-        id = 'solving';
-      } else if (leaf.submitted) {
-        id = 'download';
-      }
-      const click = () => {
-        if (!this.focusLeaf || this.focusLeaf.playerName !== leaf.playerName) {
-          this.setSolveLeaf(leaf);
-          this.modelService.selectSolveLeaf(leaf);
-        } else {
-          this.haveAGo();
-          console.log(JSON.stringify(this.focusLeaf.cards, null, 2));
-          this.guessing = true;
-        }
-      };
-      const button: Button = {
-        text: leaf.playerName || 'Nobody',
-        id,
-        tag: 'player',
-        player: leaf,
-        click,
-      };
+    this.homeButtons.push({
+      text: 'New Game',
+      id: 'replay',
+      player: null,
+      right: true,
+      click: () => {
+        this.modelService.newGame();
+      },
+    });
+  }
 
-      this.gameButtons.push(button);
-    }
+  get solveButtons() {
+    const buttons: Button[] = [this.backButton];
+
+    const but: Button = {
+      text: 'Guess',
+      id: 'solving',
+      player: null,
+      disabled: !this.canGuess(),
+      click: () => {
+        this.haveAGo();
+        // console.log(JSON.stringify(this.focusLeaf.cards, null, 2));
+        this.guessing = true;
+      },
+    };
+
+    buttons.push(but);
+
+    return buttons;
   }
 
   // initMyhand(leaf:) {
@@ -167,7 +181,7 @@ export class UiService {
   setSolveLeaf(leaf: Leaf) {
     this.router.navigateByUrl('/solve');
     this.focusLeaf = leaf;
-
+    this.focusPetal = undefined;
     // this.cards = leaf.cards;
 
     if (!leaf.hasUI) {
@@ -182,6 +196,14 @@ export class UiService {
 
     // this.clues = leaf.clues || [];
     this.makeButtons();
+  }
+
+  canGuess(): boolean {
+    return (
+      this.focusLeaf?.cards.filter(
+        (c) => c.guessSlot !== undefined && c.guessSlot >= 0
+      ).length === 4
+    );
   }
 
   haveAGo() {
@@ -208,6 +230,13 @@ export class UiService {
     // ];
   }
 
+  get leafViewButtons() {
+    if (this.setting) {
+      return this.myButtons;
+    } else {
+      return this.solveButtons;
+    }
+  }
   toggleButtons() {
     this.showButtons = !this.showButtons;
   }

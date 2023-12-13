@@ -1,8 +1,8 @@
 <svg
   xmlns="http://www.w3.org/2000/svg"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-  [attr.width]="boardWidth"
-  [attr.height]="boardHeight"
+  [attr.width]="leafData.boardWidth"
+  [attr.height]="leafData.boardHeight"
   transform-origin="0 0"
   [attr.transform]="containerScale"
   (mousemove)="!isTouch ? mouseMove($event) : null"
@@ -71,24 +71,30 @@
     </g>
 
     <!-- PETAL -->
-    <circle id="mycircle" [attr.cx]="cx" cy="0" [attr.r]="rad" fill="#390" />
+    <circle
+      id="mycircle"
+      [attr.cx]="leafData.cx"
+      cy="0"
+      [attr.r]="leafData.rad"
+      fill="#390"
+    />
 
     <g id="petal">
-      <g [attr.transform]="'translate(0, ' + tweakY + ')'">
+      <g [attr.transform]="'translate(0, ' + leafData.tweakY + ')'">
         <use xlink:href="#mycircle" />
       </g>
-      <g [attr.transform]="'translate(0,  -' + tweakY + ')'">
+      <g [attr.transform]="'translate(0,  -' + leafData.tweakY + ')'">
         <use xlink:href="#mycircle" />
       </g>
     </g>
 
-    <g [attr.transform]="petalTextTransform" id="textbox">
+    <g [attr.transform]="leafData.petalTextTransform" id="textbox">
       <rect
         x="0"
         y="0"
         fill="#4A1"
-        [attr.width]="petalTextWidth"
-        [attr.height]="petalTextHeight"
+        [attr.width]="leafData.petalTextWidth"
+        [attr.height]="leafData.petalTextHeight"
         style="cursor: text"
         rx="5"
       />
@@ -97,20 +103,24 @@
     <!-- CARDS -->
     <g id="card">
       <rect
-        [attr.x]="cardPad"
-        [attr.y]="cardPad"
-        [attr.width]="cardWidth - cardPad"
-        [attr.height]="cardWidth - cardPad"
-        [attr.rx]="cardRad"
+        [attr.x]="leafData.cardPad"
+        [attr.y]="leafData.cardPad"
+        [attr.width]="leafData.cardWidth - leafData.cardPad"
+        [attr.height]="leafData.cardWidth - leafData.cardPad"
+        [attr.rx]="leafData.cardRad"
         fill="#fff"
       />
 
       <rect
-        [attr.x]="cardPad + holeBorder"
-        [attr.y]="cardPad + holeBorder"
-        [attr.width]="cardWidth - cardPad - holeBorder * 2"
-        [attr.height]="cardWidth - cardPad - holeBorder * 2"
-        [attr.rx]="cardRad"
+        [attr.x]="leafData.cardPad + leafData.holeBorder"
+        [attr.y]="leafData.cardPad + leafData.holeBorder"
+        [attr.width]="
+          leafData.cardWidth - leafData.cardPad - leafData.holeBorder * 2
+        "
+        [attr.height]="
+          leafData.cardWidth - leafData.cardPad - leafData.holeBorder * 2
+        "
+        [attr.rx]="leafData.cardRad"
         fill="#366e39"
         [attr.style]="focusPlayer ? 'cursor:grab' : 'default'"
       />
@@ -118,11 +128,11 @@
 
     <g id="dropZone">
       <rect
-        [attr.x]="cardPad"
-        [attr.y]="cardPad"
-        [attr.width]="cardWidth - cardPad"
-        [attr.height]="cardWidth - cardPad"
-        [attr.rx]="cardRad"
+        [attr.x]="leafData.cardPad"
+        [attr.y]="leafData.cardPad"
+        [attr.width]="leafData.cardWidth - leafData.cardPad"
+        [attr.height]="leafData.cardWidth - leafData.cardPad"
+        [attr.rx]="leafData.cardRad"
         fill="#366e39"
       />
     </g>
@@ -133,7 +143,7 @@
   <g [attr.transform]="petalMainTranslate">
     <g [attr.transform]="'translate(120 120)'">
       <g transform="rotate(45)">
-        <ng-container *ngFor="let petalData of petalDatas">
+        <ng-container *ngFor="let petalData of leafData.petalDatas">
           <g
             [attr.transform]="petalData.rotate"
             (click)="setting ? selectPetal(petalData.i, $event) : null"
@@ -143,24 +153,26 @@
             <ng-container *ngIf="leaf">
               <use
                 xlink:href="#textbox"
-                [attr.stroke]="focusPetal === petalData.i ? 'black' : null"
+                [attr.stroke]="
+                  setting && focusPetal === petalData.i ? 'black' : null
+                "
                 stroke-width="0.3"
               />
               <text
-                [attr.x]="petalTextWidth / 2"
-                [attr.y]="petalTextHeight / 2"
+                [attr.x]="leafData.petalTextWidth / 2"
+                [attr.y]="leafData.petalTextHeight / 2"
                 [attr.transform]="petalData.transform"
                 text-anchor="middle"
                 dominant-baseline="middle"
                 fill="black"
-                [attr.font-size]="clueFontSize"
+                [attr.font-size]="leafData.clueFontSize"
                 font-family="Arial"
                 font-weight="600"
               >
                 {{ leaf.clues[petalData.i] }}
                 <tspan
                   class="blink-animation"
-                  *ngIf="focusPetal === petalData.i"
+                  *ngIf="setting && focusPetal === petalData.i"
                   fill="#fff"
                 >
                   &#9611;
@@ -170,12 +182,12 @@
           </g>
         </ng-container>
 
-        <circle cx="0" cy="0" [attr.r]="rHub" fill="#390" />
+        <circle cx="0" cy="0" [attr.r]="leafData.rHub" fill="#390" />
       </g>
     </g>
 
     <g [attr.transform]="'translate(120 120)'">
-      <ng-container *ngFor="let slot of dropZones">
+      <ng-container *ngFor="let slot of leafData.dropZones">
         <g
           (mouseup)="focusPlayer && !isTouch ? mouseUpDrop($event, slot) : null"
         >
@@ -216,13 +228,13 @@
                       'rotate(' +
                       (word_i + card.guessOrientation) * 90 +
                       ' ' +
-                      (cardPad + cardWidth) / 2 +
+                      (leafData.cardPad + leafData.cardWidth) / 2 +
                       ' ' +
-                      (cardPad + cardWidth) / 2 +
+                      (leafData.cardPad + leafData.cardWidth) / 2 +
                       ') translate(' +
-                      (cardPad + cardWidth / 2) +
+                      (leafData.cardPad + leafData.cardWidth / 2) +
                       ',' +
-                      wordNudgeIn +
+                      leafData.wordNudgeIn +
                       ')'
                     "
                   >
@@ -233,7 +245,7 @@
                       text-anchor="middle"
                       dominant-baseline="middle"
                       fill="black"
-                      [attr.font-size]="cardFontSize"
+                      [attr.font-size]="leafData.cardFontSize"
                       font-family="Arial"
                       font-weight="600"
                     >
@@ -258,15 +270,15 @@
           >
             <use
               xlink:href="#bin"
-              [attr.x]="tools[card.guessSlot].binX"
-              [attr.y]="tools[card.guessSlot].binY"
+              [attr.x]="leafData.tools[card.guessSlot].binX"
+              [attr.y]="leafData.tools[card.guessSlot].binY"
               (click)="toolClick(card, 'bin')"
             />
 
             <use
               xlink:href="#spin"
-              [attr.x]="tools[card.guessSlot].spinX"
-              [attr.y]="tools[card.guessSlot].spinY"
+              [attr.x]="leafData.tools[card.guessSlot].spinX"
+              [attr.y]="leafData.tools[card.guessSlot].spinY"
               (click)="toolClick(card, 'spin')"
             />
           </g>

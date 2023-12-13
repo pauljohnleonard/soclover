@@ -18,7 +18,7 @@ import { cloneDeep } from 'lodash';
 export class ModelService {
   lastUpdate = 0;
   timer: any;
-  debounce = 200;
+  debounce = 500;
 
   subject$ = new BehaviorSubject<SocloverMessage | null>(null);
   game: Game | undefined;
@@ -75,7 +75,7 @@ export class ModelService {
     });
   }
 
-  selectSolveLeaf(leaf: Leaf) {
+  selectSolveLeafBroadcast(leaf: Leaf) {
     const mess: SocloverMessage = {
       playerName: leaf.playerName,
       type: MessageType.SELECT_SOLVE,
@@ -149,6 +149,14 @@ export class ModelService {
     this.connection.doSend(message);
 
     return this.newLeafSubject$;
+  }
+
+  async newGame() {
+    const message: SocloverMessage = {
+      type: MessageType.NEW_GAME,
+    };
+
+    await this.connection.doSend(message);
   }
 
   get name() {

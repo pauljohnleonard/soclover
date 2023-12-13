@@ -29,6 +29,10 @@
       <use xlink:href="assets/icons/question_mark.svg#question_mark" />
     </g>
 
+    <g id="replay">
+      <use xlink:href="assets/icons/replay.svg#replay" />
+    </g>
+
     <g id="upload">
       <use xlink:href="assets/icons/upload.svg#upload" />
     </g>
@@ -61,9 +65,9 @@
     <ng-container *ngIf="uiService.showButtons">
       <ng-container *ngFor="let button of buttons; let i = index">
         <g
-          [attr.transform]="'translate(' + 40 * (i + 0.2) + ',0)'"
-          style="cursor: pointer"
-          (click)="button.click()"
+          [attr.transform]="buttonTransform(button, i)"
+          [attr.style.cursor]="button.disabled ? null : 'pointer'"
+          (click)="button.disabled ? null : button.click()"
         >
           <rect
             width="30"
@@ -72,6 +76,7 @@
             fill="#fff"
             stroke="#000"
             stroke-width="0.5"
+            [attr.fill]="button.disabled ? 'grey' : 'white'"
           />
           <use [attr.xlink:href]="'#' + button.id" x="3" y="3" />
           <text
