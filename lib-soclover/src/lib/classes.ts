@@ -19,6 +19,7 @@ export const cardUImembers = [
   'guessOrientation',
   'guessSlot',
   'draggee',
+  'wrong',
 ];
 
 // export type Hand = {
@@ -83,5 +84,5 @@ export interface Leaf {
 
 export type Game = {
   focusPlayerName?: string;
-  leafs: Leaf[];
+  leaves: Leaf[];
 };

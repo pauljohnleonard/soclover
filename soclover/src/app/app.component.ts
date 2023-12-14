@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { LayoutService } from './layout.service';
 
 @Component({
   selector: 'soclover-root',
@@ -7,4 +8,6 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'soclover';
+
+  constructor(public layoutService: LayoutService) {}
 }

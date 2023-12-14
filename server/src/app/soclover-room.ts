@@ -20,7 +20,7 @@ export class SocloverRoom extends Room {
   }
 
   playerInRoom(name: string) {
-    const existing = this.gameController.game.leafs.find(
+    const existing = this.gameController.game.leaves.find(
       (leaf) => leaf.playerName === name
     );
   }

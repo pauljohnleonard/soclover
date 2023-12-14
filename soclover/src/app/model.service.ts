@@ -24,7 +24,7 @@ export class ModelService {
   game: Game | undefined;
   myPlayer?: Leaf;
 
-  newLeafSubject$ = new Subject<Leaf>();
+  newleavesubject$ = new Subject<Leaf>();
   activePlayers: string[] | undefined;
 
   constructor(public connection: ConnectionService, public router: Router) {
@@ -39,7 +39,7 @@ export class ModelService {
         case MessageType.STATE:
           // console.log('STATE CHANGE', messageTyped.game);
           this.game = message.game;
-          this.myPlayer = this.game?.leafs.find(
+          this.myPlayer = this.game?.leaves.find(
             (player) => player.playerName === this?.name
           );
 
@@ -74,7 +74,7 @@ export class ModelService {
           break;
 
         case MessageType.NEW_LEAF:
-          message.newLeaf ? this.newLeafSubject$.next(message.newLeaf) : null;
+          message.newLeaf ? this.newleavesubject$.next(message.newLeaf) : null;
           break;
       }
     });
@@ -153,7 +153,7 @@ export class ModelService {
     };
     this.connection.doSend(message);
 
-    return this.newLeafSubject$;
+    return this.newleavesubject$;
   }
 
   async newGame() {

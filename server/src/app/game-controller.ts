@@ -26,7 +26,7 @@ export class GameController {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   newGame() {
-    this.game = { leafs: [] };
+    this.game = { leaves: [] };
   }
 
   setPatch(message: SocloverMessage) {
@@ -36,13 +36,13 @@ export class GameController {
 
   async addLeafToGame(message: SocloverMessage) {
     message.leaf.submitted = true;
-    this.game.leafs.push(message.leaf);
+    this.game.leaves.push(message.leaf);
 
     await MongoDB.instance.saveHand(message.leaf);
   }
 
   playerLeave(name: string) {
-    this.game.leafs = this.game.leafs.filter(
+    this.game.leaves = this.game.leaves.filter(
       (item) => item.playerName !== name
     );
   }
@@ -60,7 +60,7 @@ export class GameController {
   }
 
   leafFromPlayerName(name: string): Leaf {
-    for (const leaf of this.game.leafs) {
+    for (const leaf of this.game.leaves) {
       if (leaf.playerName === name) {
         return leaf;
       }

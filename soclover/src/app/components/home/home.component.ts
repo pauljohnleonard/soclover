@@ -54,7 +54,7 @@ export class HomeComponent implements OnInit {
 
   get puzzleButtons() {
     const buttons: Button[] = [];
-    for (const leaf of this.modelService.game?.leafs || []) {
+    for (const leaf of this.modelService.game?.leaves || []) {
       const click = () => {
         this.uiService.setSolveLeaf(leaf);
         this.modelService.selectSolveLeafBroadcast(leaf);

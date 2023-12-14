@@ -1,7 +1,7 @@
 import { Game, SocloverMessage } from './classes';
 
 export function applyPatch(message: SocloverMessage, game: Game) {
-  const player = game.leafs.find(
+  const player = game.leaves.find(
     (player) => player.playerName === message.playerName
   );
 

@@ -35,7 +35,7 @@ export class UiService {
 
       // Update the focus player
       // if (this.focusLeaf) {
-      //   const x = this.modelService.game?.leafs.find(
+      //   const x = this.modelService.game?.leaves.find(
       //     (player) => player.playerName === this.focusLeaf?.playerName
       //   );
 
@@ -56,7 +56,7 @@ export class UiService {
           !this.setting &&
           message.playerName !== this.focusLeaf?.playerName
         ) {
-          const realPlayer = this.modelService.game?.leafs.find(
+          const realPlayer = this.modelService.game?.leaves.find(
             (player) => player.playerName === message.playerName
           );
           if (realPlayer) {
@@ -88,8 +88,8 @@ export class UiService {
     const buttons: Button[] = [this.backButton];
 
     const but: Button = {
-      text: 'Guess',
-      id: 'solving',
+      text: '',
+      id: 'question_mark',
       leaf: null,
       disabled: !this.canGuess(),
       click: () => {
@@ -165,6 +165,9 @@ export class UiService {
         count++;
       }
     }
+
+    this.modelService.updateLeafUI(this.focusLeaf as Leaf);
+
     console.log('count', count);
   }
 

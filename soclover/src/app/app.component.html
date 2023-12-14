@@ -4,7 +4,18 @@
   </div>
   <div #divider class="divider"></div>
   <div class="video" #video></div>
-  <!-- <button mat-icon-button class="fullscreen" (click)="openFullscreen()">
-    <mat-icon> {{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
-  </button> -->
+  <div
+    mat-flat-button
+    class="fullscreen"
+    (click)="layoutService.openFullscreen()"
+  >
+    <img
+      *ngIf="!layoutService.isFullScreen"
+      src="/assets/icons/fullscreen.svg"
+    />
+    <img
+      *ngIf="layoutService.isFullScreen"
+      src="/assets/icons/fullscreen_exit.svg"
+    />
+  </div>
 </div>

@@ -51,11 +51,13 @@
 .player-container {
   margin-left: 20px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
   width: 100%;
 }
 
 .player {
-  background-color: white;
+  background-color: rgb(164, 249, 156);
   border: 1px solid black;
   border-radius: 5px;
   padding: 0px 4px;
