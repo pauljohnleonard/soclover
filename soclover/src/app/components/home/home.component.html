@@ -3,12 +3,4 @@
 
   <soclover-buttons class="buttons" [buttons]="uiService.homeButtons">
   </soclover-buttons>
-
-  <div *ngIf="!modelService.myPlayer?.clues">
-    <p>You have not made a leaf</p>
-
-    <button mat-raised-button (click)="uiService.makeNewLeaf()">
-      Make Leaf
-    </button>
-  </div>
 </div>

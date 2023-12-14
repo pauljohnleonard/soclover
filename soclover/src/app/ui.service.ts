@@ -10,11 +10,7 @@ import { Router } from '@angular/router';
 export class UiService {
   showButtons = true;
   guessing = false;
-  // cards: Card[] = [];
   loading = true;
-
-  homeButtons: Button[] = [];
-  private myButtons: Button[] = [];
 
   focusPetal: number | undefined;
   focusLeaf!: Leaf | undefined;
@@ -52,17 +48,15 @@ export class UiService {
           !this.setting &&
           message.playerName !== this.focusLeaf?.playerName
         ) {
-          // const realPlayer = this.modelService.game?.leafs.find(
-          //   (player) => player.playerName === message.playerName
-          // );
-          // if (realPlayer) {
-          //   this.focusLeaf = realPlayer;
-          //   this.setSolveLeaf(this.focusLeaf);
-          // }
+          const realPlayer = this.modelService.game?.leafs.find(
+            (player) => player.playerName === message.playerName
+          );
+          if (realPlayer) {
+            this.focusLeaf = realPlayer;
+            this.setSolveLeaf(this.focusLeaf);
+          }
         }
       }
-
-      this.makeButtons();
     });
   }
 
@@ -82,41 +76,8 @@ export class UiService {
     });
   }
 
-  // initSolve() {
-  //   this.setting = false;
-  //   this.focusLeaf = undefined;
-  // }
-
-  makeButtons() {
-    console.log('makeButtons', this.focusLeaf);
-    this.homeButtons = [];
-    this.myButtons = [];
-
-    this.backButton = {
-      text: '',
-      id: 'home',
-      click: () => {
-        this.router.navigateByUrl('/home');
-      },
-      player: null,
-    };
-
-    this.myButtons = [this.backButton];
-
-    if (this.focusLeaf?.clues?.filter((c) => !!c).length === 4) {
-      this.myButtons.push({
-        text: 'Submit',
-        id: 'upload',
-        player: null,
-        click: () => {
-          this.focusLeaf ? this.modelService.uploadLeaf(this.focusLeaf) : null;
-          this.focusLeaf = undefined;
-          this.setting = false;
-          this.router.navigateByUrl('/home');
-        },
-      });
-    }
-
+  get puzzleButtons() {
+    const buttons: Button[] = [];
     for (const leaf of this.modelService.game?.leafs || []) {
       const click = () => {
         this.setSolveLeaf(leaf);
@@ -129,26 +90,46 @@ export class UiService {
         click,
       };
 
-      this.homeButtons.push(button);
+      buttons.push(button);
     }
-    this.myButtons.push({
-      text: 'New',
+    return buttons;
+  }
+
+  get homeButtons() {
+    const buttons: Button[] = [];
+
+    this.backButton = {
+      text: 'Home',
+      id: 'home',
+      click: () => {
+        this.router.navigateByUrl('/home');
+      },
+      player: null,
+    };
+
+    if (!this.modelService.myPlayer?.clues) {
+      buttons.push({
+        text: 'New Leaf',
+        id: 'plant',
+        player: null,
+        click: async () => {
+          await this.makeNewLeaf();
+        },
+      });
+    }
+
+    buttons.push({
+      text: 'New Game',
       id: 'refresh',
       player: null,
-      click: () => {
-        this.makeNewLeaf();
-      },
-    });
-
-    this.homeButtons.push({
-      text: 'New Game',
-      id: 'replay',
-      player: null,
       right: true,
-      click: () => {
-        this.modelService.newGame();
+      click: async () => {
+        if (confirm('Are you sure to start a new game ?')) {
+          await this.modelService.newGame();
+        }
       },
     });
+    return buttons;
   }
 
   get solveButtons() {
@@ -161,7 +142,6 @@ export class UiService {
       disabled: !this.canGuess(),
       click: () => {
         this.haveAGo();
-        // console.log(JSON.stringify(this.focusLeaf.cards, null, 2));
         this.guessing = true;
       },
     };
@@ -171,12 +151,32 @@ export class UiService {
     return buttons;
   }
 
-  // initMyhand(leaf:) {
+  get settingButtons() {
+    const buttons: Button[] = [this.backButton];
+    buttons.push({
+      text: 'New Hand',
+      id: 'compost',
+      player: null,
+      click: () => {
+        this.makeNewLeaf();
+      },
+    });
 
-  //   this.loading = false;
-  //   this.uiService.focusLeaf) {
-  //   this.makeButtons();
-  // }
+    if (this.focusLeaf?.clues?.filter((c) => !!c).length === 4) {
+      buttons.push({
+        text: 'Submit',
+        id: 'upload',
+        player: null,
+        click: () => {
+          this.focusLeaf ? this.modelService.uploadLeaf(this.focusLeaf) : null;
+          this.focusLeaf = undefined;
+          this.setting = false;
+          this.router.navigateByUrl('/home');
+        },
+      });
+    }
+    return buttons;
+  }
 
   setSolveLeaf(leaf: Leaf) {
     this.router.navigateByUrl('/solve');
@@ -187,15 +187,12 @@ export class UiService {
     if (!leaf.hasUI) {
       for (let i = 0; i < 5; i++) {
         const card = this.focusLeaf.cards[i];
-        // card.dragPos = cloneDeep(this.heapPos[card.heapSlot]);
+
         card.guessSlot = -(i + 1);
       }
       leaf.hasUI = true;
       this.modelService.updateLeafUI(leaf);
     }
-
-    // this.clues = leaf.clues || [];
-    this.makeButtons();
   }
 
   canGuess(): boolean {
@@ -221,18 +218,11 @@ export class UiService {
 
   defaultClues(cards: Card[]) {
     return ['', '', '', ''];
-
-    // return [
-    //   `${cards[0].words[1]}-${cards[3].words[2]}`,
-    //   `${cards[1].words[1]}-${cards[0].words[2]}`,
-    //   `${cards[1].words[2]}-${cards[2].words[1]}`,
-    //   `${cards[2].words[2]}-${cards[3].words[1]}`,
-    // ];
   }
 
   get leafViewButtons() {
     if (this.setting) {
-      return this.myButtons;
+      return this.settingButtons;
     } else {
       return this.solveButtons;
     }
@@ -269,7 +259,5 @@ export class UiService {
     } else {
       return;
     }
-
-    this.makeButtons();
   }
 }

@@ -37,13 +37,13 @@
       <use xlink:href="assets/icons/upload.svg#upload" />
     </g>
 
-    <g id="refresh" style="cursor: pointer">
+    <!-- <g id="refresh" style="cursor: pointer">
       <use xlink:href="assets/icons/restart.svg#restart" />
-    </g>
+    </g> -->
 
-    <g id="home" style="cursor: pointer">
-      <use xlink:href="assets/icons/home.svg#home" />
-    </g>
+    <!-- <g id="home" style="cursor: pointer">
+      <use [attr.xlink:href]="'assets/icons/home.svg#home'" />
+    </g> -->
   </defs>
 
   <g transform="translate(15,15)">
@@ -78,7 +78,13 @@
             stroke-width="0.5"
             [attr.fill]="button.disabled ? 'grey' : 'white'"
           />
-          <use [attr.xlink:href]="'#' + button.id" x="3" y="3" />
+          <use
+            [attr.xlink:href]="
+              'assets/icons/' + button.id + '.svg#' + button.id
+            "
+            x="3"
+            y="3"
+          />
           <text
             x="15"
             y="-5"
