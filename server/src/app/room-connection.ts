@@ -5,6 +5,7 @@ export class RoomConnection {
   playerName: string;
   ws: any;
   room: Room;
+  stamp: number = Date.now();
   constructor(ws, room: Room) {
     this.ws = ws;
     this.room = room;
@@ -13,6 +14,7 @@ export class RoomConnection {
       try {
         const message: SocloverMessage = JSON.parse(str);
         console.log('received: %s', str);
+        this.stamp = Date.now();
         this.room.processMessage(message, this);
       } catch (err) {
         console.error(err);

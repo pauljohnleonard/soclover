@@ -82,11 +82,6 @@ export class UiService {
     });
   }
 
-  // initSolve() {
-  //   this.setting = false;
-  //   this.focusLeaf = undefined;
-  // }
-
   makeButtons() {
     console.log('makeButtons', this.focusLeaf);
     this.homeButtons = [];
