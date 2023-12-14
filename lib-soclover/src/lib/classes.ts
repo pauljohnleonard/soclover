@@ -42,6 +42,7 @@ export interface SocloverMessage extends Message {
   playerName?: string;
   newLeaf?: Leaf;
   leaf?: Leaf;
+  activePlayers?: string[];
 }
 
 export enum MessageType {
@@ -60,6 +61,7 @@ export enum MessageType {
   PATCH = 'PATCH',
   SELECT_SOLVE = 'SELECT_SOLVE',
   NEW_GAME = 'NEW_GAME',
+  LIST_ACTIVE = 'LIST_ACTIVE',
 }
 
 export enum SocloverStageEnum {

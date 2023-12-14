@@ -1,6 +1,44 @@
 <div class="soclover top-container">
-  <h1>Players</h1>
+  <h2>Game control</h2>
 
-  <soclover-buttons class="buttons" [buttons]="uiService.homeButtons">
-  </soclover-buttons>
+  <p>
+    This button resets the current game. Only press it if you are sure you want
+    to start over.
+  </p>
+
+  <soclover-buttons class="buttons" [buttons]="topButtons"> </soclover-buttons>
+
+  <h2>Players</h2>
+
+  <p>These are the players that are currently active.</p>
+  <div class="player-container">
+    <div *ngFor="let player of modelService.activePlayers || []">
+      <div class="player">
+        {{ player }}
+      </div>
+    </div>
+  </div>
+
+  <h2>Puzzles</h2>
+
+  <ng-container *ngIf="puzzleButtons.length > 0">
+    <p>These are the leafs that have been summit. Click to go to a leaf.</p>
+    <soclover-buttons class="buttons" [buttons]="puzzleButtons">
+    </soclover-buttons>
+  </ng-container>
+
+  <div *ngIf="puzzleButtons.length === 0">
+    <p>No leafs of been submitted yet</p>
+  </div>
+
+  <ng-container *ngIf="!modelService.hasSetupLeaf()">
+    <h2>Create Leaf</h2>
+
+    CLick here create a leaf for the the curent game.
+
+    <soclover-buttons class="buttons" [buttons]="newleafButtons">
+    </soclover-buttons>
+  </ng-container>
+
+  <h2 *ngIf="modelService.hasSetupLeaf()">You have submitted your leaf</h2>
 </div>

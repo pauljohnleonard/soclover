@@ -49,6 +49,8 @@ export class SocloverRoom extends Room {
         };
 
         fromConnection.sendMessage(logonOk);
+
+        this.broadcastAll(this.listActivePlayers());
       }
 
       switch (message.type) {
@@ -57,8 +59,15 @@ export class SocloverRoom extends Room {
           this.broadcastOthers(message, fromConnection);
           return;
 
+        case MessageType.LIST_ACTIVE:
+          {
+            fromConnection.sendMessage(this.listActivePlayers());
+          }
+          return;
+
         case MessageType.SEND_LOGOUT:
           this.gameController.playerLeave(message.sender);
+          this.broadcastAll(this.listActivePlayers());
           break;
 
         case MessageType.NEW_LEAF: {
@@ -82,23 +91,9 @@ export class SocloverRoom extends Room {
           this.broadcastStateToConection(fromConnection);
           break;
 
-        // case MessageType.SEED:
-        //   seedrandom(message.seed, { global: true });
-        //   console.log(
-        //     ' ---------------------------------------------------------------------  SEED>',
-        //     message.seed,
-        //     '<'
-        //   );
-
-        //   break;
-
         case MessageType.SEND_LEAF_WITH_CLUES:
           this.gameController.addLeafToGame(message);
           break;
-
-        // case MessageType.RESET:
-        //   this.reset();
-        //   break;
       }
 
       // Fall through if state has changed and you want to broadcast it
@@ -107,23 +102,6 @@ export class SocloverRoom extends Room {
       console.error(err);
     }
   }
-
-  // reset() {
-  //   const reset: SocloverMessage = {
-  //     sender: 'SYSTEM',
-  //     type: MessageType.RESET,
-  //     // seed: Math.random(),
-  //   };
-
-  //   this.broadcastAll(reset);
-
-  //   this.connections.forEach((c) => {
-  //     c.playerName = undefined;
-  //   });
-
-  //   console.log(' NEW GAME -----------------------------------------------  ');
-  //   this.gameController.newGame();
-  // }
 
   broadcastStateToAll() {
     for (const c of this.connections) {
@@ -143,13 +121,6 @@ export class SocloverRoom extends Room {
     }
   }
 
-  // broadcastTeam(message) {
-  //   const me = this.game.playerFromName(message.sender);
-  //   for (const c of this.connections) {
-  //     if (c.player && c.player.team === me.team) c.sendMessage(message);
-  //   }
-  // }
-
   broadcastAll(message) {
     for (const c of this.connections) {
       c.sendMessage(message);
@@ -167,5 +138,20 @@ export class SocloverRoom extends Room {
   closeConnectionImpl() {
     this.broadcastStateToAll();
     console.log('closed');
+  }
+
+  getActivePlayers(delta = 1000 * 60 * 60 * 2) {
+    const now = Date.now();
+    return this.connections
+      .filter((c) => now - c.stamp < delta)
+      .map((c) => c.playerName);
+  }
+
+  listActivePlayers(): SocloverMessage {
+    return {
+      sender: 'SYSTEM',
+      type: MessageType.LIST_ACTIVE,
+      activePlayers: this.getActivePlayers(),
+    };
   }
 }

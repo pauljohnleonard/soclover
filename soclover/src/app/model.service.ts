@@ -11,7 +11,7 @@ import {
 
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Router } from '@angular/router';
-import { ConnectionService } from '../connection.service';
+import { ConnectionService } from './connection.service';
 import { cloneDeep } from 'lodash';
 
 @Injectable({ providedIn: 'root' })
@@ -25,6 +25,7 @@ export class ModelService {
   myPlayer?: Leaf;
 
   newLeafSubject$ = new Subject<Leaf>();
+  activePlayers: string[] | undefined;
 
   constructor(public connection: ConnectionService, public router: Router) {
     this.connection.messageSubject.subscribe((rawMessage) => {
@@ -59,6 +60,10 @@ export class ModelService {
             applyPatch(message, this.game);
             this.subject$.next(message);
           }
+          break;
+
+        case MessageType.LIST_ACTIVE:
+          this.activePlayers = message.activePlayers;
           break;
 
         case MessageType.SELECT_SOLVE:
@@ -161,5 +166,9 @@ export class ModelService {
 
   get name() {
     return this.connection.name;
+  }
+
+  hasSetupLeaf(): boolean {
+    return !!this.myPlayer?.clues;
   }
 }

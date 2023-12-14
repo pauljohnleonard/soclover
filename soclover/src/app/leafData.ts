@@ -3,7 +3,7 @@ import { Card, Leaf } from '@soclover/lib-soclover';
 export type Button = {
   text: string; // Displayed text
   id: string; // The id of the button used to select it from the svg ids.
-  player: Leaf | null;
+  leaf?: Leaf | null;
   click: () => void; // Action
   disabled?: boolean;
   right?: boolean; // only pne of these

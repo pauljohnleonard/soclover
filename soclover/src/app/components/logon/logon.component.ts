@@ -3,7 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, Validators } from '@angular/forms';
 
-import { ModelService } from '../../model/model.service';
+import { ModelService } from '../../model.service';
 import { ConnectionService } from '../../connection.service';
 import { environment } from 'environments/environment';
 

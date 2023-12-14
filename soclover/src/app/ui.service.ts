@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Button } from './leafData';
-import { ModelService } from './model/model.service';
+import { ModelService } from './model.service';
 import { Card, Leaf } from '@soclover/lib-soclover';
 import { Router } from '@angular/router';
 
@@ -18,6 +18,14 @@ export class UiService {
   backButton!: Button;
 
   constructor(public modelService: ModelService, public router: Router) {
+    this.backButton = {
+      text: '',
+      id: 'home',
+      click: () => {
+        this.router.navigateByUrl('/home');
+      },
+    };
+
     this.modelService.subject$.subscribe((message) => {
       if (this.modelService.myPlayer) {
         if (this.modelService?.myPlayer?.clues?.length === 4) {
@@ -76,69 +84,13 @@ export class UiService {
     });
   }
 
-  get puzzleButtons() {
-    const buttons: Button[] = [];
-    for (const leaf of this.modelService.game?.leafs || []) {
-      const click = () => {
-        this.setSolveLeaf(leaf);
-        this.modelService.selectSolveLeafBroadcast(leaf);
-      };
-      const button: Button = {
-        text: leaf.playerName || 'Nobody',
-        id: 'download',
-        player: leaf,
-        click,
-      };
-
-      buttons.push(button);
-    }
-    return buttons;
-  }
-
-  get homeButtons() {
-    const buttons: Button[] = [];
-
-    this.backButton = {
-      text: 'Home',
-      id: 'home',
-      click: () => {
-        this.router.navigateByUrl('/home');
-      },
-      player: null,
-    };
-
-    if (!this.modelService.myPlayer?.clues) {
-      buttons.push({
-        text: 'New Leaf',
-        id: 'plant',
-        player: null,
-        click: async () => {
-          await this.makeNewLeaf();
-        },
-      });
-    }
-
-    buttons.push({
-      text: 'New Game',
-      id: 'refresh',
-      player: null,
-      right: true,
-      click: async () => {
-        if (confirm('Are you sure to start a new game ?')) {
-          await this.modelService.newGame();
-        }
-      },
-    });
-    return buttons;
-  }
-
   get solveButtons() {
     const buttons: Button[] = [this.backButton];
 
     const but: Button = {
       text: 'Guess',
       id: 'solving',
-      player: null,
+      leaf: null,
       disabled: !this.canGuess(),
       click: () => {
         this.haveAGo();
@@ -154,9 +106,9 @@ export class UiService {
   get settingButtons() {
     const buttons: Button[] = [this.backButton];
     buttons.push({
-      text: 'New Hand',
+      text: '',
       id: 'compost',
-      player: null,
+      leaf: null,
       click: () => {
         this.makeNewLeaf();
       },
@@ -164,9 +116,9 @@ export class UiService {
 
     if (this.focusLeaf?.clues?.filter((c) => !!c).length === 4) {
       buttons.push({
-        text: 'Submit',
+        text: '',
         id: 'upload',
-        player: null,
+        leaf: null,
         click: () => {
           this.focusLeaf ? this.modelService.uploadLeaf(this.focusLeaf) : null;
           this.focusLeaf = undefined;

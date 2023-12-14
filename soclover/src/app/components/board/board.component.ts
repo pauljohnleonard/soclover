@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { UiService } from '../../ui.service';
 import { LayoutService } from '../../layout.service';
-import { ModelService } from '../../model/model.service';
+import { ModelService } from '../../model.service';
 
 @Component({
   selector: 'soclover-board',

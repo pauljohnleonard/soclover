@@ -5,7 +5,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { ModelService } from '../../model/model.service';
+import { ModelService } from '../../model.service';
 import { Card, Leaf } from '@soclover/lib-soclover';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
