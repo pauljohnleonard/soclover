@@ -10,9 +10,7 @@
       "executor": "@angular-devkit/build-angular:browser",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "allowedCommonJsDependencies": [
-          "lodash"
-       ],
+        "allowedCommonJsDependencies": ["lodash"],
         "outputPath": "dist/soclover",
         "index": "soclover/src/index.html",
         "main": "soclover/src/main.ts",
@@ -36,7 +34,13 @@
               "maximumError": "4kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "environments/environment.ts",
+              "with": "environments/environment.prod.ts"
+            }
+          ]
         },
         "development": {
           "buildOptimizer": false,

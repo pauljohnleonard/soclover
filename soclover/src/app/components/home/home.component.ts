@@ -60,7 +60,7 @@ export class HomeComponent implements OnInit {
         this.modelService.selectSolveLeafBroadcast(leaf);
       };
       const button: Button = {
-        text: leaf.playerName || 'Nobody',
+        text: leaf.playerName as string,
         id: 'download',
         leaf: leaf,
         click,
