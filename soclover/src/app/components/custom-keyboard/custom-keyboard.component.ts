@@ -23,12 +23,8 @@ export class CustomKeyboardComponent implements OnInit {
       this.rows.push(row);
     }
 
-    this.rows[1].push({ disp: '-', code: '-' });
     this.rows[2] = [{ disp: 'DEL', code: 'Delete' }].concat(this.rows[2]);
-    this.rows[2].push({
-      disp: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#10004;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-      code: 'Enter',
-    });
+    this.rows[2].push({ disp: '-', code: '-' });
 
     // Define the layout of the keyboard
   }

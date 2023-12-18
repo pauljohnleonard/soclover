@@ -1,11 +1,16 @@
 <div class="slover">
   <div class="top-container">
-    <soclover-leaf class="leaf"> </soclover-leaf>
+    <soclover-leaf
+      class="leaf"
+      [style.left]="leftPos + 'px'"
+      [style.top]="topPos + 'px'"
+    >
+    </soclover-leaf>
     <soclover-buttons class="buttons" [buttons]="uiService.leafViewButtons">
     </soclover-buttons>
     <soclover-custom-keyboard
       class="keyboard"
-      *ngIf="uiService.setting && layoutService.isTouchDevice"
+      *ngIf="uiService.setting"
     ></soclover-custom-keyboard>
   </div>
 </div>

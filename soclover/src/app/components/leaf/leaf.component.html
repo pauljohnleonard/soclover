@@ -1,15 +1,13 @@
 <svg
   xmlns="http://www.w3.org/2000/svg"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-  [attr.width]="leafData.boardWidth"
-  [attr.height]="leafData.boardHeight"
-  transform-origin="0 0"
-  [attr.transform]="containerScale"
+  [attr.width]="layoutService.leafScreenWidth"
+  [attr.height]="layoutService.leafScreenHeight"
   (mousemove)="!isTouch ? mouseMove($event) : null"
   (mouseup)="!isTouch ? mouseUp($event) : null"
-  (touchmove)="touchMove($event)"
-  (touchend)="touchEnd($event)"
-  (mousedown)="mouseDown($event)"
+  (touchmove)="isTouch ? touchMove($event) : null"
+  (touchend)="isTouch ? touchEnd($event) : null"
+  (mousedown)="!isTouch ? mouseDown($event) : null"
   (click)="catchAllClick($event)"
 >
   <defs>
@@ -138,152 +136,170 @@
     </g>
   </defs>
 
-  <rect width="100%" height="100%" fill="#dcd" />
-  <!--    PETALS -->
-  <g [attr.transform]="petalMainTranslate">
-    <g [attr.transform]="'translate(120 120)'">
-      <g transform="rotate(45)">
-        <ng-container *ngFor="let petalData of leafData.petalDatas">
-          <g
-            [attr.transform]="petalData.rotate"
-            (click)="setting ? selectPetal(petalData.i, $event) : null"
-          >
-            <use xlink:href="#petal" />
+  <g transform-origin="0 0" [attr.transform]="containerScale">
+    <!-- <g transform-origin="0 0"> -->
+    <!-- <rect
+      [attr.width]="leafData.boardWidth / 2"
+      [attr.height]="leafData.boardHeight / 2"
+      fill="pink"
+    /> -->
+    <!--    PETALS -->
+    <g [attr.transform]="petalMainTranslate">
+      <g [attr.transform]="'translate(120 120)'">
+        <g transform="rotate(45)">
+          <ng-container *ngFor="let petalData of leafData.petalDatas">
+            <g
+              [attr.transform]="petalData.rotate"
+              (click)="setting ? selectPetal(petalData.i, $event) : null"
+            >
+              <use xlink:href="#petal" />
 
-            <ng-container *ngIf="leaf">
-              <use
-                xlink:href="#textbox"
-                [attr.stroke]="
-                  setting && focusPetal === petalData.i ? 'black' : null
-                "
-                stroke-width="0.3"
-              />
-              <text
-                [attr.x]="leafData.petalTextWidth / 2"
-                [attr.y]="leafData.petalTextHeight / 2"
-                [attr.transform]="petalData.transform"
-                text-anchor="middle"
-                dominant-baseline="middle"
-                fill="black"
-                [attr.font-size]="leafData.clueFontSize"
-                font-family="Arial"
-                font-weight="600"
-              >
-                {{ leaf.clues[petalData.i] }}
-                <tspan
-                  class="blink-animation"
-                  *ngIf="setting && focusPetal === petalData.i"
-                  fill="#fff"
+              <ng-container *ngIf="leaf">
+                <use
+                  xlink:href="#textbox"
+                  [attr.stroke]="
+                    setting && focusPetal === petalData.i ? 'black' : null
+                  "
+                  stroke-width="0.3"
+                  [attr.data-petal]="petalData.i"
+                />
+                <text
+                  [attr.x]="leafData.petalTextWidth / 2"
+                  [attr.y]="leafData.petalTextHeight / 2"
+                  [attr.transform]="petalData.transform"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  fill="black"
+                  [attr.font-size]="leafData.clueFontSize"
+                  font-family="Arial"
+                  font-weight="600"
                 >
-                  &#9611;
-                </tspan>
-              </text>
-            </ng-container>
-          </g>
-        </ng-container>
-
-        <circle cx="0" cy="0" [attr.r]="leafData.rHub" fill="#390" />
-      </g>
-    </g>
-
-    <g [attr.transform]="'translate(120 120)'">
-      <ng-container *ngFor="let slot of leafData.dropZones">
-        <g
-          (mouseup)="focusPlayer && !isTouch ? mouseUpDrop($event, slot) : null"
-        >
-          <g transform="rotate(45)">
-            <g [attr.transform]="zoneTransformSpin(slot)">
-              <use
-                id="cardDropZone"
-                xlink:href="#dropZone"
-                [attr.data-slot]="slot"
-              />
+                  {{
+                    leaf !== undefined && leaf.clues !== undefined
+                      ? leaf.clues[petalData.i]
+                      : ''
+                  }}
+                  <tspan
+                    class="blink-animation"
+                    *ngIf="setting && focusPetal === petalData.i"
+                    fill="#fff"
+                  >
+                    &#9611;
+                  </tspan>
+                </text>
+              </ng-container>
             </g>
-          </g>
-        </g>
-      </ng-container>
+          </ng-container>
 
-      <ng-container *ngIf="leaf">
-        <ng-container *ngFor="let card of cards; let card_i = index">
+          <circle cx="0" cy="0" [attr.r]="leafData.rHub" fill="#390" />
+        </g>
+      </g>
+
+      <g [attr.transform]="'translate(120 120)'">
+        <ng-container *ngFor="let slot of leafData.dropZones">
           <g
-            *ngIf="!setting || card_i < 4"
-            [attr.transform]="cardTransformPosition(card)"
-            (mousedown)="
-              !setting && !isTouch ? mouseDownCard($event, card) : null
+            (mouseup)="
+              focusPlayer && !isTouch ? mouseUpDrop($event, slot) : null
             "
-            (mouseup)="!setting && !isTouch ? mouseUpCard($event) : null"
-            (touchstart)="!setting ? touchStartCard($event, card) : null"
           >
             <g transform="rotate(45)">
-              <g [attr.transform]="cardTransformSpin(card)">
-                <ng-container>
-                  <use xlink:href="#card" />
-                </ng-container>
-
-                <ng-container
-                  *ngFor="let word of card.words; let word_i = index"
-                >
-                  <g
-                    [attr.transform]="
-                      'rotate(' +
-                      (word_i + card.guessOrientation) * 90 +
-                      ' ' +
-                      (leafData.cardPad + leafData.cardWidth) / 2 +
-                      ' ' +
-                      (leafData.cardPad + leafData.cardWidth) / 2 +
-                      ') translate(' +
-                      (leafData.cardPad + leafData.cardWidth / 2) +
-                      ',' +
-                      leafData.wordNudgeIn +
-                      ')'
-                    "
-                  >
-                    <text
-                      x="0"
-                      y="0"
-                      [attr.transform]="wordTransformFlip(card, word_i)"
-                      text-anchor="middle"
-                      dominant-baseline="middle"
-                      fill="black"
-                      [attr.font-size]="leafData.cardFontSize"
-                      font-family="Arial"
-                      font-weight="600"
-                    >
-                      {{ card.words[word_i] }}
-                    </text>
-                  </g>
-                </ng-container>
-
-                <use xlink:href="#wrong" *ngIf="card.wrong" />
+              <g [attr.transform]="zoneTransformSpin(slot)">
+                <use
+                  id="cardDropZone"
+                  xlink:href="#dropZone"
+                  [attr.data-slot]="slot"
+                />
               </g>
             </g>
           </g>
-          <g
-            transform="translate(-10,0)"
-            *ngIf="
-              !setting &&
-              focusPlayer &&
-              card.guessSlot !== undefined &&
-              card.guessSlot >= 0 &&
-              !card.draggee
-            "
-          >
-            <use
-              xlink:href="#bin"
-              [attr.x]="leafData.tools[card.guessSlot].binX"
-              [attr.y]="leafData.tools[card.guessSlot].binY"
-              (click)="toolClick(card, 'bin')"
-            />
-
-            <use
-              xlink:href="#spin"
-              [attr.x]="leafData.tools[card.guessSlot].spinX"
-              [attr.y]="leafData.tools[card.guessSlot].spinY"
-              (click)="toolClick(card, 'spin')"
-            />
-          </g>
         </ng-container>
-      </ng-container>
+
+        <ng-container *ngIf="leaf">
+          <ng-container *ngFor="let card of cards; let card_i = index">
+            <g
+              *ngIf="!setting || card_i < 4"
+              [attr.transform]="cardTransformPosition(card)"
+              (mousedown)="
+                !setting && !isTouch ? mouseDownCard($event, card) : null
+              "
+              (mouseup)="!setting && !isTouch ? mouseUpCard($event) : null"
+              (touchstart)="
+                isTouch && !setting ? touchStartCard($event, card) : null
+              "
+            >
+              <g transform="rotate(45)">
+                <g [attr.transform]="cardTransformSpin(card)">
+                  <ng-container>
+                    <use xlink:href="#card" />
+                  </ng-container>
+
+                  <ng-container
+                    *ngFor="let word of card.words; let word_i = index"
+                  >
+                    <g
+                      [attr.transform]="
+                        'rotate(' +
+                        (word_i + card.guessOrientation) * 90 +
+                        ' ' +
+                        (leafData.cardPad + leafData.cardWidth) / 2 +
+                        ' ' +
+                        (leafData.cardPad + leafData.cardWidth) / 2 +
+                        ') translate(' +
+                        (leafData.cardPad + leafData.cardWidth / 2) +
+                        ',' +
+                        leafData.wordNudgeIn +
+                        ')'
+                      "
+                    >
+                      <text
+                        x="0"
+                        y="0"
+                        [attr.transform]="wordTransformFlip(card, word_i)"
+                        text-anchor="middle"
+                        dominant-baseline="middle"
+                        fill="black"
+                        [attr.font-size]="leafData.cardFontSize"
+                        font-family="Arial"
+                        font-weight="600"
+                      >
+                        {{ card.words[word_i] }}
+                      </text>
+                    </g>
+                  </ng-container>
+
+                  <use xlink:href="#wrong" *ngIf="card.wrong" />
+                </g>
+              </g>
+            </g>
+            <g
+              transform="translate(-10,0)"
+              *ngIf="
+                !setting &&
+                focusPlayer &&
+                card.guessSlot !== undefined &&
+                card.guessSlot >= 0 &&
+                !card.draggee
+              "
+            >
+              <use
+                xlink:href="#bin"
+                [attr.x]="leafData.tools[card.guessSlot].binX"
+                [attr.y]="leafData.tools[card.guessSlot].binY"
+                (click)="toolClick(card, 'bin', $event)"
+                [attr.data-bin]="card.guessSlot"
+              />
+
+              <use
+                xlink:href="#spin"
+                [attr.x]="leafData.tools[card.guessSlot].spinX"
+                [attr.y]="leafData.tools[card.guessSlot].spinY"
+                (click)="toolClick(card, 'spin', $event)"
+                [attr.data-spin]="card.guessSlot"
+              />
+            </g>
+          </ng-container>
+        </ng-container>
+      </g>
     </g>
   </g>
 </svg>

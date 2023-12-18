@@ -77,7 +77,7 @@ export type SocloverState = {
 export interface Leaf {
   playerName?: string;
   cards: Card[];
-  clues: string[];
+  clues?: string[];
   hasUI?: boolean;
   submitted?: boolean;
 }

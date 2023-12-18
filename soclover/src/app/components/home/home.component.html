@@ -1,17 +1,9 @@
 <div class="soclover top-container">
-  <h1>Soclover</h1>
-  <h2>Game control</h2>
+  <!-- <h1>Soclover</h1> -->
 
-  <p>
-    This button resets the current game. Only press this if you are sure you
-    want to discard the current game and start a new game.
-  </p>
+  <h2>Active Players</h2>
 
-  <soclover-buttons class="buttons" [buttons]="topButtons"> </soclover-buttons>
-
-  <h2>Players</h2>
-
-  <p>These are the players that are currently active.</p>
+  <!-- <p>These are the players that are currently active.</p> -->
   <div class="player-container">
     <div *ngFor="let player of modelService.activePlayers || []">
       <div class="player">
@@ -23,7 +15,7 @@
   <ng-container *ngIf="!modelService.hasSetupLeaf()">
     <h2>Create Clover Leaf</h2>
 
-    Click here to create a clover leaf for the the curent game.
+    <!-- Click here to create a clover leaf for the the curent game. -->
 
     <soclover-buttons class="buttons" [buttons]="newleafButtons">
     </soclover-buttons>
@@ -36,10 +28,10 @@
   <h2>Clover Leaves to solve</h2>
 
   <ng-container *ngIf="puzzleButtons.length > 0">
-    <p>
+    <!-- <p>
       These are the leaves that have been submittted. Click to go to a leaf and
       do some guessing.
-    </p>
+    </p> -->
     <soclover-buttons class="buttons" [buttons]="puzzleButtons">
     </soclover-buttons>
   </ng-container>
@@ -47,4 +39,13 @@
   <div *ngIf="puzzleButtons.length === 0">
     <p>No player has submitted a clover leaf for solving yet.</p>
   </div>
+
+  <h2>Game control</h2>
+
+  <p>
+    Only press this if you are sure you want to discard the current game and
+    start a new game.
+  </p>
+
+  <soclover-buttons class="buttons" [buttons]="topButtons"> </soclover-buttons>
 </div>

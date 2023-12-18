@@ -1,16 +1,30 @@
 import { HostListener, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { leafData } from './leafData';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LayoutService {
+  // [x: string]: number;
   isTouchDevice?: boolean;
   subject$ = new BehaviorSubject<any>(null);
   isFullScreen = false;
+  viewportHeight = 0;
+  viewportWidth = 0;
+  scaleFactor = 1;
+  leafScreenWidth = 0;
+  leafScreenHeight = 0;
+  devicePixelRatio: number;
   constructor() {
-    this.detectTouchDevice();
-    // this.openFullscreen();
+    this.devicePixelRatio = window.devicePixelRatio || 1;
+    leafData.boardWidth = leafData._boardWidth * devicePixelRatio;
+    leafData.boardHeight = leafData._boardHeight * devicePixelRatio;
+    console.log('devicePixelRatio', devicePixelRatio);
+    this.onResize();
+    window.addEventListener('resize', () => {
+      this.onResize();
+    });
   }
 
   private detectTouchDevice() {
@@ -20,10 +34,19 @@ export class LayoutService {
       (navigator as any).msaxTouchPoints > 0;
   }
 
-  @HostListener('window:resize', ['$event'])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onResize(event: Event) {
+  onResize() {
     this.detectTouchDevice();
+    this.viewportHeight = window.innerHeight * this.devicePixelRatio;
+    this.viewportWidth = window.innerWidth * this.devicePixelRatio;
+    this.scaleFactor = Math.min(
+      this.viewportWidth / leafData.boardWidth,
+      this.viewportHeight / leafData.boardHeight
+    );
+
+    // console.log('scaleFactor', this.scaleFactor);
+    this.leafScreenWidth = leafData.boardWidth * this.scaleFactor;
+    this.leafScreenHeight = leafData.boardHeight * this.scaleFactor;
+
     this.subject$.next(this);
   }
 

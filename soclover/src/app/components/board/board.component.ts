@@ -9,9 +9,23 @@ import { ModelService } from '../../model.service';
   styleUrls: ['./board.component.scss'],
 })
 export class BoardComponent {
+  topPos = 0;
+  leftPos = 0;
   constructor(
     public uiService: UiService,
     public layoutService: LayoutService,
     public modelService: ModelService
-  ) {}
+  ) {
+    layoutService.subject$.subscribe((layout) => {
+      console.log('layout', layout);
+      this.topPos =
+        (layout.viewportHeight - layout.leafScreenHeight) /
+        2 /
+        layoutService.devicePixelRatio;
+      this.leftPos =
+        (layout.viewportWidth - layout.leafScreenWidth) /
+        2 /
+        layoutService.devicePixelRatio;
+    });
+  }
 }

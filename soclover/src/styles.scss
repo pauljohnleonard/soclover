@@ -5,12 +5,11 @@ body {
   overflow: hidden !important;
   padding: 0px !important;
   margin: 0px;
+  // background-color: lightgrey;
   background-color: #ffe4c4;
 }
 
 .soclover {
-  background-color: #ffe4c4;
-
   &.top-container {
     position: fixed;
     top: 0px;

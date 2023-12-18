@@ -60,10 +60,13 @@ export class LeafComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.petalMainTranslate = `translate(0, 118)`;
+    this.setScaling();
+
     this.layoutService.subject$
       .pipe(untilDestroyed(this))
       .subscribe((layout) => {
-        this.setViewportDimensions();
+        this.setScaling();
       });
 
     this.spinner.show();
@@ -71,20 +74,10 @@ export class LeafComponent implements OnInit, OnDestroy {
     console.log('LeafComponent', this.leaf);
   }
 
-  private setViewportDimensions() {
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-    const scaleFactor = Math.min(
-      viewportWidth / leafData.boardWidth,
-      viewportHeight / leafData.boardHeight
-    );
-    this.containerScale = `scale(${scaleFactor})`;
-    leafData.dragScaleFactor = 1.0 / scaleFactor;
-
-    // console.log('scaleFactor', scaleFactor);
-    // console.log('viewportHeight', viewportHeight);
-    // console.log('leafData.boardHeight', leafData.boardHeight);
-    this.petalMainTranslate = `translate(0, 118)`;
+  private setScaling() {
+    this.containerScale = `scale(${this.layoutService.scaleFactor})`;
+    leafData.dragScaleFactor = 1.0 / this.layoutService.scaleFactor;
+    // console.log('setScaleFactor', this.containerScale);
   }
 
   ngOnDestroy() {
@@ -148,12 +141,6 @@ export class LeafComponent implements OnInit, OnDestroy {
 
   // EVENT HANDLERS
 
-  @HostListener('window:resize', ['$event'])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onResize(event: Event) {
-    this.setViewportDimensions();
-  }
-
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
     this.uiService.handleKeyboardEvent(event.key);
@@ -173,7 +160,7 @@ export class LeafComponent implements OnInit, OnDestroy {
     this.uiService.focusPetal = undefined;
   }
 
-  toolClick(card: Card, cmd: 'bin' | 'spin') {
+  toolClick(card: Card, cmd: 'bin' | 'spin', event: any) {
     if (!this.uiService.focusLeaf || this.setting) {
       return;
     }
@@ -182,10 +169,14 @@ export class LeafComponent implements OnInit, OnDestroy {
       card.guessSlot = -1;
       card.dragPos = leafData.heapPos[card.heapSlot];
       card.wrong = false;
+      event.preventDefault();
+      event.stopPropagation();
     } else if (card && cmd === 'spin') {
       console.log('spin', card);
       card.wrong = false;
       card.guessOrientation = (card.guessOrientation + 1) % 4;
+      event.preventDefault();
+      event.stopPropagation();
     } else {
       return;
     }
@@ -346,17 +337,46 @@ export class LeafComponent implements OnInit, OnDestroy {
 
     console.log('Target Element:', targetElement);
 
-    const str = targetElement.dataset['slot'];
-    if (str !== undefined) {
-      const zone = +str;
+    const strSlot = targetElement && targetElement.dataset['slot'];
+    if (strSlot !== undefined) {
+      const zone = +strSlot;
       console.error('slotIndex', zone);
       this.doDropCard(event, zone);
     } else {
       this.doDropCard(event, -1);
     }
 
+    const strPetal = targetElement && targetElement.dataset['petal'];
+
+    console.log('strPetal', strPetal);
+    if (strPetal !== undefined && this.uiService.setting) {
+      this.selectPetal(+strPetal, event);
+    }
+
+    const strBin = targetElement && targetElement.dataset['bin'];
+
+    if (strBin !== undefined) {
+      const card = this.cardInGuessSlot(+strBin);
+      this.toolClick(card, 'bin', event);
+    }
+
+    const strSpin = targetElement && targetElement.dataset['spin'];
+
+    if (strSpin !== undefined) {
+      const card: Card = this.cardInGuessSlot(+strSpin);
+      this.toolClick(card, 'spin', event);
+    }
+
     this.isDragging = false;
     this.dragCard = null;
+  }
+
+  cardInGuessSlot(slot: number): Card {
+    const card = this.uiService.focusLeaf?.cards.find(
+      (c) => c.guessSlot === slot
+    );
+
+    return card as Card;
   }
 
   setDragDelta(newX: number, newY: number) {

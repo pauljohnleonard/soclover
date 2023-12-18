@@ -97,9 +97,10 @@ export const leafData = {
   cardFontSize: '10px',
   dropZones: [0, 1, 2, 3],
 
-  boardWidth: 240,
-  boardHeight: 500,
-
+  _boardWidth: 240,
+  _boardHeight: 500,
+  boardWidth: 0,
+  boardHeight: 0,
   heapPos: [
     { x: -70, y: -190 },
     { x: 70, y: -190 },

@@ -14,7 +14,7 @@ export class UiService {
 
   focusPetal: number | undefined;
   focusLeaf!: Leaf | undefined;
-  setting = true;
+  setting = false;
   backButton!: Button;
 
   constructor(public modelService: ModelService, public router: Router) {
@@ -71,6 +71,7 @@ export class UiService {
   initSetting(leaf: Leaf) {
     console.log('initSetting', leaf);
     this.setting = true;
+    this.guessing = false;
     this.focusLeaf = leaf;
   }
 
@@ -80,6 +81,7 @@ export class UiService {
     this.modelService.newLeaf().subscribe((leaf) => {
       this.focusLeaf = leaf;
       this.setting = true;
+      this.guessing = false;
       this.router.navigateByUrl('/makeleaf');
     });
   }
@@ -110,6 +112,7 @@ export class UiService {
       id: 'compost',
       leaf: null,
       click: () => {
+        this.setting = true;
         this.makeNewLeaf();
       },
     });
@@ -134,6 +137,7 @@ export class UiService {
     this.router.navigateByUrl('/solve');
     this.focusLeaf = leaf;
     this.focusPetal = undefined;
+    this.setting = false;
     // this.cards = leaf.cards;
 
     if (!leaf.hasUI) {
@@ -203,12 +207,15 @@ export class UiService {
     } else if (key === 'Delete' || key === 'Backspace') {
       console.log('Delete or Backspace key pressed globally');
 
-      if (this.focusLeaf.clues[this.focusPetal].length) {
+      if (
+        this.focusLeaf.clues &&
+        this.focusLeaf?.clues[this.focusPetal].length
+      ) {
         this.focusLeaf.clues[this.focusPetal] = this.focusLeaf.clues[
           this.focusPetal
         ].slice(0, -1);
       }
-    } else if (/^[a-zA-Z0-9\s-]$/.test(key)) {
+    } else if (/^[a-zA-Z0-9\s-]$/.test(key) && this.focusLeaf.clues) {
       console.log('Printable character pressed globally:', key);
       this.focusLeaf.clues[this.focusPetal] += key;
     } else {
