@@ -44,29 +44,29 @@
     </g>
 
     <!--  BUTTONS -->
-    <g id="download">
+    <!-- <g id="download">
       <use xlink:href="assets/icons/download.svg#download" />
-    </g>
+    </g> -->
 
-    <g id="thinking">
+    <!-- <g id="thinking">
       <use xlink:href="assets/icons/cognition.svg#cognition" />
-    </g>
+    </g> -->
 
     <g id="wrong" transform="translate(-11,-11) scale(4) ">
       <use xlink:href="assets/icons/close.svg#close" fill="red" />
     </g>
-
+    <!--
     <g id="solving">
       <use xlink:href="assets/icons/question_mark.svg#question_mark" />
-    </g>
-
+    </g> -->
+    <!--
     <g id="upload">
       <use xlink:href="assets/icons/upload.svg#upload" />
-    </g>
+    </g> -->
 
-    <g id="refresh" style="cursor: pointer">
+    <!-- <g id="refresh" style="cursor: pointer">
       <use xlink:href="assets/icons/restart.svg#restart" />
-    </g>
+    </g> -->
 
     <!-- PETAL -->
     <circle
@@ -215,7 +215,7 @@
         </ng-container>
 
         <ng-container *ngIf="leaf">
-          <ng-container *ngFor="let card of cards; let card_i = index">
+          <ng-container *ngFor="let card of sortedCards; let card_i = index">
             <g
               *ngIf="!setting || card_i < 4"
               [attr.transform]="cardTransformPosition(card)"

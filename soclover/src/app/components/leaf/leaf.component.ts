@@ -19,6 +19,7 @@ import {
 } from '@angular/animations';
 import { UiService } from '../../ui.service';
 import { LayoutService } from '../../layout.service';
+import { ConnectionService } from '../../connection.service';
 
 @UntilDestroy()
 @Component({
@@ -56,7 +57,8 @@ export class LeafComponent implements OnInit, OnDestroy {
     public elRef: ElementRef,
     public layoutService: LayoutService,
     private spinner: NgxSpinnerService,
-    public uiService: UiService
+    public uiService: UiService,
+    public connection: ConnectionService
   ) {}
 
   ngOnInit() {
@@ -181,6 +183,8 @@ export class LeafComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.uiService.focusLeaf.solved = false;
+
     this.modelService.updateLeafUI(this.uiService.focusLeaf);
   }
 
@@ -194,7 +198,7 @@ export class LeafComponent implements OnInit, OnDestroy {
       }
 
       this.dragCard = card;
-      card.draggee = this.modelService.myPlayer?.playerName || '';
+      card.draggee = this.connection.name || '';
       this.dragElement = event.target;
       this.dragElement.style.pointerEvents = 'none';
       this.isDragging = true;
@@ -217,7 +221,7 @@ export class LeafComponent implements OnInit, OnDestroy {
       }
 
       this.dragCard = card;
-      card.draggee = this.modelService.myPlayer?.playerName || '';
+      card.draggee = this.connection.name || '';
       this.dragElement = event.target;
       this.dragElement.style.pointerEvents = 'none';
       this.isDragging = true;
@@ -291,7 +295,7 @@ export class LeafComponent implements OnInit, OnDestroy {
       this.dragCard.dragPos = leafData.heapPos[this.dragCard.heapSlot];
     }
 
-    if (this.dragCard.guessSlot !== undefined) {
+    if (this.dragCard.guessSlot !== undefined && this.dragCard.guessSlot >= 0) {
       leafData.tools[this.dragCard.guessSlot].card = this.dragCard;
     }
     this.dragCard.draggee = '';
@@ -307,9 +311,8 @@ export class LeafComponent implements OnInit, OnDestroy {
   }
 
   mouseMove(event: any) {
-    // console.log('Move', event);
-
     if (this.isDragging) {
+      // console.log('Move Dragging', event);
       this.setDragDelta(event.clientX, event.clientY);
     }
   }
@@ -411,6 +414,17 @@ export class LeafComponent implements OnInit, OnDestroy {
       throw new Error('No focusLeaf (get cards)');
     }
     return this.uiService.focusLeaf.cards;
+  }
+
+  get sortedCards() {
+    if (!this.dragCard) {
+      return this.cards;
+    }
+
+    const cards = this.cards.filter((c) => c !== this.dragCard);
+    cards.push(this.dragCard);
+
+    return cards;
   }
 
   // get clues() {

@@ -75,6 +75,7 @@ export type SocloverState = {
 };
 
 export interface Leaf {
+  solved?: boolean;
   playerName?: string;
   cards: Card[];
   clues?: string[];

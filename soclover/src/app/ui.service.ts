@@ -27,8 +27,8 @@ export class UiService {
     };
 
     this.modelService.subject$.subscribe((message) => {
-      if (this.modelService.myPlayer) {
-        if (this.modelService?.myPlayer?.clues?.length === 4) {
+      if (this.modelService.mySettingLeaf) {
+        if (this.modelService?.mySettingLeaf?.clues?.length === 4) {
           this.setting = false;
         }
       }
@@ -160,8 +160,9 @@ export class UiService {
   }
 
   haveAGo() {
+    if (!this.focusLeaf) return;
     let count = 0;
-    for (const card of this.focusLeaf?.cards || []) {
+    for (const card of this.focusLeaf.cards || []) {
       card.wrong = false;
       if (card.guessSlot === undefined || card.guessSlot >= 0) {
         card.wrong =
@@ -170,6 +171,7 @@ export class UiService {
       }
     }
 
+    this.focusLeaf.solved = count === 0;
     this.modelService.updateLeafUI(this.focusLeaf as Leaf);
 
     console.log('count', count);

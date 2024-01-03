@@ -40,7 +40,7 @@ export class HomeComponent implements OnInit {
 
   get newleafButtons() {
     const buttons: Button[] = [];
-    if (!this.modelService.myPlayer?.clues) {
+    if (!this.modelService.mySettingLeaf?.clues) {
       buttons.push({
         text: '',
         id: 'plant',

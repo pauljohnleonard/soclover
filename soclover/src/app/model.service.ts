@@ -22,7 +22,7 @@ export class ModelService {
 
   subject$ = new BehaviorSubject<SocloverMessage | null>(null);
   game: Game | undefined;
-  myPlayer?: Leaf;
+  mySettingLeaf?: Leaf;
 
   newleavesubject$ = new Subject<Leaf>();
   activePlayers: string[] | undefined;
@@ -39,7 +39,7 @@ export class ModelService {
         case MessageType.STATE:
           // console.log('STATE CHANGE', messageTyped.game);
           this.game = message.game;
-          this.myPlayer = this.game?.leaves.find(
+          this.mySettingLeaf = this.game?.leaves.find(
             (player) => player.playerName === this?.name
           );
 
@@ -169,6 +169,6 @@ export class ModelService {
   }
 
   hasSetupLeaf(): boolean {
-    return !!this.myPlayer?.clues;
+    return !!this.mySettingLeaf?.clues;
   }
 }
