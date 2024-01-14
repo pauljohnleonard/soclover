@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Button } from './leafData';
+import { Button, StatusEnum } from './leafData';
 import { ModelService } from './model.service';
 import { Card, Leaf } from '@soclover/lib-soclover';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +17,10 @@ export class UiService {
   focusLeaf!: Leaf | undefined;
   setting = false;
   backButton!: Button;
+  status$ = new Subject<StatusEnum>();
 
   constructor(public modelService: ModelService, public router: Router) {
+    this.music();
     this.backButton = {
       text: '',
       id: 'home',
@@ -161,20 +164,26 @@ export class UiService {
 
   haveAGo() {
     if (!this.focusLeaf) return;
-    let count = 0;
+    let success = true;
     for (const card of this.focusLeaf.cards || []) {
       card.wrong = false;
       if (card.guessSlot === undefined || card.guessSlot >= 0) {
         card.wrong =
           card.guessSlot !== card.slot || card.guessOrientation !== 0;
-        count++;
+        success = success && !card.wrong;
       }
     }
 
-    this.focusLeaf.solved = count === 0;
+    this.focusLeaf.solved = success;
     this.modelService.updateLeafUI(this.focusLeaf as Leaf);
 
-    console.log('count', count);
+    if (success) {
+      this.status$.next(StatusEnum.SOLVED);
+      this.right();
+    } else {
+      this.status$.next(StatusEnum.WRONG);
+      this.wrong();
+    }
   }
 
   defaultClues(cards: Card[]) {
@@ -223,5 +232,32 @@ export class UiService {
     } else {
       return;
     }
+  }
+
+  music() {
+    const audioFile = 'assets/sounds/cheese.mp3';
+    // Create an Audio object
+    const audio = new Audio(audioFile);
+    // Play the audio
+    audio.volume = 0.2;
+    audio.play();
+  }
+
+  wrong() {
+    const audioFile = 'assets/sounds/wrong.mp3';
+    // Create an Audio object
+    const audio = new Audio(audioFile);
+    // Play the audio
+    audio.volume = 0.1;
+    audio.play();
+  }
+
+  right() {
+    const audioFile = 'assets/sounds/right.mp3';
+    // Create an Audio object
+    const audio = new Audio(audioFile);
+    // Play the audio
+    audio.volume = 0.1;
+    audio.play();
   }
 }

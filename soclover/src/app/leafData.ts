@@ -1,5 +1,10 @@
 import { Card, Leaf } from '@soclover/lib-soclover';
 
+export enum StatusEnum {
+  SOLVED = 'SOLVED',
+  WRONG = 'WRONG',
+}
+
 export type Button = {
   text: string; // Displayed text
   id: string; // The id of the button used to select it from the svg ids.
