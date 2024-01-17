@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { UiService } from '../../ui.service';
 import { LayoutService } from '../../layout.service';
 import { ModelService } from '../../model.service';

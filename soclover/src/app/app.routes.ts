@@ -1,10 +1,11 @@
 import { Route } from '@angular/router';
 
-import { HomeComponent } from './components/home/home.component';
+import { HomeComponent } from './page/home/home.component';
 import { inject } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { LogonComponent } from './components/logon/logon.component';
-import { BoardComponent } from './components/board/board.component';
+import { BoardComponent } from './page/board/board.component';
+import { BrowseComponent } from './page/browse/browse.component';
 
 export const appRoutes: Route[] = [
   {
@@ -28,6 +29,12 @@ export const appRoutes: Route[] = [
     path: 'logon',
     component: LogonComponent,
   },
+  {
+    canActivate: [() => inject(ConnectionService).canActivate()],
+    path: 'browse',
+    component: BrowseComponent,
+  },
+
   {
     path: '**',
     redirectTo: 'logon',

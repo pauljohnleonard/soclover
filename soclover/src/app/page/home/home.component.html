@@ -1,0 +1,55 @@
+<div class="soclover top-container">
+  <!-- <h1>Soclover</h1> -->
+
+  <h2>Options</h2>
+
+  <soclover-buttons class="buttons" [buttons]="gameButtons"> </soclover-buttons>
+
+  <h2>Active Players</h2>
+
+  <!-- <p>These are the players that are currently active.</p> -->
+  <div class="player-container">
+    <div *ngFor="let player of modelService.activePlayers || []">
+      <div class="player">
+        {{ player }}
+      </div>
+    </div>
+  </div>
+
+  <ng-container
+    *ngIf="!modelService.hasSetupLeaf() || this.modelService.soloMode"
+  >
+    <h2>Create Clover Leaf</h2>
+
+    <!-- Click here to create a clover leaf for the the curent game. -->
+
+    <soclover-buttons class="buttons" [buttons]="newleafButtons">
+    </soclover-buttons>
+  </ng-container>
+
+  <h2 *ngIf="modelService.hasSetupLeaf() && !this.modelService.soloMode">
+    You have submitted your clover leaf
+  </h2>
+
+  <ng-container *ngIf="!this.modelService.soloMode">
+    <h2 *ngIf="puzzleButtons.length">Clover Leaves to solve</h2>
+
+    <div *ngIf="puzzleButtons.length === 0">
+      <h2>Waiting a clover leaf</h2>
+    </div>
+
+    <ng-container *ngIf="puzzleButtons.length > 0">
+      <soclover-buttons class="buttons" [buttons]="puzzleButtons">
+      </soclover-buttons>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="this.modelService.soloMode">
+    <h2>Browse Leaves</h2>
+
+    <soclover-buttons
+      class="buttons"
+      [buttons]="[browseButton]"
+    ></soclover-buttons>
+  </ng-container>
+</div>

@@ -1,6 +1,6 @@
 import { Leaf } from '@soclover/lib-soclover';
 import { AsyncSubject } from 'rxjs';
-import { HandModel } from './schema';
+import { HandModel } from '../models/hand.model';
 /* eslint-disable @typescript-eslint/no-var-requires */
 const mongoose = require('mongoose');
 

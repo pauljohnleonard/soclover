@@ -23,7 +23,7 @@ export class ConnectionService {
   async connect() {
     try {
       this.statusSubject.next('Connecting');
-      this.ws = new WebSocket(environment.SERVER_URL);
+      this.ws = new WebSocket(environment.WSS_URL);
 
       this.ws.onopen = (evt) => {
         this.readySubject.next(true);

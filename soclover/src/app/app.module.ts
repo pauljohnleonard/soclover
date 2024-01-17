@@ -11,12 +11,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { CustomKeyboardComponent } from './components/custom-keyboard/custom-keyboard.component';
-import { ReactiveFormsModule } from '@angular/forms';
-import { HomeComponent } from './components/home/home.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HomeComponent } from './page/home/home.component';
 import { ButtonsComponent } from './components/buttons/buttons.component';
 
 import { LogonComponent } from './components/logon/logon.component';
-import { BoardComponent } from './components/board/board.component';
+import { BoardComponent } from './page/board/board.component';
+import { BrowseComponent } from './page/browse/browse.component';
+import { HttpClientModule } from '@angular/common/http';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,16 +30,21 @@ import { BoardComponent } from './components/board/board.component';
     ButtonsComponent,
     LogonComponent,
     BoardComponent,
+    BrowseComponent,
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    FormsModule,
     NgxSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
     MatFormFieldModule,
     ReactiveFormsModule,
     MatIconModule,
+    HttpClientModule,
+    MatPaginatorModule,
+    MatTableModule,
     RouterModule.forRoot(appRoutes, { initialNavigation: 'enabledBlocking' }),
   ],
   providers: [],

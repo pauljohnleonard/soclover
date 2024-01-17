@@ -14,7 +14,8 @@ import { Button } from '../../leafData';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  topButtons!: Button[];
+  gameButtons!: Button[];
+  browseButton!: Button;
 
   constructor(
     public connection: ConnectionService,
@@ -24,18 +25,19 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.topButtons = [
-      {
-        text: '',
-        id: 'refresh',
+    this.modelService.rebuildButtons$.subscribe(() => {
+      this.makeGameButtons();
+    });
+    this.makeGameButtons();
 
-        click: async () => {
-          if (confirm('Are you sure to start a new game ?')) {
-            await this.modelService.newGame();
-          }
-        },
+    this.browseButton = {
+      text: '',
+      id: 'library',
+
+      click: async () => {
+        this.router.navigateByUrl('/browse');
       },
-    ];
+    };
   }
 
   get newleafButtons() {
@@ -50,6 +52,30 @@ export class HomeComponent implements OnInit {
       });
     }
     return buttons;
+  }
+
+  makeGameButtons() {
+    this.gameButtons = [
+      {
+        text: 'new',
+        id: 'refresh',
+
+        click: async () => {
+          if (confirm('Are you sure to start a new game ?')) {
+            await this.modelService.newGame();
+          }
+        },
+      },
+
+      {
+        text: this.modelService.soloMode ? 'solo' : 'team',
+        id: this.modelService.soloMode ? 'person' : 'group',
+
+        click: async () => {
+          await this.modelService.toggleMode();
+        },
+      },
+    ];
   }
 
   get puzzleButtons() {

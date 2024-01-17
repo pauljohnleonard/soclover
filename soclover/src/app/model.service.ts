@@ -23,9 +23,10 @@ export class ModelService {
   subject$ = new BehaviorSubject<SocloverMessage | null>(null);
   game: Game | undefined;
   mySettingLeaf?: Leaf;
-
+  soloMode = false;
   newleavesubject$ = new Subject<Leaf>();
   activePlayers: string[] | undefined;
+  rebuildButtons$ = new Subject<void>();
 
   constructor(public connection: ConnectionService, public router: Router) {
     this.connection.messageSubject.subscribe((rawMessage) => {
@@ -43,6 +44,8 @@ export class ModelService {
             (player) => player.playerName === this?.name
           );
 
+          if (!this.soloMode) break;
+
           this.subject$.next(rawMessage);
           break;
 
@@ -55,6 +58,7 @@ export class ModelService {
           break;
 
         case MessageType.PATCH:
+          if (this.soloMode) break;
           if (this.game) {
             console.log('PATCH', message);
             applyPatch(message, this.game);
@@ -118,7 +122,7 @@ export class ModelService {
   }
 
   updateLeafUI(leaf: Leaf) {
-    if (!leaf) {
+    if (!leaf || this.soloMode) {
       return;
     }
 
@@ -170,5 +174,10 @@ export class ModelService {
 
   hasSetupLeaf(): boolean {
     return !!this.mySettingLeaf?.clues;
+  }
+
+  toggleMode() {
+    this.soloMode = !this.soloMode;
+    this.rebuildButtons$.next();
   }
 }
