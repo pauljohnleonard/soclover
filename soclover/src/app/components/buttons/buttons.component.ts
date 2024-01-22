@@ -13,6 +13,7 @@ export class ButtonsComponent {
 
   @Input() buttons: Button[] = [];
   @Input() showCloser = false;
+
   constructor(public uiService: UiService) {}
 
   buttonTransform(button: Button, i: number): string {

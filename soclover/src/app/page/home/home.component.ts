@@ -16,6 +16,7 @@ import { Button } from '../../leafData';
 export class HomeComponent implements OnInit {
   gameButtons!: Button[];
   browseButton!: Button;
+  private _puzzleButtons?: Button[];
 
   constructor(
     public connection: ConnectionService,
@@ -79,6 +80,10 @@ export class HomeComponent implements OnInit {
   }
 
   get puzzleButtons() {
+    return this._puzzleButtons || this.buildPuzzleButtons();
+  }
+
+  buildPuzzleButtons() {
     const buttons: Button[] = [];
     for (const leaf of this.modelService.game?.leaves || []) {
       const click = () => {
@@ -94,6 +99,7 @@ export class HomeComponent implements OnInit {
 
       buttons.push(button);
     }
+    this._puzzleButtons = buttons;
     return buttons;
   }
 }

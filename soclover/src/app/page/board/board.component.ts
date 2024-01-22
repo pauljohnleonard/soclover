@@ -22,7 +22,7 @@ export class BoardComponent {
     public modelService: ModelService
   ) {
     layoutService.subject$.subscribe((layout) => {
-      console.log('layout', layout);
+      // console.log('layout', layout);
       this.topPos =
         (layout.viewportHeight - layout.leafScreenHeight) /
         2 /

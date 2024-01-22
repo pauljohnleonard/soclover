@@ -39,6 +39,7 @@ import { MatTableModule } from '@angular/material/table';
     NgxSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
     MatFormFieldModule,
     ReactiveFormsModule,
     MatIconModule,

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
-import { usersThatHaveLeaves, fetchLeavesSummary } from './app/api';
+import { usersThatHaveLeaves, fetchLeavesSummary, fetchLeaf } from './app/api';
 import { MongoDB } from './app/db/db';
 import { WaitingRoom } from './app/waitingroom';
 const cors = require('cors');
@@ -44,3 +44,4 @@ app.get('/', (req, res) => {
 
 app.get('/users-that-have-leaves', usersThatHaveLeaves);
 app.get('/fetch-leaves', fetchLeavesSummary);
+app.get('/fetch-leaf/:id', fetchLeaf);

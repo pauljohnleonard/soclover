@@ -4,6 +4,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 import { Leaf } from '@soclover/lib-soclover';
 import { MatTableDataSource } from '@angular/material/table';
+import { UiService } from '../../ui.service';
 
 @Component({
   selector: 'soclover-browse',
@@ -12,7 +13,7 @@ import { MatTableDataSource } from '@angular/material/table';
 })
 export class BrowseComponent implements OnInit {
   @ViewChild('paginator', { static: true }) paginator!: MatPaginator;
-  displayedColumns = ['date', 'name'];
+  displayedColumns = ['date', 'name', 'download'];
 
   leaves?: Leaf[];
   length = 50;
@@ -29,7 +30,7 @@ export class BrowseComponent implements OnInit {
 
   dataSource = new MatTableDataSource<Leaf>([]);
 
-  constructor(public api: RequestService) {}
+  constructor(public api: RequestService, public ui: UiService) {}
 
   async ngOnInit() {
     this.leaves = await this.api.get('/fetch-leaves');
@@ -37,20 +38,12 @@ export class BrowseComponent implements OnInit {
     this.dataSource.paginator = this.paginator;
   }
 
-  // handlePageEvent(e: PageEvent) {
-  //   this.pageEvent = e;
-  //   this.length = e.length;
-  //   this.pageSize = e.pageSize;
-  //   this.pageIndex = e.pageIndex;
-  // }
-
-  // setPageSizeOptions(setPageSizeOptionsInput: string) {
-  //   if (setPageSizeOptionsInput) {
-  //     this.pageSizeOptions = setPageSizeOptionsInput
-  //       .split(',')
-  //       .map((str) => +str);
-  //   }
-  // }
+  fetchLeaf(id: string) {
+    this.api.get(`/fetch-leaf/${id}`).then((leaf) => {
+      console.log(leaf);
+      this.ui.setSolveLeaf(leaf);
+    });
+  }
 
   formatDate(d: string): string {
     const date = new Date(d);

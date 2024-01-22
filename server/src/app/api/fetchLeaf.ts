@@ -1,16 +1,14 @@
 import { HandModel } from '../models/hand.model';
 
-export async function fetchLeavesSummary(req, res) {
+export async function fetchLeaf(req, res) {
   // Logic to retrieve list of users that have leaves in HandModel
 
   try {
-    const hands = await HandModel.find()
-      .select('playerName createdAt')
-      .sort({ timestamp: 1 })
-      .lean();
+    const id = req.params.id;
+    const hand = await HandModel.findById(id).lean();
 
     // Send the response with the list of users
-    res.json(hands);
+    res.json(hand);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
