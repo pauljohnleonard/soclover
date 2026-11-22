@@ -63,6 +63,7 @@ export enum MessageType {
   SELECT_SOLVE = 'SELECT_SOLVE',
   NEW_GAME = 'NEW_GAME',
   LIST_ACTIVE = 'LIST_ACTIVE',
+  REPORT_SOLVED = 'REPORT_SOLVED',
 }
 
 export enum SocloverStageEnum {
@@ -81,9 +82,19 @@ export interface Leaf {
   clues?: string[];
   hasUI?: boolean;
   submitted?: boolean;
+  /** Present when leaf was loaded from MongoDB */
+  _id?: string;
+  /** Display names of players who solved this leaf */
+  solvers?: string[];
+  createdAt?: string;
 }
+
+/** solver display name → leaf.playerName they are solving */
+export type PlayerFocus = { [solverName: string]: string };
 
 export type Game = {
   focusPlayerName?: string;
+  /** Who is currently solving which leaf (by leaf author name) */
+  playerFocus?: PlayerFocus;
   leaves: Leaf[];
 };

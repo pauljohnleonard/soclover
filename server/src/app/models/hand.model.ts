@@ -36,6 +36,10 @@ const handSchema = new mongoose.Schema(
       default: [],
       required: true,
     },
+    solvers: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

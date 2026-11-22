@@ -36,35 +36,48 @@ export class UiService {
         }
       }
 
-      // Update the focus player
-      // if (this.focusLeaf) {
-      //   const x = this.modelService.game?.leaves.find(
-      //     (player) => player.playerName === this.focusLeaf?.playerName
-      //   );
+      if (!message) {
+        return;
+      }
 
-      //   if (x) {
-      //     this.focusLeaf = x;
-      //   }
-      // }
+      // Re-bind focusLeaf to the live game copy after full STATE snapshots
+      if (message.type === 'STATE' && this.focusLeaf && !this.setting) {
+        const live =
+          (this.focusLeaf._id &&
+            this.modelService.game?.leaves.find(
+              (l) => l._id === this.focusLeaf?._id
+            )) ||
+          this.modelService.leafByAuthor(this.focusLeaf.playerName || '');
+        if (live) {
+          if (this.focusLeaf.hasUI && this.focusLeaf !== live) {
+            this.mergeSolveUi(this.focusLeaf, live);
+          }
+          this.focusLeaf = live;
+        }
+      }
 
-      if (message?.type === 'PATCH') {
+      if (message.type === 'PATCH') {
         if (
           this.focusLeaf &&
           message.playerName === this.focusLeaf?.playerName
         ) {
-          this.setSolveLeaf(this.focusLeaf);
+          // focusLeaf already mutated by applyPatch when it is the live copy
+          this.focusLeaf = this.modelService.leafByAuthor(
+            message.playerName || ''
+          ) || this.focusLeaf;
         }
-      } else if (message?.type === 'SELECT_SOLVE') {
+      } else if (message.type === 'SELECT_SOLVE') {
+        // Only auto-follow if already solving (not creating); join via Home otherwise
         if (
           !this.setting &&
+          this.focusLeaf &&
           message.playerName !== this.focusLeaf?.playerName
         ) {
-          const realPlayer = this.modelService.game?.leaves.find(
-            (player) => player.playerName === message.playerName
+          const realPlayer = this.modelService.leafByAuthor(
+            message.playerName || ''
           );
           if (realPlayer) {
-            this.focusLeaf = realPlayer;
-            this.setSolveLeaf(this.focusLeaf);
+            this.setSolveLeaf(realPlayer);
           }
         }
       }
@@ -136,11 +149,38 @@ export class UiService {
     return buttons;
   }
 
+  /** Copy drag/guess UI fields onto the shared room leaf after STATE refresh */
+  private mergeSolveUi(from: Leaf, to: Leaf) {
+    for (const card of from.cards || []) {
+      const target = to.cards.find((c) => c.slot === card.slot);
+      if (!target) {
+        continue;
+      }
+      target.guessSlot = card.guessSlot;
+      target.guessOrientation = card.guessOrientation || 0;
+      target.dragPos = card.dragPos;
+      target.draggee = card.draggee;
+      target.wrong = card.wrong;
+    }
+    to.hasUI = true;
+    to.solved = from.solved;
+  }
+
   setSolveLeaf(leaf: Leaf) {
     this.router.navigateByUrl('/solve');
     this.focusLeaf = leaf;
     this.focusPetal = undefined;
     this.setting = false;
+
+    // Prefer the live room copy so patches stay shared
+    const live =
+      (leaf._id &&
+        this.modelService.game?.leaves.find((l) => l._id === leaf._id)) ||
+      this.modelService.leafByAuthor(leaf.playerName || '');
+    if (live) {
+      this.focusLeaf = live;
+      leaf = live;
+    }
 
     // Cards from MongoDB omit UI fields; missing guessOrientation
     // becomes rotate(NaN) and stacks all four words on each card.
@@ -186,6 +226,7 @@ export class UiService {
     this.modelService.updateLeafUI(this.focusLeaf as Leaf);
 
     if (success) {
+      this.modelService.reportSolved(this.focusLeaf);
       this.status$.next(StatusEnum.SOLVED);
       this.right();
     } else {

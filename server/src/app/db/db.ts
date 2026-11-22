@@ -36,6 +36,22 @@ export class MongoDB {
   async saveHand(leaf: Leaf) {
     await this.ready$.toPromise();
     const res = await HandModel.create(leaf);
+    leaf._id = res._id.toString();
+    if (!leaf.solvers) {
+      leaf.solvers = [];
+    }
     console.log(res);
+    return res;
+  }
+
+  async addSolvers(leafId: string, solvers: string[]) {
+    if (!leafId || !solvers.length) {
+      return;
+    }
+    await this.ready$.toPromise();
+    await HandModel.updateOne(
+      { _id: leafId },
+      { $addToSet: { solvers: { $each: solvers } } }
+    );
   }
 }

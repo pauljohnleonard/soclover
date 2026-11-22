@@ -1,3 +1,8 @@
+<div class="browse-bar">
+  <button type="button" class="home-btn" (click)="ui.router.navigateByUrl('/home')">
+    Home
+  </button>
+</div>
 <table mat-table [dataSource]="dataSource">
   <!-- Symbol Column -->
   <ng-container matColumnDef="name">

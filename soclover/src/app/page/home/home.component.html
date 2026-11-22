@@ -1,55 +1,57 @@
 <div class="soclover top-container">
-  <!-- <h1>Soclover</h1> -->
+  <h2>Online</h2>
 
-  <h2>Options</h2>
-
-  <soclover-buttons class="buttons" [buttons]="gameButtons"> </soclover-buttons>
-
-  <h2>Active Players</h2>
-
-  <!-- <p>These are the players that are currently active.</p> -->
-  <div class="player-container">
-    <div *ngFor="let player of modelService.activePlayers || []">
+  <div class="player-container" *ngIf="onlinePlayers.length; else noPlayers">
+    <div class="player-row" *ngFor="let player of onlinePlayers">
       <div class="player">
         {{ player }}
+        <span class="status">— {{ solvingLabel(player) }}</span>
       </div>
+      <button
+        *ngIf="canJoin(player)"
+        type="button"
+        class="join-btn"
+        (click)="joinPlayer(player)"
+      >
+        Join
+      </button>
     </div>
   </div>
+  <ng-template #noPlayers>
+    <p class="hint">No one else is here yet.</p>
+  </ng-template>
 
-  <ng-container
-    *ngIf="!modelService.hasSetupLeaf() || this.modelService.soloMode"
-  >
-    <h2>Create Clover Leaf</h2>
+  <h2>Create</h2>
+  <p class="hint">Make a clover leaf and save it to the library.</p>
+  <soclover-buttons class="buttons" [buttons]="createButtons">
+  </soclover-buttons>
+  <h3 *ngIf="modelService.hasSetupLeaf()" class="submitted-note">
+    You have submitted a leaf this session — you can still make another.
+  </h3>
 
-    <!-- Click here to create a clover leaf for the the curent game. -->
+  <h2>Recent leaves</h2>
+  <p class="hint">Newest first. Open one to solve — others can join you.</p>
 
-    <soclover-buttons class="buttons" [buttons]="newleafButtons">
-    </soclover-buttons>
-  </ng-container>
-
-  <h2 *ngIf="modelService.hasSetupLeaf() && !this.modelService.soloMode">
-    You have submitted your clover leaf
-  </h2>
-
-  <ng-container *ngIf="!this.modelService.soloMode">
-    <h2 *ngIf="puzzleButtons.length">Clover Leaves to solve</h2>
-
-    <div *ngIf="puzzleButtons.length === 0">
-      <h2>Waiting a clover leaf</h2>
+  <div class="recent-list" *ngIf="visibleRecent.length; else noRecent">
+    <div class="recent-row" *ngFor="let leaf of visibleRecent">
+      <div class="recent-meta">
+        <span class="recent-author">{{ leaf.playerName }}</span>
+        <span class="recent-date">{{ formatDate(leaf.createdAt) }}</span>
+        <span class="solved-badge" *ngIf="iSolved(leaf)">Solved</span>
+      </div>
+      <button type="button" class="join-btn" (click)="openRecent(leaf)">
+        {{ iSolved(leaf) ? 'View' : 'Solve' }}
+      </button>
     </div>
+  </div>
+  <ng-template #noRecent>
+    <p class="hint">No saved leaves yet — create one above.</p>
+  </ng-template>
 
-    <ng-container *ngIf="puzzleButtons.length > 0">
-      <soclover-buttons class="buttons" [buttons]="puzzleButtons">
-      </soclover-buttons>
-    </ng-container>
-  </ng-container>
-
-  <ng-container *ngIf="this.modelService.soloMode">
-    <h2>Browse Leaves</h2>
-
+  <div class="browse-more">
     <soclover-buttons
       class="buttons"
       [buttons]="[browseButton]"
     ></soclover-buttons>
-  </ng-container>
+  </div>
 </div>

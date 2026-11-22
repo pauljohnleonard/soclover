@@ -25,7 +25,10 @@ export class SocloverRoom extends Room {
     );
   }
 
-  processMessage(message: SocloverMessage, fromConnection: RoomConnection) {
+  async processMessage(
+    message: SocloverMessage,
+    fromConnection: RoomConnection
+  ) {
     console.log(JSON.stringify(message));
     try {
       // const sendingPlayerName = this.connections.find(
@@ -49,7 +52,7 @@ export class SocloverRoom extends Room {
         };
 
         fromConnection.sendMessage(logonOk);
-
+        this.broadcastStateToConection(fromConnection);
         this.broadcastAll(this.listActivePlayers());
       }
 
@@ -83,7 +86,13 @@ export class SocloverRoom extends Room {
           break;
 
         case MessageType.SELECT_SOLVE:
+          // Optional leaf payload: promote library leaf into the live room
+          if (message.leaf) {
+            this.gameController.ensureLeafInGame(message.leaf);
+            message.playerName = message.leaf.playerName;
+          }
           this.gameController.setFocusPlayer(message);
+          this.broadcastStateToAll();
           this.broadcastOthers(message, fromConnection);
           return;
 
@@ -92,7 +101,11 @@ export class SocloverRoom extends Room {
           break;
 
         case MessageType.SEND_LEAF_WITH_CLUES:
-          this.gameController.addLeafToGame(message);
+          await this.gameController.addLeafToGame(message);
+          break;
+
+        case MessageType.REPORT_SOLVED:
+          await this.gameController.reportSolved(message);
           break;
       }
 
@@ -135,7 +148,12 @@ export class SocloverRoom extends Room {
     }
   }
 
-  closeConnectionImpl() {
+  cutConnection(c: RoomConnection) {
+    if (c.playerName) {
+      this.gameController.clearPlayerFocus(c.playerName);
+    }
+    super.cutConnection(c);
+    this.broadcastAll(this.listActivePlayers());
     this.broadcastStateToAll();
     console.log('closed');
   }

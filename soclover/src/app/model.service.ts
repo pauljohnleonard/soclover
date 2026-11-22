@@ -23,7 +23,6 @@ export class ModelService {
   subject$ = new BehaviorSubject<SocloverMessage | null>(null);
   game: Game | undefined;
   mySettingLeaf?: Leaf;
-  soloMode = false;
   newleavesubject$ = new Subject<Leaf>();
   activePlayers: string[] | undefined;
   rebuildButtons$ = new Subject<void>();
@@ -35,18 +34,14 @@ export class ModelService {
         return;
       }
 
-      // console.log('message', message);
       switch (rawMessage.type) {
         case MessageType.STATE:
-          // console.log('STATE CHANGE', messageTyped.game);
           this.game = message.game;
           this.mySettingLeaf = this.game?.leaves.find(
             (player) => player.playerName === this?.name
           );
-
-          if (!this.soloMode) break;
-
           this.subject$.next(rawMessage);
+          this.rebuildButtons$.next();
           break;
 
         case MessageType.LOGON_OK:
@@ -58,7 +53,6 @@ export class ModelService {
           break;
 
         case MessageType.PATCH:
-          if (this.soloMode) break;
           if (this.game) {
             console.log('PATCH', message);
             applyPatch(message, this.game);
@@ -68,12 +62,21 @@ export class ModelService {
 
         case MessageType.LIST_ACTIVE:
           this.activePlayers = message.activePlayers;
+          this.rebuildButtons$.next();
           break;
 
         case MessageType.SELECT_SOLVE:
           if (this.game) {
             console.log('SELECT SOLVE', message);
+            if (message.sender && message.playerName) {
+              if (!this.game.playerFocus) {
+                this.game.playerFocus = {};
+              }
+              this.game.playerFocus[message.sender] = message.playerName;
+            }
+            this.game.focusPlayerName = message.playerName;
             this.subject$.next(rawMessage);
+            this.rebuildButtons$.next();
           }
           break;
 
@@ -84,12 +87,62 @@ export class ModelService {
     });
   }
 
+  /** Leaf author name the given player is currently solving, if any */
+  solvingLeafAuthor(playerName: string): string | undefined {
+    return this.game?.playerFocus?.[playerName];
+  }
+
+  leafByAuthor(authorName: string): Leaf | undefined {
+    return this.game?.leaves.find((l) => l.playerName === authorName);
+  }
+
+  /** Keep a local copy in game.leaves so solve/join work before STATE returns */
+  ensureLocalLeaf(leaf: Leaf): Leaf {
+    if (!this.game) {
+      this.game = { leaves: [], playerFocus: {} };
+    }
+
+    const existing =
+      (leaf._id && this.game.leaves.find((l) => l._id === leaf._id)) ||
+      this.game.leaves.find((l) => l.playerName === leaf.playerName);
+
+    if (existing) {
+      return existing;
+    }
+
+    this.game.leaves.push(leaf);
+    return leaf;
+  }
+
   selectSolveLeafBroadcast(leaf: Leaf) {
+    const local = this.ensureLocalLeaf(leaf);
+
     const mess: SocloverMessage = {
-      playerName: leaf.playerName,
+      playerName: local.playerName,
+      leaf: local,
       type: MessageType.SELECT_SOLVE,
     };
     this.connection.doSend(mess);
+
+    // Optimistic local presence so Join shows immediately for self
+    if (this.name && local.playerName && this.game) {
+      if (!this.game.playerFocus) {
+        this.game.playerFocus = {};
+      }
+      this.game.playerFocus[this.name] = local.playerName;
+      this.game.focusPlayerName = local.playerName;
+      this.rebuildButtons$.next();
+    }
+
+    return local;
+  }
+
+  /**
+   * Open a leaf for solving (from library or session).
+   * Promotes library leaves into the live room so peers can join.
+   */
+  openLeafForSolve(leaf: Leaf): Leaf {
+    return this.selectSolveLeafBroadcast(leaf);
   }
 
   _updateUI(leaf: Leaf | undefined) {
@@ -114,7 +167,6 @@ export class ModelService {
     };
 
     const now = Date.now();
-    // console.log('Send patch:', JSON.stringify(patch, null, 2));
     this.lastUpdate = now;
     clearTimeout(this.timer);
     this.timer = null;
@@ -122,21 +174,17 @@ export class ModelService {
   }
 
   updateLeafUI(leaf: Leaf) {
-    if (!leaf || this.soloMode) {
+    if (!leaf) {
       return;
     }
 
     const now = Date.now();
-
     const delta = now - this.lastUpdate;
-    // console.log('delta', delta);
 
     if (delta > this.debounce) {
-      // console.log('update');
       this._updateUI(leaf);
     } else if (!this.timer) {
       const wait = now + this.debounce - this.lastUpdate;
-      // console.log('deffered update', wait);
       this.timer = setTimeout(() => {
         this._updateUI(leaf);
       }, wait);
@@ -146,6 +194,15 @@ export class ModelService {
   uploadLeaf(leaf: Leaf) {
     const message: SocloverMessage = {
       type: MessageType.SEND_LEAF_WITH_CLUES,
+      leaf,
+    };
+    this.connection.doSend(message);
+  }
+
+  reportSolved(leaf: Leaf) {
+    const message: SocloverMessage = {
+      type: MessageType.REPORT_SOLVED,
+      playerName: leaf.playerName,
       leaf,
     };
     this.connection.doSend(message);
@@ -173,11 +230,6 @@ export class ModelService {
   }
 
   hasSetupLeaf(): boolean {
-    return !!this.mySettingLeaf?.clues;
-  }
-
-  toggleMode() {
-    this.soloMode = !this.soloMode;
-    this.rebuildButtons$.next();
+    return !!this.mySettingLeaf?.submitted || !!this.mySettingLeaf?.clues;
   }
 }

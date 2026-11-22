@@ -51,14 +51,92 @@
 .player-container {
   margin-left: 20px;
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: calc(100% - 20px);
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
-  gap: 5px;
-  width: 100%;
 }
 
 .player {
   background-color: rgb(164, 249, 156);
   border: 1px solid black;
   border-radius: 5px;
-  padding: 0px 4px;
+  padding: 4px 8px;
+}
+
+.player .status {
+  font-weight: normal;
+  opacity: 0.85;
+}
+
+.join-btn {
+  cursor: pointer;
+  padding: 4px 12px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.hint {
+  margin: 0 20px 8px;
+  opacity: 0.8;
+  font-size: 0.95rem;
+}
+
+.submitted-note {
+  margin: 8px 20px;
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+.recent-list {
+  margin: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.recent-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.recent-author {
+  font-weight: 600;
+}
+
+.recent-date {
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.solved-badge {
+  background: rgb(164, 249, 156);
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.85rem;
+}
+
+.browse-more {
+  margin-top: 12px;
 }

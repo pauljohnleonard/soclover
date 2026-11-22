@@ -41,7 +41,12 @@ export class BrowseComponent implements OnInit {
   fetchLeaf(id: string) {
     this.api.get(`/fetch-leaf/${id}`).then((leaf) => {
       console.log(leaf);
-      this.ui.setSolveLeaf(leaf);
+      if (leaf?._id) {
+        leaf._id = String(leaf._id);
+      }
+      // Promote into the live room so peers can Join and sync
+      const live = this.ui.modelService.openLeafForSolve(leaf);
+      this.ui.setSolveLeaf(live);
     });
   }
 
