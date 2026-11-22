@@ -10,4 +10,10 @@ export class RequestService {
   get(path: string): Promise<any> {
     return this.http.get<any>(environment.API_URL + path).toPromise();
   }
+
+  post(path: string, body: unknown = {}): Promise<any> {
+    return this.http
+      .post<any>(environment.API_URL + path, body)
+      .toPromise();
+  }
 }

@@ -22,9 +22,13 @@
   </ng-template>
 
   <h2>Create</h2>
-  <p class="hint">Make a clover leaf and save it to the library.</p>
+  <p class="hint">
+    Plant a blank leaf, or generate one with AI clues (review before upload).
+  </p>
   <soclover-buttons class="buttons" [buttons]="createButtons">
   </soclover-buttons>
+  <p class="hint" *ngIf="generating">Generating puzzle…</p>
+  <p class="error-hint" *ngIf="generateError">{{ generateError }}</p>
   <h3 *ngIf="modelService.hasSetupLeaf()" class="submitted-note">
     You have submitted a leaf this session — you can still make another.
   </h3>

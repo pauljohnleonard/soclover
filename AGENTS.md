@@ -17,6 +17,7 @@ Path alias: `@soclover/lib-soclover` → `lib-soclover/src/index.ts` (see `tscon
 
 ```bash
 brew services start mongodb-community   # mongodb://localhost:27017/soclover
+# Optional: OPENAI_API_KEY in repo-root .env (AI Generate on home)
 npm run server                          # nx serve server
 npm run soclover                        # nx serve soclover → http://0.0.0.0:4200
 ```

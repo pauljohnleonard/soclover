@@ -12,11 +12,13 @@ Multiplayer clover-leaf word puzzle. Create a leaf (five word cards + four clues
 
 - Node.js (repo uses Angular/Nx 17-era tooling)
 - MongoDB locally: `brew services start mongodb-community`
+- Optional: `OPENAI_API_KEY` in a repo-root `.env` for **AI Generate puzzle** on the home screen (`OPENAI_MODEL` defaults to `gpt-4o-mini`)
 
 ## Develop
 
 ```bash
 npm install
+# echo 'OPENAI_API_KEY=sk-...' >> .env   # required for Generate
 npm run server     # WebSocket + API on :3055
 npm run soclover   # Angular app on :4200
 ```

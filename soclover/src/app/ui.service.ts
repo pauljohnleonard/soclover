@@ -102,6 +102,17 @@ export class UiService {
     });
   }
 
+  /** Open make-leaf with an AI-generated (or otherwise ready) leaf for review. */
+  openGeneratedLeaf(leaf: Leaf) {
+    leaf.playerName = this.modelService.name;
+    leaf.submitted = false;
+    this.focusLeaf = leaf;
+    this.focusPetal = undefined;
+    this.setting = true;
+    this.guessing = false;
+    this.router.navigateByUrl('/makeleaf');
+  }
+
   get solveButtons() {
     const buttons: Button[] = [this.backButton];
 

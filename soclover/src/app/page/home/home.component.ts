@@ -25,6 +25,8 @@ export class HomeComponent implements OnInit {
   browseButton!: Button;
   recentLeaves: LeafSummary[] = [];
   recentLimit = 12;
+  generating = false;
+  generateError = '';
 
   constructor(
     public connection: ConnectionService,
@@ -91,7 +93,43 @@ export class HomeComponent implements OnInit {
           await this.uiService.makeNewLeaf();
         },
       },
+      {
+        text: '',
+        id: 'cognition',
+        disabled: this.generating,
+        click: async () => {
+          await this.generatePuzzle();
+        },
+      },
     ];
+  }
+
+  async generatePuzzle() {
+    if (this.generating) {
+      return;
+    }
+    this.generating = true;
+    this.generateError = '';
+    this.makeCreateButtons();
+    this.cdr.detectChanges();
+
+    try {
+      const leaf = (await this.api.post('/generate-leaf')) as Leaf;
+      if (!leaf?.cards?.length || !leaf?.clues?.length) {
+        throw new Error('Invalid generated leaf');
+      }
+      this.uiService.openGeneratedLeaf(leaf);
+    } catch (err: any) {
+      console.error(err);
+      this.generateError =
+        err?.error?.error ||
+        err?.message ||
+        'Could not generate a puzzle. Check OPENAI_API_KEY on the server.';
+    } finally {
+      this.generating = false;
+      this.makeCreateButtons();
+      this.cdr.detectChanges();
+    }
   }
 
   get onlinePlayers(): string[] {
