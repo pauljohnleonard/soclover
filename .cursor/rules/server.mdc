@@ -1,0 +1,14 @@
+---
+description: Game server conventions
+globs: server/**/*.ts
+alwaysApply: false
+---
+
+# Server
+
+- Entry: `server/src/main.ts` — Express + `ws` on 3055
+- Flow: `WaitingRoom` → `SocloverRoom.processMessage` → `GameController`
+- Hands: `makeHand()` / word lists under `server/src/assets/` and `words.ts`
+- Persistence: `MongoDB` singleton + `HandModel` (`mongodb://localhost:27017/soclover`)
+- REST is read-oriented (`fetch-leaves`, `fetch-leaf`, `users-that-have-leaves`); gameplay is WebSocket
+- Import shared types from `@soclover/lib-soclover`; keep message handling aligned with `MessageType`

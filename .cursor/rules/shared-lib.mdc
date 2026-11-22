@@ -1,0 +1,14 @@
+---
+description: Shared lib-soclover contracts
+globs: lib-soclover/**/*.ts
+alwaysApply: false
+---
+
+# lib-soclover
+
+Public API is `src/index.ts` (re-exports `classes` + `applyPatch`).
+
+- `Card`, `Leaf`, `Game`, `SocloverMessage`, `MessageType` are the wire/domain contracts — changing them affects client and server
+- `applyPatch` merges card patch fields onto a leaf by `playerName` + `slot`
+- `cardUImembers` lists UI-only card fields — keep in sync if you add drag/guess properties
+- Prefer additive, backwards-compatible message fields over breaking renames

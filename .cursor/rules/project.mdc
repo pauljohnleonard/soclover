@@ -1,0 +1,16 @@
+---
+description: Soclover project context for every session
+alwaysApply: true
+---
+
+# Soclover
+
+Nx monorepo: Angular client (`soclover/`), Express+WS server (`server/` port 3055), shared package `@soclover/lib-soclover`.
+
+Game loop: create leaf → write 4 clues → submit → others solve by arranging/rotating cards. Sync via WebSocket `PATCH` / `STATE` messages; MongoDB stores submitted leaves.
+
+- Shared types/protocol only in `lib-soclover`
+- Client env: `environments/environment.ts` (`localserver` toggle)
+- Do not commit secrets, `.env`, or `*.pem`
+- Prefer focused diffs; match existing NgModule Angular style
+- Full map: see `AGENTS.md`

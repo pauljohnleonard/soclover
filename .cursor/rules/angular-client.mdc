@@ -1,0 +1,14 @@
+---
+description: Angular client conventions (soclover app)
+globs: soclover/**/*.{ts,html,scss}
+alwaysApply: false
+---
+
+# Angular client
+
+- Selector prefix: `soclover-`
+- Services (root): `ConnectionService` (WS), `ModelService` (game state), `UiService` (set/solve UI), `LayoutService`
+- Routes in `app.routes.ts`; auth gate via `ConnectionService.canActivate()`
+- Leaf geometry/UI constants: `leafData.ts` — keep SVG/layout math there, not scattered
+- When changing sync: update via `ModelService` patches; strip UI-only fields with `cardUImembers` where relevant
+- Styles: SCSS colocated with components; global in `styles.scss`
