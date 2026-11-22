@@ -110,6 +110,7 @@ export class LeafComponent implements OnInit, OnDestroy {
 
   wordTransformFlip(card: Card, word_i: number): string {
     let slot = 0;
+    const orientation = card.guessOrientation || 0;
 
     if (!this.uiService.setting) {
       if (card.guessSlot !== undefined && card.guessSlot >= 0) {
@@ -119,7 +120,7 @@ export class LeafComponent implements OnInit, OnDestroy {
       slot = card.slot;
     }
 
-    return (word_i + slot + 1 + card.guessOrientation) % 4 > 1
+    return (word_i + slot + 1 + orientation) % 4 > 1
       ? 'rotate( 180 0 -1)'
       : '';
   }
@@ -129,7 +130,8 @@ export class LeafComponent implements OnInit, OnDestroy {
       return 'rotate(' + card.slot * 90 + ')';
     } else {
       if (!card.draggee) {
-        if (card.guessSlot && card.guessSlot >= 0) {
+        // guessSlot 0 is valid — don't use truthiness
+        if (card.guessSlot !== undefined && card.guessSlot >= 0) {
           return 'rotate(' + card.guessSlot * 90 + ')';
         }
       }

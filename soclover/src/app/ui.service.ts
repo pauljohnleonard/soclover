@@ -141,16 +141,24 @@ export class UiService {
     this.focusLeaf = leaf;
     this.focusPetal = undefined;
     this.setting = false;
-    // this.cards = leaf.cards;
 
+    // Cards from MongoDB omit UI fields; missing guessOrientation
+    // becomes rotate(NaN) and stacks all four words on each card.
     if (!leaf.hasUI) {
-      for (let i = 0; i < 5; i++) {
-        const card = this.focusLeaf.cards[i];
-
+      for (let i = 0; i < leaf.cards.length; i++) {
+        const card = leaf.cards[i];
         card.guessSlot = -(i + 1);
+        card.guessOrientation = card.guessOrientation || 0;
+        card.wrong = false;
+        card.draggee = undefined;
+        card.dragPos = undefined;
       }
       leaf.hasUI = true;
       this.modelService.updateLeafUI(leaf);
+    } else {
+      for (const card of leaf.cards) {
+        card.guessOrientation = card.guessOrientation || 0;
+      }
     }
   }
 

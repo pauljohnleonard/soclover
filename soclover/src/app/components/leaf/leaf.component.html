@@ -239,7 +239,7 @@
                     <g
                       [attr.transform]="
                         'rotate(' +
-                        (word_i + card.guessOrientation) * 90 +
+                        (word_i + (card.guessOrientation || 0)) * 90 +
                         ' ' +
                         (leafData.cardPad + leafData.cardWidth) / 2 +
                         ' ' +
