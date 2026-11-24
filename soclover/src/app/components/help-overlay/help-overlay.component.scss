@@ -1,0 +1,91 @@
+.help-fab {
+  position: absolute;
+  top: 4px;
+  right: 44px;
+  z-index: 200;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #000;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.help-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+
+.help-panel {
+  width: min(420px, 100%);
+  max-height: min(80vh, 560px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid #000;
+  border-radius: 12px;
+  background: #fff8e7;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.help-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.help-close {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.help-body {
+  overflow: auto;
+  flex: 1;
+}
+
+.help-body p {
+  margin: 0 0 10px;
+  line-height: 1.4;
+  font-size: 1rem;
+}
+
+.help-body p:last-child {
+  margin-bottom: 0;
+}
+
+.help-got-it {
+  align-self: flex-end;
+  padding: 8px 16px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: rgb(164, 249, 156);
+  font-weight: 600;
+  cursor: pointer;
+}

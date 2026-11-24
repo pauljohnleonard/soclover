@@ -27,6 +27,7 @@ export class HomeComponent implements OnInit {
   recentLimit = 12;
   generating = false;
   generateError = '';
+  generateLeafEnabled = false;
 
   constructor(
     public connection: ConnectionService,
@@ -44,6 +45,7 @@ export class HomeComponent implements OnInit {
       this.cdr.detectChanges();
     });
     this.makeCreateButtons();
+    this.loadFeatures();
     this.loadRecentLeaves();
 
     this.browseButton = {
@@ -53,6 +55,20 @@ export class HomeComponent implements OnInit {
         this.router.navigateByUrl('/browse');
       },
     };
+  }
+
+  async loadFeatures() {
+    try {
+      const features = (await this.api.get('/features')) as {
+        generateLeaf?: boolean;
+      };
+      this.generateLeafEnabled = !!features?.generateLeaf;
+    } catch (err) {
+      console.error(err);
+      this.generateLeafEnabled = false;
+    }
+    this.makeCreateButtons();
+    this.cdr.detectChanges();
   }
 
   async loadRecentLeaves() {
@@ -85,7 +101,7 @@ export class HomeComponent implements OnInit {
   }
 
   makeCreateButtons() {
-    this.createButtons = [
+    const buttons: Button[] = [
       {
         text: '',
         id: 'plant',
@@ -93,15 +109,18 @@ export class HomeComponent implements OnInit {
           await this.uiService.makeNewLeaf();
         },
       },
-      {
+    ];
+    if (this.generateLeafEnabled) {
+      buttons.push({
         text: '',
         id: 'cognition',
         disabled: this.generating,
         click: async () => {
           await this.generatePuzzle();
         },
-      },
-    ];
+      });
+    }
+    this.createButtons = buttons;
   }
 
   async generatePuzzle() {
@@ -121,6 +140,11 @@ export class HomeComponent implements OnInit {
       this.uiService.openGeneratedLeaf(leaf);
     } catch (err: any) {
       console.error(err);
+      const status = err?.status;
+      // Key missing/rejected — hide the AI button rather than leaving a dead control
+      if (status === 401 || status === 403 || status === 503) {
+        this.generateLeafEnabled = false;
+      }
       this.generateError =
         err?.error?.error ||
         err?.message ||
@@ -144,6 +168,11 @@ export class HomeComponent implements OnInit {
     const author = this.modelService.solvingLeafAuthor(player);
     if (!author) {
       return 'idle';
+    }
+    const leaf = this.modelService.leafByAuthor(author);
+    const n = leaf?.guesses?.[player] || 0;
+    if (n > 0) {
+      return `solving ${author}'s leaf · ${n} guess${n === 1 ? '' : 'es'}`;
     }
     return `solving ${author}'s leaf`;
   }
@@ -169,7 +198,8 @@ export class HomeComponent implements OnInit {
     if (!leaf) {
       return;
     }
-    this.uiService.setSolveLeaf(leaf);
+    // Case 3: join that player's shared board
+    this.uiService.setSolveLeaf(leaf, { joinHost: player });
     this.modelService.selectSolveLeafBroadcast(leaf);
   }
 

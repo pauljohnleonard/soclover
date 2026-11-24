@@ -12,22 +12,6 @@
 >
   <defs>
     <!--  TOOLS -->
-    <g fill="#000000" id="bin" style="cursor: pointer">
-      <rect
-        x="-7"
-        y="-7"
-        width="15"
-        height="15"
-        rx="2"
-        fill="transparent"
-      ></rect>
-
-      <use
-        xlink:href="assets/icons/delete.svg#delete"
-        transform="scale(0.5) translate(-11,-11)"
-      />
-    </g>
-
     <g id="spin" style="cursor: pointer">
       <rect
         x="-7"
@@ -217,15 +201,12 @@
         <ng-container *ngIf="leaf">
           <ng-container *ngFor="let card of sortedCards; let card_i = index">
             <g
-              *ngIf="!setting || card_i < 4"
               [attr.transform]="cardTransformPosition(card)"
-              (mousedown)="
-                !setting && !isTouch ? mouseDownCard($event, card) : null
-              "
-              (mouseup)="!setting && !isTouch ? mouseUpCard($event) : null"
-              (touchstart)="
-                isTouch && !setting ? touchStartCard($event, card) : null
-              "
+              [attr.data-guess-slot]="card.guessSlot"
+              [attr.pointer-events]="isDragging ? 'none' : null"
+              (mousedown)="!isTouch ? mouseDownCard($event, card) : null"
+              (mouseup)="!isTouch ? mouseUpCard($event) : null"
+              (touchstart)="isTouch ? touchStartCard($event, card) : null"
             >
               <g transform="rotate(45)">
                 <g [attr.transform]="cardTransformSpin(card)">
@@ -268,34 +249,24 @@
                   </ng-container>
 
                   <use xlink:href="#wrong" *ngIf="card.wrong" />
+
+                  <use
+                    *ngIf="
+                      focusPlayer &&
+                      card.guessSlot !== undefined &&
+                      card.guessSlot >= 0 &&
+                      !card.draggee
+                    "
+                    xlink:href="#spin"
+                    [attr.x]="(leafData.cardPad + leafData.cardWidth) / 2"
+                    [attr.y]="(leafData.cardPad + leafData.cardWidth) / 2"
+                    (mousedown)="$event.stopPropagation()"
+                    (touchstart)="$event.stopPropagation()"
+                    (click)="toolClick(card, 'spin', $event)"
+                    [attr.data-spin]="card.guessSlot"
+                  />
                 </g>
               </g>
-            </g>
-            <g
-              transform="translate(-10,0)"
-              *ngIf="
-                !setting &&
-                focusPlayer &&
-                card.guessSlot !== undefined &&
-                card.guessSlot >= 0 &&
-                !card.draggee
-              "
-            >
-              <use
-                xlink:href="#bin"
-                [attr.x]="leafData.tools[card.guessSlot].binX"
-                [attr.y]="leafData.tools[card.guessSlot].binY"
-                (click)="toolClick(card, 'bin', $event)"
-                [attr.data-bin]="card.guessSlot"
-              />
-
-              <use
-                xlink:href="#spin"
-                [attr.x]="leafData.tools[card.guessSlot].spinX"
-                [attr.y]="leafData.tools[card.guessSlot].spinY"
-                (click)="toolClick(card, 'spin', $event)"
-                [attr.data-spin]="card.guessSlot"
-              />
             </g>
           </ng-container>
         </ng-container>

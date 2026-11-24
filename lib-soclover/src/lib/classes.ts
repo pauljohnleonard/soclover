@@ -20,7 +20,18 @@ export const cardUImembers = [
   'guessSlot',
   'draggee',
   'wrong',
+  'heapSlot',
 ];
+
+/** Per-player card placement on a leaf (solve UI). */
+export type CardLayout = {
+  slot: number;
+  guessSlot?: number;
+  guessOrientation: number;
+  dragPos?: { x: number; y: number };
+  wrong?: boolean;
+  heapSlot?: number;
+};
 
 // export type Hand = {
 //   hasUI: boolean;
@@ -41,6 +52,8 @@ export interface SocloverMessage extends Message {
   clues?: string[];
   cards?: Card[];
   playerName?: string;
+  /** Whose solve layout a PATCH updates (defaults to sender). */
+  layoutOwner?: string;
   newLeaf?: Leaf;
   leaf?: Leaf;
   activePlayers?: string[];
@@ -64,6 +77,7 @@ export enum MessageType {
   NEW_GAME = 'NEW_GAME',
   LIST_ACTIVE = 'LIST_ACTIVE',
   REPORT_SOLVED = 'REPORT_SOLVED',
+  REPORT_GUESS = 'REPORT_GUESS',
 }
 
 export enum SocloverStageEnum {
@@ -86,6 +100,10 @@ export interface Leaf {
   _id?: string;
   /** Display names of players who solved this leaf */
   solvers?: string[];
+  /** Per-player guess attempt counts (display name → count) */
+  guesses?: { [playerName: string]: number };
+  /** Per-player board placements while solving (in-room) */
+  layouts?: { [playerName: string]: CardLayout[] };
   createdAt?: string;
 }
 

@@ -104,6 +104,10 @@ export class SocloverRoom extends Room {
           await this.gameController.addLeafToGame(message);
           break;
 
+        case MessageType.REPORT_GUESS:
+          await this.gameController.reportGuess(message);
+          break;
+
         case MessageType.REPORT_SOLVED:
           await this.gameController.reportSolved(message);
           break;

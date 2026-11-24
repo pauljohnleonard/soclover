@@ -1,0 +1,35 @@
+<button
+  type="button"
+  class="help-fab"
+  title="Help"
+  aria-label="Help"
+  (click)="show()"
+>
+  ?
+</button>
+
+<div
+  class="help-backdrop"
+  *ngIf="open"
+  (click)="dismiss()"
+  role="presentation"
+>
+  <div
+    class="help-panel"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="page.title"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="help-header">
+      <h2>{{ page.title }}</h2>
+      <button type="button" class="help-close" (click)="dismiss()" aria-label="Close">
+        ×
+      </button>
+    </div>
+    <div class="help-body">
+      <p *ngFor="let paragraph of page.paragraphs">{{ paragraph }}</p>
+    </div>
+    <button type="button" class="help-got-it" (click)="dismiss()">Got it</button>
+  </div>
+</div>

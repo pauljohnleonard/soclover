@@ -6,8 +6,10 @@ export enum StatusEnum {
 }
 
 export type Button = {
-  text: string; // Displayed text
-  id: string; // The id of the button used to select it from the svg ids.
+  text: string; // Caption above the control
+  id: string; // Icon id under assets/icons (ignored when label is set)
+  /** Text drawn inside the button instead of an icon (e.g. "Guess") */
+  label?: string;
   leaf?: Leaf | null;
   click: () => void; // Action
   disabled?: boolean;
@@ -111,6 +113,7 @@ export const leafData = {
     { x: 70, y: -190 },
     { x: -70, y: 90 },
     { x: 70, y: 90 },
-    { x: 0, y: 140 },
+    // Fifth (decoy) above the top heap row (½ card higher to clear overlap)
+    { x: 0, y: -190 - cardWidth / 2 },
   ],
 };

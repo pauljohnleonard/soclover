@@ -40,6 +40,10 @@ const handSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    guesses: {
+      type: Object,
+      default: {},
+    },
   },
   { timestamps: true }
 );

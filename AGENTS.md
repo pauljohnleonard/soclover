@@ -26,10 +26,10 @@ Set `localserver = true` in `environments/environment.ts` for local WS/API.
 
 ## Deploy
 
-- Client: `./deploy_soclover.sh` → `nx b soclover --configuration=production` + Firebase Hosting (`dist/soclover`)
-- Server: `./deploy_server.sh` → build + `scp` to `soclover-server.drpjl.com` (needs `PAULS_SERVER_KEY.pem`, gitignored)
+- **Production:** `./deploy_production.sh` — build, rsync to ThinkCentre, restart PM2 `soclover`, ensure `soclover-mongo`, sync scripts, smoke-test LAN + `https://soclover.drpjl.com`. Use `--nginx` to (re)install the nginx/certbot vhost (sudo). Optional `CLOUDFLARE_API_TOKEN=... ./deploy_production.sh --dns`.
+- Internals (usually don’t run directly): `deploy_thinkcentre.sh` (app build/rsync/PM2), `scripts/install-nginx-soclover.sh`, `scripts/cloudflare-dns-soclover.sh`.
 
-Prod URLs (when `localserver` is false): `wss://soclover-server.drpjl.com/soclover`, `https://soclover-server.drpjl.com/soclover`.
+ThinkCentre `.env` lives at `~/soclover/.env` on the box (`MONGODB_URI`, optional `OPENAI_API_KEY`).
 
 ## Domain model (shared)
 

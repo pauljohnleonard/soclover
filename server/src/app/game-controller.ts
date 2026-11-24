@@ -53,9 +53,36 @@ export class GameController {
       solved: false,
       submitted: true,
       solvers: leaf.solvers ? [...leaf.solvers] : [],
+      guesses: leaf.guesses ? { ...leaf.guesses } : {},
+      layouts: leaf.layouts ? { ...leaf.layouts } : {},
     };
     this.game.leaves.push(promoted);
     return promoted;
+  }
+
+  /** Increment the sender's guess count on this leaf. */
+  async reportGuess(message: SocloverMessage): Promise<Leaf | undefined> {
+    const leaf =
+      this.findLeaf({
+        _id: message.leaf?._id,
+        playerName: message.playerName || message.leaf?.playerName,
+      }) ||
+      (message.leaf ? this.ensureLeafInGame(message.leaf) : undefined);
+
+    if (!leaf || !message.sender) {
+      return undefined;
+    }
+
+    if (!leaf.guesses) {
+      leaf.guesses = {};
+    }
+    leaf.guesses[message.sender] = (leaf.guesses[message.sender] || 0) + 1;
+
+    if (leaf._id) {
+      await MongoDB.instance.setGuesses(String(leaf._id), leaf.guesses);
+    }
+
+    return leaf;
   }
 
   findLeaf(leaf: Partial<Leaf>): Leaf | undefined {
@@ -136,6 +163,12 @@ export class GameController {
     }
 
     message.leaf.submitted = true;
+    if (!message.leaf.guesses) {
+      message.leaf.guesses = {};
+    }
+    if (!message.leaf.layouts) {
+      message.leaf.layouts = {};
+    }
 
     const existingIndex = this.game.leaves.findIndex(
       (l) => l.playerName === message.leaf?.playerName

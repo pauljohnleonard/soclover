@@ -8,10 +8,30 @@
     </soclover-leaf>
     <soclover-buttons class="buttons" [buttons]="uiService.leafViewButtons">
     </soclover-buttons>
-    <soclover-custom-keyboard
-      class="keyboard"
-      *ngIf="uiService.setting"
-    ></soclover-custom-keyboard>
+    <div
+      class="guess-scoreboard"
+      *ngIf="!uiService.setting && uiService.guessScoreboard.length"
+    >
+      <div class="guess-title">Guesses</div>
+      <div
+        class="guess-row"
+        *ngFor="let row of uiService.guessScoreboard"
+      >
+        <span class="guess-name">{{ row.name }}</span>
+        <span class="guess-count">{{ row.count }}</span>
+      </div>
+    </div>
+    <div class="keyboard-area" *ngIf="uiService.setting">
+      <button
+        type="button"
+        class="dice-btn"
+        title="Randomize cards"
+        (click)="uiService.randomizeSettingCards()"
+      >
+        <img src="assets/icons/casino.svg" alt="Dice" width="28" height="28" />
+      </button>
+      <soclover-custom-keyboard class="keyboard"></soclover-custom-keyboard>
+    </div>
   </div>
 </div>
 <div id="fireworks" class="fireworks"></div>

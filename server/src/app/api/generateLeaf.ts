@@ -6,18 +6,32 @@ import {
 import axios from 'axios';
 import { words } from '../words';
 
-const SYSTEM_PROMPT = `You invent clover-leaf word puzzles.
-Return ONLY valid JSON with this shape:
+const SYSTEM_PROMPT = `You invent clover-leaf word puzzles for a party game.
+Return ONLY valid JSON:
 {"pairs":[{"wordA":"...","wordB":"...","clue":"..."},{"wordA":"...","wordB":"...","clue":"..."},{"wordA":"...","wordB":"...","clue":"..."},{"wordA":"...","wordB":"...","clue":"..."}]}
 
-Rules:
+Each petal shows one clue. Solvers arrange cards so the two words touching that petal are linked by the clue.
+
+Hard rules:
 - Exactly 4 pairs.
-- wordA, wordB, and clue are short English tokens (prefer a single word; clue may be 1-3 words).
-- The clue must connect wordA and wordB (association, compound, category, or shared phrase).
-- Do not reuse wordA or wordB as the clue.
-- Family-friendly; no proper nouns that need obscure knowledge.
-- Prefer common words that fit on a small card (uppercase is fine).
-- All eight edge words across the four pairs should be distinct.`;
+- wordA, wordB, and clue are EACH exactly ONE English word: letters A-Z only (no spaces, hyphens, digits, or punctuation).
+- Clue must NOT equal wordA or wordB.
+- All eight edge words (wordA/wordB across pairs) must be distinct.
+- All four clues must be distinct.
+- Common, family-friendly words only.
+
+What makes a good clue (in priority order):
+1) Compound / set phrase: the clue + one edge word, or the two edge words together, form a familiar compound or fixed phrase.
+2) Shared category: both edge words are clear, equal members of the clue (e.g. TREE + FLOWER → PLANT).
+3) Shared property both words obviously have (e.g. TREE + CAR → TRUNK).
+
+Reject vague free-association (e.g. LOVE linking unrelated words).
+
+Good examples:
+{"wordA":"MOON","wordB":"LIGHT","clue":"NIGHT"}
+{"wordA":"TREE","wordB":"CAR","clue":"TRUNK"}
+{"wordA":"BUTTER","wordB":"FLY","clue":"INSECT"}
+{"wordA":"RAIN","wordB":"BOW","clue":"ARC"}`;
 
 function fillerWords(count: number, avoid: Set<string>): string[] {
   const out: string[] = [];
@@ -45,6 +59,10 @@ function normalizePairs(raw: unknown): PetalPair[] {
     throw new Error('Model did not return exactly 4 pairs');
   }
 
+  const singleWord = /^[A-Z]+$/;
+  const edgeWords = new Set<string>();
+  const clues = new Set<string>();
+
   return obj.pairs.map((p, i) => {
     const wordA = String(p.wordA || '')
       .trim()
@@ -58,15 +76,43 @@ function normalizePairs(raw: unknown): PetalPair[] {
     if (!wordA || !wordB || !clue) {
       throw new Error(`Pair ${i} missing wordA, wordB, or clue`);
     }
+    for (const [label, value] of [
+      ['wordA', wordA],
+      ['wordB', wordB],
+      ['clue', clue],
+    ] as const) {
+      if (!singleWord.test(value)) {
+        throw new Error(
+          `Pair ${i} ${label} must be a single word (letters only): "${value}"`
+        );
+      }
+    }
+    if (clue === wordA || clue === wordB) {
+      throw new Error(`Pair ${i} clue must not reuse wordA/wordB`);
+    }
+    if (edgeWords.has(wordA) || edgeWords.has(wordB)) {
+      throw new Error(`Pair ${i} reuses an edge word`);
+    }
+    if (clues.has(clue)) {
+      throw new Error(`Pair ${i} reuses clue "${clue}"`);
+    }
+    edgeWords.add(wordA);
+    edgeWords.add(wordB);
+    clues.add(clue);
     return { wordA, wordB, clue };
   });
 }
 
+function hasOpenAIApiKey(): boolean {
+  const key = process.env.OPENAI_API_KEY;
+  return typeof key === 'string' && key.trim().length > 0;
+}
+
 async function callOpenAI(): Promise<PetalPair[]> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  if (!hasOpenAIApiKey()) {
     throw new Error('OPENAI_API_KEY is not set');
   }
+  const apiKey = process.env.OPENAI_API_KEY!.trim();
 
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
@@ -74,14 +120,14 @@ async function callOpenAI(): Promise<PetalPair[]> {
     'https://api.openai.com/v1/chat/completions',
     {
       model,
-      temperature: 0.9,
+      temperature: 0.55,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         {
           role: 'user',
           content:
-            'Generate one fresh clover-leaf puzzle with four creative pairs and clues.',
+            'Generate one clover-leaf puzzle: four pairs, each with a single-word clue that tightly links wordA and wordB. Favour compounds, set phrases, or clear shared categories over vague associations.',
         },
       ],
     },
@@ -100,6 +146,12 @@ async function callOpenAI(): Promise<PetalPair[]> {
   }
 
   return normalizePairs(JSON.parse(content));
+}
+
+export function features(req, res) {
+  res.json({
+    generateLeaf: hasOpenAIApiKey(),
+  });
 }
 
 export async function generateLeaf(req, res) {
@@ -122,9 +174,21 @@ export async function generateLeaf(req, res) {
     });
   } catch (error: any) {
     console.error('generateLeaf', error?.response?.data || error);
-    const status = error?.message?.includes('OPENAI_API_KEY') ? 503 : 500;
+    const openaiStatus = error?.response?.status;
+    const missingKey = error?.message?.includes('OPENAI_API_KEY');
+    const status =
+      openaiStatus === 401 || openaiStatus === 403
+        ? openaiStatus
+        : missingKey
+          ? 503
+          : typeof openaiStatus === 'number'
+            ? openaiStatus
+            : 500;
     res.status(status).json({
-      error: error?.message || 'Failed to generate leaf',
+      error:
+        openaiStatus === 401 || openaiStatus === 403
+          ? 'OpenAI rejected the API key'
+          : error?.message || 'Failed to generate leaf',
     });
   }
 }

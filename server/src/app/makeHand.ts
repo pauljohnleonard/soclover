@@ -7,9 +7,13 @@ export function makeHand(): Card[] {
   const cards: Card[] = [];
   shuffleArray(heapSlots);
 
+  // Fresh without-replacement draw so a hand never repeats a physical card
+  words.makeAvailable();
+
   for (let i = 0; i < 5; i++) {
     const card = makeCard(i);
     card.heapSlot = heapSlots[i];
+    card.guessSlot = -(i + 1);
     cards.push(card);
   }
 
@@ -24,16 +28,12 @@ function shuffleArray(array) {
 }
 
 export function makeCard(slot): Card {
-  const card: Card = {
-    words: [],
+  return {
+    words: words.randomCard(),
     slot,
+    heapSlot: slot,
     guessOrientation: 0,
-    guessSlot: 0,
+    guessSlot: -(slot + 1),
+    wrong: false,
   } as Card;
-
-  for (let i = 0; i < 4; i++) {
-    const word = words.random();
-    card.words.push(word);
-  }
-  return card;
 }

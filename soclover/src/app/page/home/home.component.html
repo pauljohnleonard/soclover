@@ -22,8 +22,11 @@
   </ng-template>
 
   <h2>Create</h2>
-  <p class="hint">
+  <p class="hint" *ngIf="generateLeafEnabled">
     Plant a blank leaf, or generate one with AI clues (review before upload).
+  </p>
+  <p class="hint" *ngIf="!generateLeafEnabled">
+    Plant a blank leaf and save it to the library.
   </p>
   <soclover-buttons class="buttons" [buttons]="createButtons">
   </soclover-buttons>
@@ -52,6 +55,8 @@
     <p class="hint">No saved leaves yet — create one above.</p>
   </ng-template>
 
+  <h2>All leaves</h2>
+  <p class="hint">Browse the full library.</p>
   <div class="browse-more">
     <soclover-buttons
       class="buttons"

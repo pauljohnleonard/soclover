@@ -16,11 +16,19 @@ export class ButtonsComponent {
 
   constructor(public uiService: UiService) {}
 
+  buttonWidth(button: Button): number {
+    return button.label ? 52 : 30;
+  }
+
   buttonTransform(button: Button, i: number): string {
-    if (!button.right) {
-      return 'translate(' + 40 * (i + 0.2) + ',0)';
+    if (button.right) {
+      return `translate(${leafData.boardWidth - this.buttonWidth(button)},0)`;
     }
 
-    return `translate(${leafData.boardWidth - 40},0)`;
+    let x = 8;
+    for (let j = 0; j < i; j++) {
+      x += this.buttonWidth(this.buttons[j]) + 10;
+    }
+    return 'translate(' + x + ',0)';
   }
 }

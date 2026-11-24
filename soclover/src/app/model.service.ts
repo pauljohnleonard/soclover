@@ -110,6 +110,12 @@ export class ModelService {
       return existing;
     }
 
+    if (!leaf.layouts) {
+      leaf.layouts = {};
+    }
+    if (!leaf.guesses) {
+      leaf.guesses = {};
+    }
     this.game.leaves.push(leaf);
     return leaf;
   }
@@ -145,7 +151,7 @@ export class ModelService {
     return this.selectSolveLeafBroadcast(leaf);
   }
 
-  _updateUI(leaf: Leaf | undefined) {
+  _updateUI(leaf: Leaf | undefined, layoutOwner?: string) {
     if (!leaf || !leaf.playerName) {
       return;
     }
@@ -163,6 +169,7 @@ export class ModelService {
     const patch: SocloverMessage = {
       cards,
       playerName: leaf.playerName,
+      layoutOwner: layoutOwner || this.name,
       type: MessageType.PATCH,
     };
 
@@ -173,20 +180,27 @@ export class ModelService {
     this.connection.doSend(patch);
   }
 
-  updateLeafUI(leaf: Leaf) {
+  pendingLayoutOwner?: string;
+
+  updateLeafUI(leaf: Leaf, layoutOwner?: string) {
     if (!leaf) {
       return;
     }
 
+    if (layoutOwner !== undefined) {
+      this.pendingLayoutOwner = layoutOwner;
+    }
+
     const now = Date.now();
     const delta = now - this.lastUpdate;
+    const owner = this.pendingLayoutOwner;
 
     if (delta > this.debounce) {
-      this._updateUI(leaf);
+      this._updateUI(leaf, owner);
     } else if (!this.timer) {
       const wait = now + this.debounce - this.lastUpdate;
       this.timer = setTimeout(() => {
-        this._updateUI(leaf);
+        this._updateUI(leaf, this.pendingLayoutOwner);
       }, wait);
     }
   }
@@ -194,6 +208,15 @@ export class ModelService {
   uploadLeaf(leaf: Leaf) {
     const message: SocloverMessage = {
       type: MessageType.SEND_LEAF_WITH_CLUES,
+      leaf,
+    };
+    this.connection.doSend(message);
+  }
+
+  reportGuess(leaf: Leaf) {
+    const message: SocloverMessage = {
+      type: MessageType.REPORT_GUESS,
+      playerName: leaf.playerName,
       leaf,
     };
     this.connection.doSend(message);

@@ -16,11 +16,9 @@ export class MongoDB {
   ready$ = new AsyncSubject<boolean>();
 
   constructor() {
-    // Connect to MongoDB
-    mongoose.connect('mongodb://localhost:27017/soclover', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const uri =
+      process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/soclover';
+    mongoose.connect(uri);
 
     // Check the connection
     const db = mongoose.connection;
@@ -53,5 +51,13 @@ export class MongoDB {
       { _id: leafId },
       { $addToSet: { solvers: { $each: solvers } } }
     );
+  }
+
+  async setGuesses(leafId: string, guesses: { [name: string]: number }) {
+    if (!leafId || !guesses) {
+      return;
+    }
+    await this.ready$.toPromise();
+    await HandModel.updateOne({ _id: leafId }, { $set: { guesses } });
   }
 }

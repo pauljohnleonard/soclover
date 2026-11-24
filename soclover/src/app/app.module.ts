@@ -18,6 +18,7 @@ import { ButtonsComponent } from './components/buttons/buttons.component';
 import { LogonComponent } from './components/logon/logon.component';
 import { BoardComponent } from './page/board/board.component';
 import { BrowseComponent } from './page/browse/browse.component';
+import { HelpOverlayComponent } from './components/help-overlay/help-overlay.component';
 import { HttpClientModule } from '@angular/common/http';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
@@ -31,6 +32,7 @@ import { MatTableModule } from '@angular/material/table';
     LogonComponent,
     BoardComponent,
     BrowseComponent,
+    HelpOverlayComponent,
   ],
   imports: [
     BrowserModule,

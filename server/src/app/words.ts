@@ -1,79 +1,109 @@
 import fs from 'fs';
 import path from 'path';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
+/** One physical game card: Top, Right, Bottom, Left → words[0..3]. */
+export type DeckCard = [string, string, string, string];
 
 class Words {
-  allWords!: Array<string>;
+  /** Curated physical cards from Word List.csv */
+  allCards!: DeckCard[];
+  availCards!: DeckCard[];
+
+  /** Flat unique word pool (e.g. AI fillers), drawn from the same deck */
+  allWords!: string[];
   availWords!: { [key: string]: boolean };
 
   constructor() {
-    // Rest of the constructor code...
-
-    this.allWords = this.loadAllWords();
-
-    console.log(`Loaded ${this.allWords.length} words`);
-    this.makeAvaliable();
-
-    // Rest of the constructor code...
+    this.allCards = this.loadDeck();
+    this.allWords = this.wordsFromDeck(this.allCards);
+    console.log(
+      `Loaded ${this.allCards.length} curated cards (${this.allWords.length} unique words)`
+    );
+    this.makeAvailable();
   }
 
-  loadAllWords(): string[] {
-    const assetFolderPath = path.join(__dirname, 'assets/');
+  loadDeck(): DeckCard[] {
+    const assetFolderPath = path.join(__dirname, 'assets');
+    const filePath = path.join(assetFolderPath, 'Word List.csv');
+    console.log('Loading card deck from', filePath);
 
-    console.log(assetFolderPath);
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const cards: DeckCard[] = [];
 
-    const files = fs.readdirSync(assetFolderPath);
-    console.log(files);
-    const words = {};
+    for (const line of fileContent.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('Card,')) {
+        continue;
+      }
+      const parts = trimmed.split(',');
+      if (parts.length < 5) {
+        continue;
+      }
+      // Card,Top,Right,Bottom,Left — preserve curated casing
+      const top = parts[1].trim();
+      const right = parts[2].trim();
+      const bottom = parts[3].trim();
+      const left = parts[4].trim();
+      if (!top || !right || !bottom || !left) {
+        continue;
+      }
+      cards.push([top, right, bottom, left]);
+    }
 
-    files.forEach((file) => {
-      if (file.endsWith('.words')) {
-        const filePath = assetFolderPath + '/' + file;
-        console.log(filePath);
-        const stats = fs.statSync(filePath);
+    if (cards.length < 5) {
+      throw new Error(
+        `Word List.csv produced only ${cards.length} cards; need at least 5`
+      );
+    }
 
-        if (stats.isFile()) {
-          console.log(`Processing file: ${filePath}`);
-          const fileContent = fs.readFileSync(filePath, 'utf-8');
-          const list = fileContent.split('\n');
-          // console.log(`Found ${words.length} words`);
-          for (let word of list) {
-            word = word.trim();
-            if (word.length > 10) continue;
-            word = this.capitalizeWord(word);
-            if (!words[word]) {
-              words[word] = true;
-            }
-          }
+    return cards;
+  }
+
+  private wordsFromDeck(cards: DeckCard[]): string[] {
+    const seen: { [key: string]: boolean } = {};
+    const out: string[] = [];
+    for (const card of cards) {
+      for (const word of card) {
+        const key = word.toUpperCase();
+        if (!seen[key]) {
+          seen[key] = true;
+          out.push(word);
         }
       }
-    });
-    return Object.keys(words);
+    }
+    return out;
   }
 
-  makeAvaliable() {
+  makeAvailable() {
+    this.availCards = [...this.allCards];
     this.availWords = {};
     this.allWords.forEach((word) => {
       this.availWords[word] = true;
     });
   }
 
+  /** Draw a full curated card (4 faces). Without replacement until the deck is exhausted. */
+  randomCard(): string[] {
+    if (this.availCards.length === 0) {
+      this.makeAvailable();
+    }
+    const i = Math.floor(Math.random() * this.availCards.length);
+    const card = this.availCards.splice(i, 1)[0];
+    return [...card];
+  }
+
+  /** Single word from the curated vocabulary (AI fillers, etc.). */
   random() {
     let keys = Object.keys(this.availWords);
     if (keys.length === 0) {
-      this.makeAvaliable();
+      this.makeAvailable();
       keys = Object.keys(this.availWords);
     }
 
     const ii = Math.floor(Math.random() * keys.length);
     const key = keys[ii];
     delete this.availWords[key];
-    return this.capitalizeWord(key);
-  }
-
-  capitalizeWord(word) {
-    // Make the first letter uppercase and the rest lowercase
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    return key;
   }
 }
 
